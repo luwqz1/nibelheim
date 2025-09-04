@@ -1,0 +1,149 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "nibelheim"
+authors = [{ name = "luwqz1", email = "howluwqz1@gmail.com" }]
+maintainers = [{ name = "luwqz1", email = "howluwqz1@gmail.com" }]
+dynamic = ["version"]
+description = "Convenient and reliable Python SDK for remnawave."
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.13"
+dependencies = [
+    "aiohttp>=3.12.15,<4.0.0",
+    "msgspec>=0.19.0,<0.20.0",
+    "fntypes",
+]
+keywords = [
+    "async",
+    "asyncio",
+    "openapi",
+    "openapi schema",
+    "sdk",
+    "nibel",
+    "nibelheim",
+    "remna",
+    "remnawave",
+    "xray",
+    "client",
+]
+classifiers = [
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Software Development :: Quality Assurance",
+    "Topic :: Utilities",
+    "Typing :: Typed",
+]
+
+[project.urls]
+Source = "https://github.com/luwqz1/nibelheim"
+"Bug Tracker" = "https://github.com/luwqz1/nibelheim/issues"
+
+[project.optional-dependencies]
+brotli = ["brotli"]
+uvloop = [
+    "uvloop; (sys_platform == 'darwin' or sys_platform == 'linux')",
+    "winloop; (sys_platform == 'cli' or sys_platform == 'cygwin' or sys_platform == 'win32')",
+]
+speedups = ["brotli", "uvloop"]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.12.12,<1",
+    "basedpyright>=1.31.4,<2",
+    "requests>=2.32.5,<3",
+    "tomlkit>=0.13.3,<1",
+    "pytest>=8.4.1,<9",
+    "pytest-asyncio>=1.1.0,<2",
+    "pytest-cov>=6.2.1,<7",
+    "pytest-mock>=3.14.1,<4",
+    "pre-commit>=4.3.0,<5",
+]
+
+[tool.hatch.version]
+path = "src/__meta__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/nibel"]
+
+[tool.uv.sources]
+fntypes = { git = "https://github.com/timoniq/fntypes.git" }
+
+[tool.uv]
+package = true
+
+[tool.ruff]
+line-length = 150
+target-version = "py313"
+
+[tool.ruff.format]
+quote-style = "double"
+docstring-code-line-length = "dynamic"
+
+[tool.ruff.lint]
+select = [
+  "I",
+  "D",
+  "N",
+  "PLR",
+  "Q",
+  "COM",
+  "TC",
+  "YTT",
+  "SIM"
+]
+ignore = [
+  "COM812",
+  "N805",
+  "N818",
+  "TC001",
+  "TC002",
+  "TC003",
+  "TC004",
+  "D100",
+  "D101",
+  "D102",
+  "D103",
+  "D104",
+  "D105",
+  "D107",
+  "D202",
+  "D203",
+  "D205",
+  "D209",
+  "D211",
+  "D213",
+  "D400",
+  "D401",
+  "D404",
+  "D415",
+  "PLR2004",
+  "PLR0911",
+  "PLR0912",
+  "PLR0913"
+]
+fixable = ["ALL"]
+exclude = [".venv", ".idea", "docs"]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401", "F403"]
+
+[tool.pyright]
+exclude = [
+  ".venv",
+  ".idea",
+  ".ruff_cache",
+  ".pytest_cache",
+]
+typeCheckingMode = "strict"
+pythonPlatform = "All"
+pythonVersion = "3.13"
+reportMissingImports = true
+reportMissingTypeStubs = false
+reportSelfClsParameterName = false
