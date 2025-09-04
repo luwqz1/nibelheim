@@ -42,7 +42,8 @@ classifiers = [
 ]
 
 [project.urls]
-Source = "https://github.com/luwqz1/nibelheim"
+Homepage = "https://github.com/luwqz1/nibelheim"
+Repository = "https://github.com/luwqz1/nibelheim"
 "Bug Tracker" = "https://github.com/luwqz1/nibelheim/issues"
 
 [project.optional-dependencies]
@@ -79,7 +80,7 @@ fntypes = { git = "https://github.com/timoniq/fntypes.git" }
 package = true
 
 [tool.ruff]
-line-length = 150
+line-length = 160
 target-version = "py313"
 
 [tool.ruff.format]
@@ -135,12 +136,7 @@ exclude = [".venv", ".idea", "docs"]
 "__init__.py" = ["F401", "F403"]
 
 [tool.pyright]
-exclude = [
-  ".venv",
-  ".idea",
-  ".ruff_cache",
-  ".pytest_cache",
-]
+include = ["src"]
 typeCheckingMode = "strict"
 pythonPlatform = "All"
 pythonVersion = "3.13"

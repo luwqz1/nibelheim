@@ -25,9 +25,18 @@ repos:
       - id: basedpyright
         name: basedpyright
         description: "Run 'basedpyright' for Python type checking"
-        entry: uv run basedpyright src tests examples --level error
+        entry: uv run basedpyright --level error
         pass_filenames: false
         language: system
+        types: [ python ]
+        stages: [ pre-commit ]
+
+      - id: pytest
+        name: pytest
+        description: "Run tests for testing code"
+        entry: uv run pytest
+        language: system
+        pass_filenames: false
         types: [ python ]
         stages: [ pre-commit ]
 
