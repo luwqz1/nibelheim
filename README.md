@@ -6,6 +6,23 @@
   <h1 align="center">Nibelheim</h3>
 
   <p align="center">
-    Convenient and reliable Python SDK for Remnawave.
+    Convenient and reliable Python SDK for <a href="https://github.com/remnawave">Remnawave</a>.
   </p>
 </div>
+
+
+## Getting started
+
+Install with `pip`, `poetry`, or `uv`:
+```shell
+pip install nibel
+poetry add nibel
+uv add nibel
+```
+
+Or install from [source](https://github.com/luwqz1/nibelheim):
+```shell
+pip install git+https://github.com/luwqz1/nibelheim.git@dev
+poetry add git+https://github.com/luwqz1/nibelheim.git@dev
+uv add "nibel @ git+https://github.com/luwqz1/nibelheim.git@dev"
+```
