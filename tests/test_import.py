@@ -1,2 +1,2 @@
 def test_import() -> None:
-    pass  # type: ignore
+    import nibel  # type: ignore # noqa
