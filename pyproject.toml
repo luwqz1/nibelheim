@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "nibelheim"
+name = "nibel"
 authors = [{ name = "luwqz1", email = "howluwqz1@gmail.com" }]
 maintainers = [{ name = "luwqz1", email = "howluwqz1@gmail.com" }]
 dynamic = ["version"]
@@ -12,7 +12,7 @@ readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.13"
 dependencies = [
-    "aiohttp>=3.12.15,<4.0.0",
+    "aiohttp>=3.13.0,<4.0.0",
     "msgspec>=0.19.0,<0.20.0",
     "fntypes",
 ]
@@ -56,14 +56,14 @@ speedups = ["brotli", "uvloop"]
 
 [dependency-groups]
 dev = [
-    "ruff>=0.12.12,<1",
-    "basedpyright>=1.31.4,<2",
+    "ruff>=0.14.0,<1",
+    "basedpyright>=1.31.6,<2",
     "niquests>=3.15.2,<4.0.0",
     "tomlkit>=0.13.3,<1",
     "pytest>=8.4.1,<9",
-    "pytest-asyncio>=1.1.0,<2",
-    "pytest-cov>=6.2.1,<7",
-    "pytest-mock>=3.15.0,<4",
+    "pytest-asyncio>=1.2.0,<2",
+    "pytest-cov>=7.0.0,<8",
+    "pytest-mock>=3.15.1,<4",
     "pre-commit>=4.3.0,<5",
 ]
 
