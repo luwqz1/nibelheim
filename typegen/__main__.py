@@ -27,6 +27,3 @@ def get_remna_api() -> RemnaAPI:
     raw_response = niquests.get(url=REMNA_OPENAPI_URL).content  # type: ignore
     assert raw_response is not None, "Failed to fetch Remna API"
     return msgspec.json.decode(raw_response, type=RemnaAPI, dec_hook=decode_hook)
-
-
-print(get_remna_api())
