@@ -35,7 +35,6 @@ class RequestBodyResponse(Model):
 class RequestBody(Model):
     required: bool
     content: RequestBodyContent
-    responses: dict[str, RequestBodyResponse] | None = msgspec.field(default=None)
 
 
 class Parameter(Model):
@@ -53,6 +52,8 @@ class PathRequestMethod(Model, kw_only=True):
     security: list[SecuritySchema] = msgspec.field(default_factory=list)
     summary: str | None = msgspec.field(default=None)
     tags: list[str] = msgspec.field(default_factory=list)
+    description: str | None = msgspec.field(default=None)
+    responses: dict[str, RequestBodyResponse] | None = msgspec.field(default=None)
 
 
 class PathMethods(Model):

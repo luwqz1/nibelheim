@@ -2,14 +2,8 @@ import typing
 
 import msgspec
 
-if typing.TYPE_CHECKING:
-    from typegen.schema.properties import BasePropertySchema
 
-
-def decode_hook(
-    type: typing.Any,
-    obj: typing.Any,
-) -> "BasePropertySchema":
+def decode_hook(type: typing.Any, obj: typing.Any) -> typing.Any:
     if not issubclass(type, _Union) or not isinstance(obj, dict):
         raise NotImplementedError
 
