@@ -2,42 +2,43 @@ import typing
 
 import msgspec
 
+from typegen.model import Model
 from typegen.schema.properties import PropertySchema
 from typegen.schema.security import Security
 
 type Paths = dict[str, PathMethods]
 
 
-class SecuritySchema(msgspec.Struct):
+class SecuritySchema(Model):
     authorization: list[Security] = msgspec.field(default_factory=list, name="Authorization")
 
 
-class Schema(msgspec.Struct):
+class Schema(Model):
     ref: str | None = msgspec.field(default=None, name="$ref")
     type: str | None = msgspec.field(default=None)
     properties: dict[str, PropertySchema] | None = msgspec.field(default=None)
 
 
-class ApplicationJSON(msgspec.Struct):
+class ApplicationJSON(Model):
     schema: Schema
 
 
-class RequestBodyContent(msgspec.Struct):
+class RequestBodyContent(Model):
     application_json: ApplicationJSON = msgspec.field(name="application/json")
 
 
-class RequestBodyResponse(msgspec.Struct):
+class RequestBodyResponse(Model):
     description: str
     content: RequestBodyContent | None = msgspec.field(default=None)
 
 
-class RequestBody(msgspec.Struct):
+class RequestBody(Model):
     required: bool
     content: RequestBodyContent
     responses: dict[str, RequestBodyResponse] | None = msgspec.field(default=None)
 
 
-class Parameter(msgspec.Struct):
+class Parameter(Model):
     name: str
     required: bool
     in_: typing.Literal["query", "path"] = msgspec.field(name="in")
@@ -45,7 +46,7 @@ class Parameter(msgspec.Struct):
     description: str | None = msgspec.field(default=None)
 
 
-class PathRequestMethod(msgspec.Struct, kw_only=True):
+class PathRequestMethod(Model, kw_only=True):
     operation_id: str = msgspec.field(name="operationId")
     parameters: list[Parameter] = msgspec.field(default_factory=list)
     request_body: RequestBody | None = msgspec.field(default=None, name="requestBody")
@@ -54,7 +55,7 @@ class PathRequestMethod(msgspec.Struct, kw_only=True):
     tags: list[str] = msgspec.field(default_factory=list)
 
 
-class PathMethods(msgspec.Struct):
+class PathMethods(Model):
     get: PathRequestMethod | None = msgspec.field(default=None)
     post: PathRequestMethod | None = msgspec.field(default=None)
     delete: PathRequestMethod | None = msgspec.field(default=None)

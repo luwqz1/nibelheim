@@ -1,7 +1,9 @@
 import msgspec
 
+from typegen.model import Model
 
-class Security(msgspec.Struct):
+
+class Security(Model):
     scheme: str
     name: str
     type: str | None = msgspec.field(default=None)
@@ -9,7 +11,7 @@ class Security(msgspec.Struct):
     description: str | None = msgspec.field(default=None)
 
 
-class SecuritySchemes(msgspec.Struct):
+class SecuritySchemes(Model):
     authorization: Security = msgspec.field(name="Authorization")
     prometheus: Security = msgspec.field(name="Prometheus")
 

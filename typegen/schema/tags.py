@@ -1,9 +1,11 @@
 import msgspec
 
+from typegen.model import Model
+
 type Tags = list[Tag]
 
 
-class Tag(msgspec.Struct):
+class Tag(Model):
     name: str
     description: str | None = msgspec.field(default=None)
 

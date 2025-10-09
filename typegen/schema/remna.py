@@ -1,17 +1,16 @@
-import msgspec
-
+from typegen.model import Model
 from typegen.schema.components import Components
 from typegen.schema.paths import Paths
 from typegen.schema.tags import Tags
 
 
-class Info(msgspec.Struct):
+class Info(Model):
     title: str
     description: str
     version: str
 
 
-class RemnaAPI(msgspec.Struct):
+class RemnaAPI(Model):
     openapi: str
     info: Info
     tags: Tags

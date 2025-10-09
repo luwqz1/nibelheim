@@ -3,18 +3,25 @@ import typing
 
 import msgspec
 
+from typegen.model import Model, Union
 from typegen.schema.properties import BasePropertySchema, PropertySchema
 from typegen.schema.security import SecuritySchemes
 
 type Schemas = dict[str, Component]
-type Property = typing.Union[
+type Property = Union[
     StringPropertySchema,
     IntegerPropertySchema,
     NumberPropertySchema,
     BooleanPropertySchema,
     ArrayPropertySchema,
     ObjectPropertySchema,
+    DefaultPropertySchema,
 ]
+
+
+def get_tag(struct_qualname: str) -> str:
+    name = struct_qualname.lower()
+    return next(x.value for x in PropertyType if name.startswith(x.value))
 
 
 class PropertyType(enum.Enum):
@@ -25,11 +32,8 @@ class PropertyType(enum.Enum):
     ARRAY = "array"
     OBJECT = "object"
 
-    def to_str(self) -> str:
-        return self.value
 
-
-class ComponentPropertyTaggedFieldType(msgspec.Struct, tag_field="type"):
+class ComponentPropertyTaggedFieldType(Model, tag_field="type"):
     @property
     def type(self) -> PropertyType:
         tag = self.__struct_config__.tag
@@ -40,41 +44,45 @@ class ComponentPropertySchema(BasePropertySchema, ComponentPropertyTaggedFieldTy
     pass
 
 
-class StringPropertySchema(ComponentPropertySchema, tag=PropertyType.STRING.to_str()):
+class DefaultPropertySchema(BasePropertySchema, kw_only=True):
+    type: typing.Literal["object"] = msgspec.field(default="object")
+
+
+class StringPropertySchema(ComponentPropertySchema, tag=get_tag):
     pass
 
 
-class IntegerPropertySchema(ComponentPropertySchema, tag=PropertyType.INTEGER.to_str()):
+class IntegerPropertySchema(ComponentPropertySchema, tag=get_tag):
     pass
 
 
-class NumberPropertySchema(ComponentPropertySchema, tag=PropertyType.NUMBER.to_str()):
+class NumberPropertySchema(ComponentPropertySchema, tag=get_tag):
     pass
 
 
-class BooleanPropertySchema(ComponentPropertySchema, tag=PropertyType.BOOLEAN.to_str()):
+class BooleanPropertySchema(ComponentPropertySchema, tag=get_tag):
     pass
 
 
-class ObjectPropertySchema(ComponentPropertyTaggedFieldType, tag_field="type", tag=PropertyType.OBJECT.to_str()):
+class ObjectPropertySchema(ComponentPropertyTaggedFieldType, tag=get_tag):
     additional_properties: PropertySchema | None = msgspec.field(default=None, name="additionalProperties")
     properties: dict[str, Property] | None = msgspec.field(default=None)
     required: list[str] = msgspec.field(default_factory=list)
     nullable: bool | None = msgspec.field(default=None)
 
 
-class ArrayPropertySchema(ComponentPropertyTaggedFieldType, tag_field="type", tag=PropertyType.ARRAY.to_str()):
+class ArrayPropertySchema(ComponentPropertyTaggedFieldType, tag=get_tag):
     items: Property
     required: list[str] = msgspec.field(default_factory=list)
 
 
-class Component(msgspec.Struct):
+class Component(Model):
     type: str
     properties: dict[str, Property]
     required: list[str] = msgspec.field(default_factory=list)
 
 
-class Components(msgspec.Struct):
+class Components(Model):
     schemas: Schemas
     security_schemes: SecuritySchemes = msgspec.field(name="securitySchemes")
 
