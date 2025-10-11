@@ -8,7 +8,7 @@ def decode_hook(type: typing.Any, obj: typing.Any) -> typing.Any:
         raise NotImplementedError
 
     if "type" not in obj:
-        return msgspec.convert(obj, type=type.__args__[0])  # type: ignore
+        return msgspec.convert(obj, type=type.__args__[-1])  # type: ignore
 
     tagged_union = typing.Union[*type.__args__[:-1]]  # type: ignore
     return msgspec.convert(obj, type=tagged_union, dec_hook=decode_hook)

@@ -1,4 +1,4 @@
+from nibel.types.categories.abc import ABCCategory
 from nibel.types.categories.base import BaseCategory
-from nibel.types.categories.categories import APICategories
 
-__all__ = ("APICategories", "BaseCategory")
+__all__ = ("ABCCategory", "BaseCategory")

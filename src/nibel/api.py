@@ -1,12 +1,9 @@
-import typing
-
-from nibel.types.categories.categories import APICategories
+from nibel.types.categories.categories import BaseCategories
 
 
-class Remnawave(APICategories):
-    @property
-    def api(self) -> typing.Self:
-        return self
+class Remnawave(BaseCategories):
+    def __init__(self) -> None:
+        super().__init__(api=self)
 
 
 __all__ = ("Remnawave",)

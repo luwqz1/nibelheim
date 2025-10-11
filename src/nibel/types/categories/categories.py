@@ -1,17 +1,14 @@
 from __future__ import annotations
 
-import abc
 import typing
 
 if typing.TYPE_CHECKING:
     from nibel.api import Remnawave
 
 
-class APICategories(abc.ABC):
-    @property
-    @abc.abstractmethod
-    def api(self) -> Remnawave:
-        pass
+class BaseCategories:
+    def __init__(self, api: Remnawave) -> None:
+        self.api = api
 
 
-__all__ = ("APICategories",)
+__all__ = ("BaseCategories",)
