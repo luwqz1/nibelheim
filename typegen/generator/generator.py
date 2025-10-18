@@ -8,13 +8,13 @@ import niquests
 from packaging.version import parse
 
 from nibel.logger import get_logger
-from src.__meta__ import __remnawave_api__
+from src.__remna__ import __version__
 from typegen.model import decode_hook
 from typegen.schema.remna import OAS, RemnaAPI
 
 type Context = dict[str, typing.Any]
 
-REMNA_API_VERSION: typing.Final = parse(__remnawave_api__)
+REMNA_API_VERSION: typing.Final = parse(__version__)
 TYPEGEN_OAS: typing.Final = parse("3.1.1")
 REMNA_OPENAPI_URL: typing.Final = "https://cdn.remna.st/docs/openapi.json"
 API_MAP_TYPES: typing.Final = {

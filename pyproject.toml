@@ -77,7 +77,7 @@ dev = [
 ]
 
 [tool.hatch.version]
-path = "src/__meta__.py"
+path = "src/nibel/__meta__.py"
 
 [tool.uv.sources]
 fntypes = { git = "https://github.com/timoniq/fntypes.git" }
