@@ -3,16 +3,23 @@ from __future__ import annotations
 import logging
 import re
 import sys
+import threading
+import types
 import typing
 from contextlib import suppress
 
-import charset_normalizer
 import colorama
 import msgspec
 import structlog
 
 if typing.TYPE_CHECKING:
     from _typeshed import SupportsWrite
+
+colorama.just_fix_windows_console()
+colorama.init()
+
+_LOCK: typing.Final = threading.Lock()
+_LOGGERS: typing.Final[dict[str, logging.Logger] | types.MappingProxyType[str, logging.Logger]] = {}
 
 LEVELS_COLORS: typing.Final = dict(
     debug=colorama.Fore.LIGHTBLUE_EX,
@@ -30,16 +37,26 @@ STDLIB_PROCESSORS: typing.Final = (
     structlog.stdlib.add_logger_name,
     structlog.stdlib.add_log_level,
 )
+
+
+class _CallsiteParameterAdder(structlog.processors.CallsiteParameterAdder):
+    _handlers = structlog.processors.CallsiteParameterAdder._handlers | {
+        structlog.processors.CallsiteParameter.MODULE: lambda module, frame: frame.f_globals.get("__name__", module),  # type: ignore
+    }
+
+
 DEFAULT_PROCESSORS: typing.Final = (
     structlog.processors.format_exc_info,
     structlog.processors.StackInfoRenderer(),
     structlog.processors.TimeStamper(fmt="iso"),
     structlog.processors.UnicodeDecoder(),
-    structlog.processors.CallsiteParameterAdder(
+    _CallsiteParameterAdder(
         parameters=[
             structlog.processors.CallsiteParameter.FILENAME,
-            structlog.processors.CallsiteParameter.LINENO,
+            structlog.processors.CallsiteParameter.MODULE,
             structlog.processors.CallsiteParameter.FUNC_NAME,
+            structlog.processors.CallsiteParameter.LINENO,
+            structlog.processors.CallsiteParameter.PROCESS,
         ]
     ),
 )
@@ -56,63 +73,81 @@ def msgspec_json_serializer(
     if indent is not None:
         result = msgspec.json.format(result, indent=indent)
 
-    charset_match = charset_normalizer.from_bytes(result).best()
-    if charset_match is not None:
-        return str(charset_match)
-
-    return str(result, errors="replace")
+    return str(result, encoding="utf-8", errors="replace")
 
 
 def configure(
-    service_name: str,
     *,
     level: int = logging.INFO,
     colors: bool = True,
-    filename: str | None = None,
     stream: SupportsWrite[str] | None = sys.stderr,
+    filename: str | None = None,
+    file_handler: logging.FileHandler | None = None,
     json: bool = False,
     json_indent: int | None = None,
     json_serializer: typing.Callable[..., str | bytes] = msgspec_json_serializer,
+    **context: typing.Any,
 ) -> None:
-    if json and stream is not None:
-        raise ValueError("Cannot use JSON and stream at the same time.")
+    global _LOGGERS
 
-    kwargs: dict[str, typing.Any] = dict(stream=stream)
+    with _LOCK:
+        if not _LOGGERS:
+            return
 
-    if filename is not None:
-        kwargs.pop("stream", None)
-        kwargs.setdefault("filename", filename)
+        if json and stream is not None:
+            raise ValueError("Cannot use JSON with stream, only with file.")
 
-    logging.basicConfig(
-        level=level,
-        format="%(message)s",
-        **(dict(filename=filename) if filename is not None else dict(stream=stream)),  # type: ignore
-    )
+        handlers: list[logging.Handler] = []
+        renderers: list[structlog.types.Processor] = []
 
-    processors: list[structlog.types.Processor] = []
+        if stream is not None:
+            handlers.append(logging.StreamHandler(stream))
 
-    if json:
-        processors.append(structlog.processors.JSONRenderer(serializer=json_serializer, indent=json_indent))
-    elif stream is not None:
-        processors.append(structlog.dev.ConsoleRenderer(colors=colors))
+        if filename is not None or file_handler is not None:
+            handlers.append(logging.FileHandler(filename) if filename is not None else file_handler)  # type: ignore
 
-    structlog.contextvars.clear_contextvars()
-    _ = structlog.contextvars.bind_contextvars(service=service_name)
+        if json:
+            renderers.append(structlog.processors.JSONRenderer(serializer=json_serializer, indent=json_indent))
+        elif stream is not None:
+            renderers.append(structlog.dev.ConsoleRenderer(colors=colors))
 
-    structlog.configure(
-        processors=(*STDLIB_PROCESSORS, SLF4JStyleFormatter(colors=colors), *DEFAULT_PROCESSORS, *processors),
-        wrapper_class=structlog.stdlib.BoundLogger,
-        context_class=dict,
-        logger_factory=structlog.stdlib.LoggerFactory(),
-        cache_logger_on_first_use=True,
-    )
+        for logger in _LOGGERS.values():
+            logger.setLevel(level)
+
+            for handler in handlers:
+                if handler.formatter is None:
+                    handler.setFormatter(logging.Formatter("%(message)s"))
+
+            logger.handlers.extend(handlers)
+
+        _LOGGERS = types.MappingProxyType[str, logging.Logger](mapping={})  # type: ignore
+
+        structlog.contextvars.clear_contextvars()
+        _ = structlog.contextvars.bind_contextvars(**context)
+
+        structlog.configure(
+            processors=(*STDLIB_PROCESSORS, _SLF4JStyleFormatter(colors=colors), *DEFAULT_PROCESSORS, *renderers),
+            wrapper_class=structlog.stdlib.BoundLogger,
+            context_class=dict,
+            logger_factory=structlog.stdlib.LoggerFactory(),
+            cache_logger_on_first_use=True,
+        )
 
 
-def get_logger(name: str | None = None, /) -> structlog.stdlib.BoundLogger:
-    return structlog.get_logger(name) if name else structlog.get_logger()
+def get_logger(name: str, /) -> structlog.stdlib.BoundLogger:
+    with _LOCK:
+        if isinstance(_LOGGERS, types.MappingProxyType):
+            raise LookupError("Cannot get logger after configuration.")
+
+        logger = logging.getLogger(name)
+
+        if name not in _LOGGERS:
+            _LOGGERS[name] = logger
+
+    return structlog.wrap_logger(logger)
 
 
-class SLF4JStyleFormatter:
+class _SLF4JStyleFormatter:
     def __init__(self, *, colors: bool = True) -> None:
         self.colors = colors
 
@@ -290,6 +325,9 @@ class SLF4JStyleFormatter:
         for value in values:
             full_message = self._highlight_single_value(full_message, value, log_level)
         return full_message
+
+
+structlog.configure(wrapper_class=structlog.stdlib.BoundLogger)
 
 
 __all__ = ("configure", "get_logger")

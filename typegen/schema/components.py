@@ -1,4 +1,5 @@
 import enum
+import typing
 
 import msgspec
 
@@ -80,7 +81,7 @@ class ArrayPropertySchema(ComponentPropertyTaggedFieldType, tag=get_tag):
 
 
 class Component(Model):
-    type: str
+    type: typing.Literal["object"]
     properties: dict[str, Property]
     required: list[str] = msgspec.field(default_factory=list)
 

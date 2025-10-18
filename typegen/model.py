@@ -11,6 +11,12 @@ def decode_hook(type: typing.Any, obj: typing.Any) -> typing.Any:
         return msgspec.convert(obj, type=type.__args__[-1])  # type: ignore
 
     tagged_union = typing.Union[*type.__args__[:-1]]  # type: ignore
+
+    if isinstance(obj["type"], list):
+        types_ = obj["type"]  # type: ignore
+        obj["type"] = obj["type"][0]
+        obj["nullable"] = "null" in types_
+
     return msgspec.convert(obj, type=tagged_union, dec_hook=decode_hook)
 
 
@@ -26,7 +32,7 @@ class _Union(metaclass=_UnionMeta):
         return type("_Union", (cls,), {"__args__": (items,) if not isinstance(items, tuple) else items})
 
 
-class Model(msgspec.Struct):
+class Model(msgspec.Struct, kw_only=True, dict=True):
     pass
 
 

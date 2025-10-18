@@ -12,24 +12,30 @@ readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.13"
 dependencies = [
-    "aiohttp>=3.13.0,<4.0.0",
-    "msgspec>=0.19.0,<0.20.0",
+    "msgspec>=0.19.0",
     "structlog>=25.4.0",
     "colorama>=0.4.6",
+    "rnet>=2.4.2",
     "fntypes",
-    "charset-normalizer>=3.4.3",
 ]
 keywords = [
     "async",
     "asyncio",
+    "fast",
+    "rnet-http-client",
+    "msgspec-models",
+    "oas",
     "openapi",
-    "openapi schema",
+    "openapi-schema",
     "sdk",
     "nibel",
     "nibelheim",
     "remna",
     "remnawave",
+    "remna-api",
+    "remnawave-api",
     "xray",
+    "miohomo",
     "client",
 ]
 classifiers = [
@@ -50,21 +56,20 @@ Repository = "https://github.com/luwqz1/nibelheim"
 "Bug Tracker" = "https://github.com/luwqz1/nibelheim/issues"
 
 [project.optional-dependencies]
-brotli = ["brotli"]
 uvloop = [
     "uvloop; (sys_platform == 'darwin' or sys_platform == 'linux')",
     "winloop; (sys_platform == 'cli' or sys_platform == 'cygwin' or sys_platform == 'win32')",
 ]
-speedups = ["brotli", "uvloop"]
 
 [dependency-groups]
 dev = [
-    "ruff>=0.14.0,<1",
+    "ruff>=0.14.1,<1",
     "basedpyright>=1.31.7,<2",
     "niquests>=3.15.2,<4.0.0",
     "tomlkit>=0.13.3,<1",
     "pytest>=8.4.2,<9",
     "jinja2>=3.1.6,<4",
+    "packaging>=25.0,<30",
     "pytest-asyncio>=1.2.0,<2",
     "pytest-cov>=7.0.0,<8",
     "pytest-mock>=3.15.1,<4",
