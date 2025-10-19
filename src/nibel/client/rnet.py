@@ -39,7 +39,6 @@ class RnetClient(ABCClient):
         brotli: bool = True,
         zstd: bool = True,
         gzip: bool = True,
-        proxy: rnet.ProxyParams | None = None,
         proxies: list[rnet.Proxy] | None = None,
         timeout: int = DEFAULT_TIMEOUT,
         read_timeout: int = DEFAULT_READ_TIMEOUT,
@@ -51,6 +50,7 @@ class RnetClient(ABCClient):
         self._client = rnet.Client(
             http2_only=True,
             user_agent=USER_AGENT,
+            proxies=proxies,
             http2_max_retry_count=DEFAULT_HTTP2_MAX_RETRIES,
             connect_timeout=connect_timeout,
             read_timeout=read_timeout,
@@ -64,7 +64,7 @@ class RnetClient(ABCClient):
         )
 
     def __repr__(self) -> str:
-        return "<{}, client={!r}, timeout={}>".format(
+        return "<{}: client={!r}, timeout={}>".format(
             type(self).__name__,
             self._client,
             self._timeout,
