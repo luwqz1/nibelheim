@@ -3,8 +3,8 @@ import typing
 import msgspec
 
 from typegen.model import Model
-from typegen.schema.properties import PropertySchema
-from typegen.schema.security import Security
+from typegen.schema.oas.v3.oas_3_1_1.properties import PropertySchema
+from typegen.schema.oas.v3.oas_3_1_1.security import Security
 
 type Paths = dict[str, PathMethods]
 

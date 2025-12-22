@@ -4,7 +4,7 @@ import abc
 import typing
 
 if typing.TYPE_CHECKING:
-    from nibel.api import Remnawave
+    from nibel.remna import Remnawave
 
 
 class ABCCategory(abc.ABC):

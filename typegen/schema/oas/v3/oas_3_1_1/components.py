@@ -4,8 +4,8 @@ import typing
 import msgspec
 
 from typegen.model import Model, Union
-from typegen.schema.properties import BasePropertySchema, PropertySchema
-from typegen.schema.security import SecuritySchemes
+from typegen.schema.oas.v3.oas_3_1_1.properties import BasePropertySchema, PropertySchema
+from typegen.schema.oas.v3.oas_3_1_1.security import SecuritySchemes
 
 type Schemas = dict[str, Component]
 type Property = Union[

@@ -1,4 +1,3 @@
-import abc
 import pathlib
 import typing
 
@@ -8,95 +7,68 @@ import niquests
 from packaging.version import parse
 
 from nibel.logger import get_logger
-from src.__remna__ import __version__
+from src.__remna__ import __api_spec_url__, __version__
+from typegen.generator.oas import OAS as OAS_GENERATOR
 from typegen.model import decode_hook
-from typegen.schema.remna import OAS, RemnaAPI
+from typegen.schema.oas import OAS as OAS_SCHEMA
+from typegen.schema.remna_oas import RemnaOAS
 
-type Context = dict[str, typing.Any]
+if typing.TYPE_CHECKING:
+    from typegen.generator.abc import Context
 
 REMNA_API_VERSION: typing.Final = parse(__version__)
-TYPEGEN_OAS: typing.Final = parse("3.1.1")
-REMNA_OPENAPI_URL: typing.Final = "https://cdn.remna.st/docs/openapi.json"
-API_MAP_TYPES: typing.Final = {
-    "string": "str",
-    "integer": "int",
-    "number": "float",
-    "boolean": "bool",
-    "object": "dict",
-    "array": "list",
-}
-API_MAP_FORMATS: typing.Final = {
-    "date-time": "datetime",
-    "timestamp": "datetime",
-    "uuid": "UUID",
-}
-
-logger = get_logger(__name__)
-
-
-class ABCGenerator(abc.ABC):
-    @abc.abstractmethod
-    def generate(
-        self,
-        work_path: pathlib.Path,
-        remna_api: RemnaAPI,
-        jinja_env: jinja2.Environment,
-        context: Context,
-    ) -> None:
-        pass
+LOG: typing.Final = get_logger(__name__)
 
 
 def generate(
-    work_path: pathlib.Path,
-    objects_generator: ABCGenerator | None = None,
-    paths_generator: ABCGenerator | None = None,
-    errors_generator: ABCGenerator | None = None,
-    enums_generator: ABCGenerator | None = None,
-    jinja_loader: jinja2.FileSystemLoader | None = None,
-) -> None:
-    if not any((objects_generator, paths_generator, errors_generator, enums_generator)):
-        logger.error("No generators provided.")
-        return
+    workdir: pathlib.Path,
+    templates_loader: jinja2.FileSystemLoader | None = None,
+) -> int:
+    try:
+        raw_response = niquests.get(url=__api_spec_url__).content  # type: ignore
+    except Exception as e:
+        LOG.error("Failed to download Remnawave API schema with error: '{!s}'", e)
+        return 1
 
-    raw_response = niquests.get(url=REMNA_OPENAPI_URL).content  # type: ignore
     if not raw_response:
-        logger.error("Failed to fetch Remnawave API schema.")
-        return
+        LOG.error("Failed to download Remnawave API schema.")
+        return 1
 
-    remna_oas = msgspec.json.decode(raw_response, type=OAS)
-    if remna_oas.version != TYPEGEN_OAS:
-        logger.critical(
-            "Remnawave Open API Schema version `{}` is not supported. Generator supported version: `{}`.",
-            remna_oas.version,
-            TYPEGEN_OAS,
+    remna_oas = msgspec.json.decode(raw_response, type=RemnaOAS)
+    if remna_oas.version.major not in OAS_SCHEMA or remna_oas.version not in OAS_SCHEMA[remna_oas.version.major]:
+        is_supported_major_version = remna_oas.version.major in OAS_SCHEMA
+        LOG.error(
+            "Remnawave Open API Schema version `{}` is not supported. Only supported versions: {}.",
+            f"{remna_oas.version.major}.x.x" if not is_supported_major_version else remna_oas.version,
+            ", ".join(
+                map(
+                    lambda x: f"`{x}.x.x`" if not is_supported_major_version else f"`{x}`",
+                    OAS_SCHEMA[remna_oas.version.major] if not is_supported_major_version else [remna_oas.version],
+                ),
+            ),
         )
-        return
+        return 1
 
-    remna_api = msgspec.json.decode(raw_response, type=RemnaAPI, dec_hook=decode_hook)
+    schema = OAS_SCHEMA[remna_oas.version.major][remna_oas.version]
+    remna_api = msgspec.json.decode(raw_response, type=schema.remna.RemnaAPI, dec_hook=decode_hook)
+
     if remna_api.version == REMNA_API_VERSION:
-        logger.info("Remnawave API version `{}` is up to date. Skipping generation.", remna_api.version)
-        return
+        LOG.info("Remnawave API version `{}` | OAS `{}` is up to date, skipping generation.", remna_api.version, remna_oas.version)
+        return 0
 
-    jinja_env = jinja2.Environment(
-        loader=jinja_loader or jinja2.FileSystemLoader("templates"),
+    LOG.warning("New Remnawave API version `{}` | OAS `{}` detected, running generator...", remna_api.version, remna_oas.version)
+
+    environment = jinja2.Environment(
+        loader=templates_loader or jinja2.FileSystemLoader("templates"),
         trim_blocks=True,
         lstrip_blocks=True,
     )
     context: Context = dict()
 
-    logger.info("New Remnawave API version `{}` detected. Generating API...", remna_api.version)
+    for generator in OAS_GENERATOR[remna_oas.version.major][remna_oas.version]:
+        generator.generate(remna_api, context, environment, workdir)  # type: ignore
 
-    if objects_generator:
-        objects_generator.generate(work_path, remna_api, jinja_env, context)
-
-    if paths_generator:
-        paths_generator.generate(work_path, remna_api, jinja_env, context)
-
-    if errors_generator:
-        errors_generator.generate(work_path, remna_api, jinja_env, context)
-
-    if enums_generator:
-        enums_generator.generate(work_path, remna_api, jinja_env, context)
+    return 0
 
 
 __all__ = ("generate",)

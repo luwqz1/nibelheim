@@ -1,13 +1,10 @@
 import logging
 import pathlib
+import sys
 
 from nibel.logger import configure
-from typegen.generator.generator import generate
-from typegen.generator.objects import ObjectsGenerator
+from typegen.generator import generate
 
 if __name__ == "__main__":
-    configure(level=logging.DEBUG, service="nibelheim-typegen")
-    generate(
-        work_path=pathlib.Path("nibel/types"),
-        objects_generator=ObjectsGenerator(),
-    )
+    configure(level=logging.DEBUG)
+    sys.exit(generate(workdir=pathlib.Path("nibel") / "types"))
