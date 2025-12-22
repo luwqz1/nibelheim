@@ -4,32 +4,35 @@ import logging
 import re
 import sys
 import threading
-import types
 import typing
 from contextlib import suppress
 
-import colorama
 import msgspec
 import structlog
+
+try:
+    import colorama  # type: ignore
+except ImportError:
+    colorama = None
 
 if typing.TYPE_CHECKING:
     from _typeshed import SupportsWrite
 
-colorama.just_fix_windows_console()
-colorama.init()
+if colorama is not None:
+    colorama.just_fix_windows_console()
+    colorama.init(wrap=False)
 
+_IS_WIN: typing.Final = sys.platform == "win32"
 _LOCK: typing.Final = threading.Lock()
-_LOGGERS: typing.Final[dict[str, logging.Logger] | types.MappingProxyType[str, logging.Logger]] = {}
+_STRUCTLOG_IS_CONFIGURED: typing.Final = False
+_LOGGERS: typing.Final = dict[str, logging.Logger]()
+_ALL: typing.Final = "*"
 
-LEVELS_COLORS: typing.Final = dict(
-    debug=colorama.Fore.LIGHTBLUE_EX,
-    info=colorama.Fore.LIGHTGREEN_EX,
-    warning=colorama.Fore.LIGHTYELLOW_EX,
-    error=colorama.Fore.LIGHTRED_EX,
-    critical=colorama.Fore.LIGHTRED_EX,
-)
+MEGABYTE: typing.Final = 1024**2
 ANSI_ESCAPE: typing.Final = re.compile(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])")
 BRACE_PATTERN: typing.Final = re.compile(r"\{(?:([^}]*?)(?:!([sra]))?)?\}")
+HAS_NAMED_PATTERN: typing.Final = re.compile(r"%\([^)]+\)")
+HAS_POSITIONAL_PATTERN: typing.Final = re.compile(r"%[sdfrx]")
 PERCENT_PATTERN: typing.Final = re.compile(r"%(?:\(([^)]+)\))?([sdfrx])")
 STDLIB_PROCESSORS: typing.Final = (
     structlog.contextvars.merge_contextvars,
@@ -39,10 +42,44 @@ STDLIB_PROCESSORS: typing.Final = (
 )
 
 
+class Colors:
+    RESET = "\033[0m"
+    RED = "\033[31m"
+    GREEN = "\033[32m"
+    YELLOW = "\033[33m"
+    BLUE = "\033[34m"
+    MAGENTA = "\033[35m"
+    CYAN = "\033[36m"
+    WHITE = "\033[37m"
+    BLACK = "\033[30m"
+    LIGHT_RED = "\033[91m"
+    LIGHT_GREEN = "\033[92m"
+    LIGHT_YELLOW = "\033[93m"
+    LIGHT_BLUE = "\033[94m"
+    LIGHT_MAGENTA = "\033[95m"
+    LIGHT_CYAN = "\033[96m"
+    LIGHT_WHITE = "\033[97m"
+    LIGHT_BLACK = "\033[90m"
+
+
 class _CallsiteParameterAdder(structlog.processors.CallsiteParameterAdder):
-    _handlers = structlog.processors.CallsiteParameterAdder._handlers | {
-        structlog.processors.CallsiteParameter.MODULE: lambda module, frame: frame.f_globals.get("__name__", module),  # type: ignore
+    _handlers = structlog.processors.CallsiteParameterAdder._handlers | {  # type: ignore
+        structlog.processors.CallsiteParameter.MODULE: (
+            lambda module, frame: frame.f_globals.get("__name__", module)  # type: ignore
+        ),
     }
+
+
+class _LoggerConfig(typing.TypedDict, total=False):
+    level: typing.NotRequired[int]
+    colors: typing.NotRequired[bool]
+    stream: typing.NotRequired[SupportsWrite[str] | None]
+    filename: typing.NotRequired[str]
+    file_handler: typing.NotRequired[logging.FileHandler]
+    json: typing.NotRequired[bool]
+    json_indent: typing.NotRequired[int]
+    json_serializer: typing.NotRequired[typing.Callable[..., str | bytes]]
+    context: typing.NotRequired[dict[str, typing.Any]]
 
 
 DEFAULT_PROCESSORS: typing.Final = (
@@ -77,25 +114,18 @@ def msgspec_json_serializer(
 
 
 def configure(
-    *,
-    level: int = logging.INFO,
-    colors: bool = True,
-    stream: SupportsWrite[str] | None = sys.stderr,
-    filename: str | None = None,
-    file_handler: logging.FileHandler | None = None,
-    json: bool = False,
-    json_indent: int | None = None,
-    json_serializer: typing.Callable[..., str | bytes] = msgspec_json_serializer,
-    **context: typing.Any,
+    module: str = _ALL,
+    /,
+    **kwargs: typing.Unpack[_LoggerConfig],
 ) -> None:
-    global _LOGGERS
+    global _STRUCTLOG_IS_CONFIGURED  # noqa: PLW0603
 
     with _LOCK:
-        if not _LOGGERS:
-            return
+        if kwargs.get("colors", True) and _IS_WIN and colorama is None:
+            raise RuntimeError("Dependency `colorama` is needed to colorize logs on Windows.")
 
-        if json and stream is not None:
-            raise ValueError("Cannot use JSON with stream, only with file.")
+        stream = kwargs.get("stream", sys.stderr)
+        colors = False if stream is None else kwargs.get("colors", True)
 
         handlers: list[logging.Handler] = []
         renderers: list[structlog.types.Processor] = []
@@ -103,16 +133,24 @@ def configure(
         if stream is not None:
             handlers.append(logging.StreamHandler(stream))
 
-        if filename is not None or file_handler is not None:
+        if (filename := kwargs.get("filename")) is not None or (file_handler := kwargs.get("file_handler")) is not None:
             handlers.append(logging.FileHandler(filename) if filename is not None else file_handler)  # type: ignore
 
-        if json:
-            renderers.append(structlog.processors.JSONRenderer(serializer=json_serializer, indent=json_indent))
+        if kwargs.get("json", False):
+            renderers.append(
+                structlog.processors.JSONRenderer(
+                    serializer=kwargs.get("json_serializer", msgspec_json_serializer),
+                    indent=kwargs.get("json_indent"),
+                ),
+            )
         elif stream is not None:
             renderers.append(structlog.dev.ConsoleRenderer(colors=colors))
 
         for logger in _LOGGERS.values():
-            logger.setLevel(level)
+            if module != _ALL and not logger.name.startswith(module):
+                continue
+
+            logger.setLevel(kwargs.get("level", logging.INFO))
 
             for handler in handlers:
                 if handler.formatter is None:
@@ -120,25 +158,28 @@ def configure(
 
             logger.handlers.extend(handlers)
 
-        _LOGGERS = types.MappingProxyType[str, logging.Logger](mapping={})  # type: ignore
+        if not _STRUCTLOG_IS_CONFIGURED:
+            _STRUCTLOG_IS_CONFIGURED = True  # type: ignore
 
-        structlog.contextvars.clear_contextvars()
-        _ = structlog.contextvars.bind_contextvars(**context)
+            structlog.contextvars.clear_contextvars()
+            structlog.configure(
+                processors=(
+                    *STDLIB_PROCESSORS,
+                    _SLF4JStyleFormatter(colors=colors),
+                    *DEFAULT_PROCESSORS,
+                    *renderers,
+                ),
+                wrapper_class=structlog.stdlib.BoundLogger,
+                context_class=dict,
+                logger_factory=structlog.stdlib.LoggerFactory(),
+                cache_logger_on_first_use=True,
+            )
 
-        structlog.configure(
-            processors=(*STDLIB_PROCESSORS, _SLF4JStyleFormatter(colors=colors), *DEFAULT_PROCESSORS, *renderers),
-            wrapper_class=structlog.stdlib.BoundLogger,
-            context_class=dict,
-            logger_factory=structlog.stdlib.LoggerFactory(),
-            cache_logger_on_first_use=True,
-        )
+        _ = structlog.contextvars.bind_contextvars(**kwargs.get("context", {}))
 
 
 def get_logger(name: str, /) -> structlog.stdlib.BoundLogger:
     with _LOCK:
-        if isinstance(_LOGGERS, types.MappingProxyType):
-            raise LookupError("Cannot get logger after configuration.")
-
         logger = logging.getLogger(name)
 
         if name not in _LOGGERS:
@@ -148,6 +189,14 @@ def get_logger(name: str, /) -> structlog.stdlib.BoundLogger:
 
 
 class _SLF4JStyleFormatter:
+    LEVELS_COLORS: typing.Final = {
+        "debug": colorama.Fore.LIGHTBLUE_EX if colorama is not None else Colors.LIGHT_BLUE,
+        "info": colorama.Fore.LIGHTGREEN_EX if colorama is not None else Colors.LIGHT_GREEN,
+        "warning": colorama.Fore.LIGHTYELLOW_EX if colorama is not None else Colors.LIGHT_YELLOW,
+        "error": colorama.Fore.LIGHTRED_EX if colorama is not None else Colors.LIGHT_RED,
+        "critical": colorama.Fore.LIGHTRED_EX if colorama is not None else Colors.LIGHT_RED,
+    }
+
     def __init__(self, *, colors: bool = True) -> None:
         self.colors = colors
 
@@ -170,9 +219,19 @@ class _SLF4JStyleFormatter:
 
         with suppress(TypeError, ValueError, IndexError, KeyError):
             if BRACE_PATTERN.search(event):
-                event_dict["event"], used_kwargs = self._format_braces(event, args, kwargs, log_level)
+                event_dict["event"], used_kwargs = self._format_braces(
+                    event,
+                    args,
+                    kwargs,
+                    log_level,
+                )
             elif PERCENT_PATTERN.search(event):
-                event_dict["event"], used_kwargs = self._format_percent(event, args, kwargs, log_level)
+                event_dict["event"], used_kwargs = self._format_percent(
+                    event,
+                    args,
+                    kwargs,
+                    log_level,
+                )
             elif args:
                 event_dict["event"] = self._highlight_values(event, args, log_level)
             else:
@@ -186,7 +245,7 @@ class _SLF4JStyleFormatter:
         return event_dict
 
     def _colorize(self, value: typing.Any, log_level: str) -> str:
-        return f"{LEVELS_COLORS[log_level]}{value}{colorama.Fore.RESET}" if self.colors else value
+        return f"{self.LEVELS_COLORS[log_level]}{value}{colorama.Fore.RESET if colorama is not None else Colors.RESET}" if self.colors else value
 
     def _format_braces(
         self,
@@ -237,7 +296,7 @@ class _SLF4JStyleFormatter:
         result.append(message[last_end:])
         return "".join(result), used_kwargs
 
-    def _format_percent(
+    def _format_percent(  # noqa: C901, PLR0912
         self,
         message: str,
         args: tuple[typing.Any, ...],
@@ -247,8 +306,8 @@ class _SLF4JStyleFormatter:
         used_kwargs: set[str] = set()
 
         try:
-            has_named = bool(re.search(r"%\([^)]+\)", message))
-            has_positional = bool(re.search(r"%[sdfrx]", message))
+            has_named = bool(HAS_NAMED_PATTERN.search(message))
+            has_positional = bool(HAS_POSITIONAL_PATTERN.search(message))
 
             if has_named and not has_positional:
                 formatted = message % kwargs
@@ -279,7 +338,7 @@ class _SLF4JStyleFormatter:
                 formatted = message
 
             return formatted, used_kwargs
-        except (TypeError, KeyError, ValueError):
+        except TypeError, KeyError, ValueError:
             if kwargs:
                 try:
                     formatted = message % kwargs
@@ -287,7 +346,7 @@ class _SLF4JStyleFormatter:
                     for value in kwargs.values():
                         formatted = self._highlight_single_value(formatted, value, log_level)
                     return formatted, used_kwargs
-                except (TypeError, KeyError):
+                except TypeError, KeyError:
                     pass
 
             if args:
@@ -296,7 +355,7 @@ class _SLF4JStyleFormatter:
                     for value in args:
                         formatted = self._highlight_single_value(formatted, value, log_level)
                     return formatted, used_kwargs
-                except (TypeError, ValueError):
+                except TypeError, ValueError:
                     pass
 
             return message, used_kwargs

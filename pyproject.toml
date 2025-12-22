@@ -14,7 +14,6 @@ requires-python = ">=3.14"
 dependencies = [
     "msgspec>=0.20.0",
     "structlog>=25.5.0",
-    "colorama>=0.4.6",
     "rnet (>=3.0.0rc15)",
     "fntypes",
 ]
@@ -57,8 +56,9 @@ Repository = "https://github.com/luwqz1/nibelheim"
 
 [project.optional-dependencies]
 uvloop = [
-    "uvloop; (sys_platform == 'darwin' or sys_platform == 'linux')",
+    "uvloop; (sys_platform != 'cli' and sys_platform != 'cygwin' and sys_platform != 'win32')",
     "winloop; (sys_platform == 'cli' or sys_platform == 'cygwin' or sys_platform == 'win32')",
+    "colorama; (sys_platform == 'win32')",
 ]
 
 [dependency-groups]
