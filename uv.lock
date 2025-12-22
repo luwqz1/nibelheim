@@ -15,6 +15,15 @@ wheels = [
 ]
 
 [[package]]
+name = "certifi"
+version = "2025.11.12"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/a2/8c/58f469717fa48465e4a50c014a0400602d3c437d7c0c468e17ada824da3a/certifi-2025.11.12.tar.gz", hash = "sha256:d8ab5478f2ecd78af242878415affce761ca6bc54a22a27e026d7c25357c3316", size = 160538, upload-time = "2025-11-12T02:54:51.517Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/70/7d/9bc192684cea499815ff478dfcdc13835ddf401365057044fb721ec6bddb/certifi-2025.11.12-py3-none-any.whl", hash = "sha256:97de8790030bbd5c2d96b7ec782fc2f7820ef8dba6db909ccf95449f2d062d4b", size = 159438, upload-time = "2025-11-12T02:54:49.735Z" },
+]
+
+[[package]]
 name = "cfgv"
 version = "3.5.0"
 source = { registry = "https://pypi.org/simple" }
@@ -254,6 +263,7 @@ wheels = [
 name = "nibel"
 source = { editable = "." }
 dependencies = [
+    { name = "certifi" },
     { name = "fntypes" },
     { name = "msgspec" },
     { name = "rnet" },
@@ -284,10 +294,11 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "certifi", specifier = ">=2025.11.12" },
     { name = "colorama", marker = "sys_platform == 'win32' and extra == 'uvloop'" },
     { name = "fntypes", git = "https://github.com/luwqz1/kungfu?rev=types" },
     { name = "msgspec", specifier = ">=0.20.0" },
-    { name = "rnet", specifier = ">=3.0.0rc15" },
+    { name = "rnet", specifier = ">=3.0.0rc16" },
     { name = "structlog", specifier = ">=25.5.0" },
     { name = "uvloop", marker = "sys_platform != 'cli' and sys_platform != 'cygwin' and sys_platform != 'win32' and extra == 'uvloop'" },
     { name = "winloop", marker = "(sys_platform == 'cli' and extra == 'uvloop') or (sys_platform == 'cygwin' and extra == 'uvloop') or (sys_platform == 'win32' and extra == 'uvloop')" },

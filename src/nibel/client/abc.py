@@ -1,6 +1,9 @@
 import abc
 import typing
 
+if typing.TYPE_CHECKING:
+    from datetime import timedelta
+
 
 class ABCClient(abc.ABC):
     async def __aenter__(self) -> typing.Self:
@@ -20,7 +23,7 @@ class ABCClient(abc.ABC):
 
     @property
     @abc.abstractmethod
-    def timeout(self) -> float: ...
+    def timeout(self) -> timedelta: ...
 
     @abc.abstractmethod
     async def request_text(
