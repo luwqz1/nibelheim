@@ -6,43 +6,6 @@ class StrEnum(str, enum.Enum):
         return self.value
 
 
-class Provider(StrEnum):
-    """OAuth2 authorization provider."""
-
-    GITHUB = "github"
-    POCKETID = "pocketid"
-    YANDEX = "yandex"
-
-
-class Status(StrEnum):
-    """User account status."""
-
-    ACTIVE = "ACTIVE"
-    DISABLED = "DISABLED"
-    LIMITED = "LIMITED"
-    EXPIRED = "EXPIRED"
-
-
-class TrafficLimitStrategy(StrEnum):
-    """Available reset periods."""
-
-    NO_RESET = "NO_RESET"
-    DAY = "DAY"
-    WEEK = "WEEK"
-    MONTH = "MONTH"
-
-
-class TemplateType(StrEnum):
-    """Type of template configuration for `Xray-Core`, `mihomo`, etc."""
-
-    XRAY_JSON = "XRAY_JSON"
-    XRAY_BASE64 = "XRAY_BASE64"
-    MIHOMO = "MIHOMO"
-    STASH = "STASH"
-    CLASH = "CLASH"
-    SINGBOX = "SINGBOX"
-
-
 class ALPN(StrEnum):
     """Application-Layer Protocol Negotiation."""
 
@@ -52,6 +15,15 @@ class ALPN(StrEnum):
     H_COMBINED = "h2,http/1.1"
     H3_H2_H1_COMBINED = "h3,h2,http/1.1"
     H3_H2_COMBINED = "h3,h2"
+
+
+class ClientType(StrEnum):
+    STASH = "stash"
+    SINGBOX = "singbox"
+    MIHOMO = "mihomo"
+    JSON = "json"
+    V2RAY_JSON = "v2ray-json"
+    CLASH = "clash"
 
 
 class Fingerprint(StrEnum):
@@ -86,6 +58,14 @@ class Fingerprint(StrEnum):
     with `TLS 1.3` using `X25519`)."""
 
 
+class Provider(StrEnum):
+    """OAuth2 authorization provider."""
+
+    GITHUB = "github"
+    POCKETID = "pocketid"
+    YANDEX = "yandex"
+
+
 class SecurityLayer(StrEnum):
     """Transport layer encryption."""
 
@@ -94,4 +74,33 @@ class SecurityLayer(StrEnum):
     NONE = "NONE"
 
 
-__all__ = ("ALPN", "Fingerprint", "Provider", "SecurityLayer", "Status", "TemplateType", "TrafficLimitStrategy")
+class Status(StrEnum):
+    """User account status."""
+
+    ACTIVE = "ACTIVE"
+    DISABLED = "DISABLED"
+    LIMITED = "LIMITED"
+    EXPIRED = "EXPIRED"
+
+
+class TemplateType(StrEnum):
+    """Type of template configuration for `Xray-Core`, `mihomo`, etc."""
+
+    XRAY_JSON = "XRAY_JSON"
+    XRAY_BASE64 = "XRAY_BASE64"
+    MIHOMO = "MIHOMO"
+    STASH = "STASH"
+    CLASH = "CLASH"
+    SINGBOX = "SINGBOX"
+
+
+class TrafficLimitStrategy(StrEnum):
+    """Available reset periods."""
+
+    NO_RESET = "NO_RESET"
+    DAY = "DAY"
+    WEEK = "WEEK"
+    MONTH = "MONTH"
+
+
+__all__ = ("ALPN", "ClientType", "Fingerprint", "Provider", "SecurityLayer", "Status", "TemplateType", "TrafficLimitStrategy")
