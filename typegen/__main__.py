@@ -12,6 +12,7 @@ if __name__ == "__main__":
     sys.exit(
         generate(
             workdir=pathlib.Path("src") / "nibel" / "types",
+            config_path=pathlib.Path(__file__).parent / "config.toml",
             templates_loader=FileSystemLoader(pathlib.Path(__file__).parent / "generator" / "templates"),
         ),
     )

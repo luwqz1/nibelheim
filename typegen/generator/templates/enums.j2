@@ -6,11 +6,19 @@ class StrEnum(str, enum.Enum):
         return self.value
 
 
-{% for name, type, enum_dict in enums %}
+{% for name, description, type, enum_dict, enumerations_descriptions in enums %}
 {% if type == "string" %}
 class {{ pascal_case(name) }}(StrEnum):
+    {% if description %}
+    """{{ chunks_str(refactor_field_description(description)) }}"""
+    {% endif %}
+
     {% for enum_name, enum_value in enum_dict.items() %}
     {{ enum_name }} = "{{ enum_value }}"
+    {% if enumerations_descriptions and enum_name in enumerations_descriptions %}
+    """{{ chunks_str(enumerations_descriptions[enum_name]) }}"""
+
+    {% endif %}
     {% endfor %}
 {% elif type == "integer" %}
 class {{ pascal_case(name) }}(enum.IntEnum):
@@ -31,7 +39,7 @@ class {{ pascal_case(name) }}(float, enum.Enum):
 
 
 __all__ = (
-    {% for name, type, values in enums %}
+    {% for name, _, _, _, _ in enums %}
     "{{ pascal_case(name) }}"{% if not loop.last %},{% endif %}
 
     {% endfor %}
