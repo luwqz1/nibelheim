@@ -20,6 +20,12 @@ REMNA_API_VERSION: typing.Final = parse(__version__)
 LOG: typing.Final = get_logger(__name__)
 
 
+def to_pascal_case(s: str, /) -> str:
+    if "_" in s:
+        return "".join(to_pascal_case(c) for c in s.split("_"))
+    return s[0].upper() + s[1:]
+
+
 def generate(
     workdir: pathlib.Path,
     templates_loader: jinja2.FileSystemLoader | None = None,
@@ -63,6 +69,7 @@ def generate(
         trim_blocks=True,
         lstrip_blocks=True,
     )
+    environment.globals["pascal_case"] = to_pascal_case  # type: ignore
     context: Context = dict()
 
     for generator in OAS_GENERATOR[remna_oas.version.major][remna_oas.version]:

@@ -1,4 +1,4 @@
-from nibel.types.categories.categories import BaseCategories
+from nibel.types.controllers.categories import BaseCategories
 
 
 class Remnawave(BaseCategories):

@@ -1,0 +1,38 @@
+import enum
+
+
+class StrEnum(str, enum.Enum):
+    def __str__(self) -> str:
+        return self.value
+
+
+{% for name, type, values in enums %}
+{% if type == "string" %}
+class {{ pascal_case(name) }}(StrEnum):
+    {% for value in values %}
+    {{ pascal_case(value) }} = "{{ value }}"
+    {% endfor %}
+{% elif type == "integer" %}
+class {{ pascal_case(name) }}(enum.IntEnum):
+    {% for value in values %}
+    {{ pascal_case(value) }} = {{ value }}
+    {% endfor %}
+{% elif type == "number" %}
+class {{ pascal_case(name) }}(float, enum.Enum):
+    {% for value in values %}
+    {{ pascal_case(value) }} = {{ value }}
+    {% endfor %}
+{% endif %}
+{% if not loop.last %}
+
+
+{% endif %}
+{% endfor %}
+
+
+__all__ = (
+    {% for name, type, values in enums %}
+    "{{ pascal_case(name) }}"{% if not loop.last %},{% endif %}
+
+    {% endfor %}
+)
