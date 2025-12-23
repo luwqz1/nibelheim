@@ -6,21 +6,21 @@ class StrEnum(str, enum.Enum):
         return self.value
 
 
-{% for name, type, values in enums %}
+{% for name, type, enum_dict in enums %}
 {% if type == "string" %}
 class {{ pascal_case(name) }}(StrEnum):
-    {% for value in values %}
-    {{ pascal_case(value) }} = "{{ value }}"
+    {% for enum_name, enum_value in enum_dict.items() %}
+    {{ enum_name }} = "{{ enum_value }}"
     {% endfor %}
 {% elif type == "integer" %}
 class {{ pascal_case(name) }}(enum.IntEnum):
-    {% for value in values %}
-    {{ pascal_case(value) }} = {{ value }}
+    {% for enum_name, enum_value in enum_dict.items() %}
+    {{ enum_name }} = {{ enum_value }}
     {% endfor %}
 {% elif type == "number" %}
 class {{ pascal_case(name) }}(float, enum.Enum):
-    {% for value in values %}
-    {{ pascal_case(value) }} = {{ value }}
+    {% for enum_name, enum_value in enum_dict.items() %}
+    {{ enum_name }} = {{ enum_value }}
     {% endfor %}
 {% endif %}
 {% if not loop.last %}

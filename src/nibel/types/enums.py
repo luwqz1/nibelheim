@@ -7,9 +7,9 @@ class StrEnum(str, enum.Enum):
 
 
 class Provider(StrEnum):
-    GITHUB = "GITHUB"
-    POCKETID = "POCKETID"
-    YANDEX = "YANDEX"
+    GITHUB = "github"
+    POCKETID = "pocketid"
+    YANDEX = "yandex"
 
 
 class Status(StrEnum):
@@ -20,15 +20,15 @@ class Status(StrEnum):
 
 
 class TrafficLimitStrategy(StrEnum):
-    NORESET = "NO_RESET"
+    NO_RESET = "NO_RESET"
     DAY = "DAY"
     WEEK = "WEEK"
     MONTH = "MONTH"
 
 
 class TemplateType(StrEnum):
-    XRAYJSON = "XRAY_JSON"
-    XRAYBASE64 = "XRAY_BASE64"
+    XRAY_JSON = "XRAY_JSON"
+    XRAY_BASE64 = "XRAY_BASE64"
     MIHOMO = "MIHOMO"
     STASH = "STASH"
     CLASH = "CLASH"
@@ -36,24 +36,24 @@ class TemplateType(StrEnum):
 
 
 class Alpn(StrEnum):
-    H3 = "H3"
-    H2 = "H2"
-    HTTP11 = "HTTP_1_1"
-    HCOMBINED = "H_COMBINED"
-    H3H2H1COMBINED = "H3_H2_H1_COMBINED"
-    H3H2COMBINED = "H3_H2_COMBINED"
+    H3 = "h3"
+    H2 = "h2"
+    HTTP_1_1 = "http/1.1"
+    H_COMBINED = "h2,http/1.1"
+    H3_H2_H1_COMBINED = "h3,h2,http/1.1"
+    H3_H2_COMBINED = "h3,h2"
 
 
 class Fingerprint(StrEnum):
-    CHROME = "CHROME"
-    FIREFOX = "FIREFOX"
-    SAFARI = "SAFARI"
-    IOS = "IOS"
-    ANDROID = "ANDROID"
-    EDGE = "EDGE"
-    QQ = "QQ"
-    RANDOM = "RANDOM"
-    RANDOMIZED = "RANDOMIZED"
+    CHROME = "chrome"
+    FIREFOX = "firefox"
+    SAFARI = "safari"
+    IOS = "ios"
+    ANDROID = "android"
+    EDGE = "edge"
+    QQ = "qq"
+    RANDOM = "random"
+    RANDOMIZED = "randomized"
 
 
 class SecurityLayer(StrEnum):
