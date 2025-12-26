@@ -24,7 +24,7 @@ def validate_webhook_signature(
     return hmac.compare_digest(computed_signature, signature)
 
 
-def validate_webhook_headers(
+def validate_webhook_signature_from_headers(
     body: typing.Any,
     headers: typing.Mapping[str, str],
     secret: str,
@@ -41,4 +41,4 @@ def validate_webhook_headers(
     return validate_webhook_signature(body, signature, secret)
 
 
-__all__ = ("validate_webhook_headers", "validate_webhook_signature")
+__all__ = ("validate_webhook_headers", "validate_webhook_signature_from_headers")
