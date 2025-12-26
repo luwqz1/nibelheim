@@ -1,7 +1,7 @@
 import http
 
 
-class APIError(Exception):
+class RemnawaveError(Exception):
     def __init__(self, error: object, code: int) -> None:
         self.error = error
         self.code = code
@@ -15,4 +15,4 @@ class APIError(Exception):
         return f"{type(self).__name__}: {self}"
 
 
-__all__ = ("APIError",)
+__all__ = ("RemnawaveError",)

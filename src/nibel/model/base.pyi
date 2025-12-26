@@ -3,6 +3,14 @@ import typing
 
 import msgspec
 
+def model_asdict(
+    model: Model,
+    /,
+    *,
+    exclude_unset: bool = ...,
+    unset_as_nothing: bool = ...,
+) -> dict[str, typing.Any]: ...
+
 @typing.overload
 def field() -> typing.Any: ...
 @typing.overload
