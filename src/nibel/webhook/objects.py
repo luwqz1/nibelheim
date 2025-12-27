@@ -42,7 +42,7 @@ class Service(Event[ServiceEvent]):
 
 
 class Update(Model):
-    """This object represents an incoming event from the webhook server."""
+    """This object represents an incoming update of the event from the webhook server."""
 
     type: UpdateType
     """The type of update that occurred."""
