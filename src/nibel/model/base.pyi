@@ -14,11 +14,17 @@ def model_asdict(
 @typing.overload
 def field() -> typing.Any: ...
 @typing.overload
-def field(*, name: str | None = ...) -> typing.Any: ...
+def field(*, name: str | None) -> typing.Any: ...
+@typing.overload
+def field(*, default: typing.Any) ->  typing.Any: ...
+@typing.overload
+def field(*, default_factory: typing.Callable[[], typing.Any]) -> typing.Any: ...
+@typing.overload
+def field(*, converter: typing.Callable[[typing.Any], typing.Any] | None) -> typing.Any: ...
 @typing.overload
 def field(
     *,
-    default: typing.Any | None = ...,
+    default: typing.Any = ...,
     name: str | None = ...,
 ) -> typing.Any: ...
 @typing.overload
@@ -30,21 +36,13 @@ def field(
 @typing.overload
 def field(
     *,
-    default: typing.Any | None = ...,
+    default: typing.Any = ...,
     converter: typing.Callable[[typing.Any], typing.Any] | None = ...,
     name: str | None = ...,
 ) -> typing.Any: ...
 @typing.overload
 def field(
     *,
-    default_factory: typing.Callable[[], typing.Any] | None = ...,
-    converter: typing.Callable[[typing.Any], typing.Any] | None = ...,
-    name: str | None = ...,
-) -> typing.Any: ...
-@typing.overload
-def field(
-    *,
-    default: typing.Any | None = ...,
     default_factory: typing.Callable[[], typing.Any] | None = ...,
     converter: typing.Callable[[typing.Any], typing.Any] | None = ...,
     name: str | None = ...,
