@@ -22,35 +22,38 @@ def field(*, default_factory: typing.Callable[[], typing.Any]) -> typing.Any: ..
 @typing.overload
 def field(*, converter: typing.Callable[[typing.Any], typing.Any] | None) -> typing.Any: ...
 @typing.overload
-def field(
-    *,
-    default: typing.Any = ...,
-    name: str | None = ...,
-) -> typing.Any: ...
-@typing.overload
-def field(
-    *,
-    default_factory: typing.Callable[[], typing.Any] | None = ...,
-    name: str | None = ...,
-) -> typing.Any: ...
+def field(*, converter: typing.Callable[[typing.Any], typing.Any] = ...) -> typing.Any: ...
 @typing.overload
 def field(
     *,
     default: typing.Any = ...,
-    converter: typing.Callable[[typing.Any], typing.Any] | None = ...,
     name: str | None = ...,
 ) -> typing.Any: ...
 @typing.overload
 def field(
     *,
-    default_factory: typing.Callable[[], typing.Any] | None = ...,
-    converter: typing.Callable[[typing.Any], typing.Any] | None = ...,
+    default_factory: typing.Callable[[], typing.Any] = ...,
+    name: str | None = ...,
+) -> typing.Any: ...
+@typing.overload
+def field(
+    *,
+    default: typing.Any = ...,
+    converter: typing.Callable[[typing.Any], typing.Any] = ...,
+    name: str | None = ...,
+) -> typing.Any: ...
+@typing.overload
+def field(
+    *,
+    default_factory: typing.Callable[[], typing.Any] = ...,
+    converter: typing.Callable[[typing.Any], typing.Any] = ...,
     name: str | None = ...,
 ) -> typing.Any: ...
 
 class From[T]:
-    def __new__(cls, _: T) -> T: ...
+    def __new__(cls, _: T, /) -> typing.Any: ...
 
+@typing.dataclass_transform(field_specifiers=(field,))
 class Model(msgspec.Struct):
     @classmethod
     def get_fields(cls) -> types.MappingProxyType[str, typing.Any]: ...

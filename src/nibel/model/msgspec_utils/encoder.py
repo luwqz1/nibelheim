@@ -8,7 +8,7 @@ import msgspec
 
 from nibel.model.msgspec_utils.caster import SupportsCast
 from nibel.model.msgspec_utils.custom_types.datetime import datetime, timedelta
-from nibel.model.msgspec_utils.custom_types.enum_meta import BaseEnumMeta
+from nibel.model.msgspec_utils.custom_types.enum import BaseEnumMeta
 
 type Context = dict[str, typing.Any]
 type Order = typing.Literal["deterministic", "sorted"]

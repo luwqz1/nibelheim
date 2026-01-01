@@ -1,11 +1,4 @@
-import enum
-
-from nibel.model.msgspec_utils.custom_types.enum_meta import BaseEnumMeta
-
-
-class StrEnum(str, enum.Enum):
-    def __str__(self) -> str:
-        return self.value
+from nibel.model.msgspec_utils.custom_types.enum import BaseEnumMeta, StrEnum
 
 
 class UpdateType(StrEnum):

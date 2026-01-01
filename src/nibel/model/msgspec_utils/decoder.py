@@ -8,7 +8,7 @@ import msgspec
 
 from nibel.model.msgspec_utils.caster import SupportsCast
 from nibel.model.msgspec_utils.custom_types.datetime import datetime, timedelta
-from nibel.model.msgspec_utils.custom_types.enum_meta import BaseEnumMeta
+from nibel.model.msgspec_utils.custom_types.enum import BaseEnumMeta
 from nibel.model.msgspec_utils.custom_types.literal import _Literal  # type: ignore
 from nibel.model.msgspec_utils.custom_types.option import Option
 from nibel.model.msgspec_utils.type_check import is_common_type, type_check

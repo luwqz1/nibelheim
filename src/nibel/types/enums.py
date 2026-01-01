@@ -1,12 +1,7 @@
-import enum
+from nibel.model.msgspec_utils.custom_types.enum import BaseEnumMeta, StrEnum
 
 
-class StrEnum(str, enum.Enum):
-    def __str__(self) -> str:
-        return self.value
-
-
-class ALPN(StrEnum):
+class ALPN(StrEnum, metaclass=BaseEnumMeta):
     """Application-Layer Protocol Negotiation."""
 
     H3 = "h3"
@@ -17,7 +12,7 @@ class ALPN(StrEnum):
     H3_H2_COMBINED = "h3,h2"
 
 
-class ClientType(StrEnum):
+class ClientType(StrEnum, metaclass=BaseEnumMeta):
     STASH = "stash"
     SINGBOX = "singbox"
     MIHOMO = "mihomo"
@@ -26,7 +21,7 @@ class ClientType(StrEnum):
     CLASH = "clash"
 
 
-class Fingerprint(StrEnum):
+class Fingerprint(StrEnum, metaclass=BaseEnumMeta):
     """Simulate the TLS fingerprint using the `uTLS` library or it generate randomly."""
 
     CHROME = "chrome"
@@ -58,7 +53,7 @@ class Fingerprint(StrEnum):
     with `TLS 1.3` using `X25519`)."""
 
 
-class Provider(StrEnum):
+class Provider(StrEnum, metaclass=BaseEnumMeta):
     """OAuth2 authorization provider."""
 
     GITHUB = "github"
@@ -66,7 +61,7 @@ class Provider(StrEnum):
     YANDEX = "yandex"
 
 
-class SecurityLayer(StrEnum):
+class SecurityLayer(StrEnum, metaclass=BaseEnumMeta):
     """Transport layer encryption."""
 
     DEFAULT = "DEFAULT"
@@ -74,7 +69,7 @@ class SecurityLayer(StrEnum):
     NONE = "NONE"
 
 
-class Status(StrEnum):
+class Status(StrEnum, metaclass=BaseEnumMeta):
     """User account status."""
 
     ACTIVE = "ACTIVE"
@@ -83,7 +78,7 @@ class Status(StrEnum):
     EXPIRED = "EXPIRED"
 
 
-class TemplateType(StrEnum):
+class TemplateType(StrEnum, metaclass=BaseEnumMeta):
     """Type of template configuration for `Xray-Core`, `mihomo`, etc."""
 
     XRAY_JSON = "XRAY_JSON"
@@ -94,7 +89,7 @@ class TemplateType(StrEnum):
     SINGBOX = "SINGBOX"
 
 
-class TrafficLimitStrategy(StrEnum):
+class TrafficLimitStrategy(StrEnum, metaclass=BaseEnumMeta):
     """Available reset periods."""
 
     NO_RESET = "NO_RESET"

@@ -9,6 +9,7 @@ import msgspec
 from fntypes.library.monad.option import Nothing
 from msgspec import field as _field
 
+from nibel.model.msgspec_utils.custom_types.option import Option
 from nibel.model.msgspec_utils.decoder import decoder
 from nibel.model.msgspec_utils.encoder import encoder
 
@@ -18,6 +19,8 @@ MODEL_CONFIG: typing.Final = {
     "dict": True,
     "rename": {kw + "_": kw for kw in keyword.kwlist},
 }
+
+type From[T] = T
 
 
 def is_none(obj: typing.Any, /) -> typing.TypeIs[Nothing | None]:
@@ -46,28 +49,25 @@ def field(**kwargs: typing.Any) -> typing.Any:
     return _field(**kwargs)
 
 
-@typing.dataclass_transform(field_specifiers=(field,))
 class Model(msgspec.Struct, **MODEL_CONFIG):
-    if not typing.TYPE_CHECKING:
+    def __getattribute__(self, name: str, /) -> typing.Any:
+        class_ = type(self)
+        val = object.__getattribute__(self, name)
 
-        def __getattribute__(self, name: str, /) -> typing.Any:
-            class_ = type(self)
-            val = object.__getattribute__(self, name)
-
-            if name not in class_.__struct_fields__:
-                return val
-
-            if (
-                (field_info := class_.get_fields().get(name)) is not None
-                and isinstance(field_info.type, msgspec.inspect.CustomType)
-                and issubclass(field_info.type.cls, Option)
-            ):
-                return Nothing() if val is UNSET else val
-
-            if val is UNSET:
-                raise AttributeError(f"{class_.__name__!r} object has no attribute {name!r}")
-
+        if name not in class_.__struct_fields__:
             return val
+
+        if (
+            (field_info := class_.get_fields().get(name)) is not None
+            and isinstance(field_info.type, msgspec.inspect.CustomType)
+            and issubclass(field_info.type.cls, Option)  # type: ignore
+        ):
+            return NOTHING if val is UNSET else val
+
+        if val is UNSET:
+            raise AttributeError(f"{class_.__name__!r} object has no attribute {name!r}")
+
+        return val
 
     def __post_init__(self) -> None:
         for field, value in model_asdict(self, exclude_unset=False).items():
@@ -134,4 +134,4 @@ class Model(msgspec.Struct, **MODEL_CONFIG):
         return self._to_dict("model_as_full_dict", exclude_fields or set(), full=True)
 
 
-__all__ = ("MODEL_CONFIG", "UNSET", "Model", "field", "is_none", "model_asdict")
+__all__ = ("From", "Model", "field", "model_asdict")

@@ -25,7 +25,7 @@ if colorama is not None:
 _IS_WIN: typing.Final = sys.platform == "win32"
 _LOCK: typing.Final = threading.Lock()
 _STRUCTLOG_IS_CONFIGURED: typing.Final = False
-_LOGGERS: typing.Final = dict[str, logging.Logger]()
+_LOGGERS: typing.Final = dict[str, tuple[logging.Logger, "_BoundLogger"]]()
 _ALL: typing.Final = "*"
 
 MEGABYTE: typing.Final = 1024**2
@@ -40,6 +40,32 @@ STDLIB_PROCESSORS: typing.Final = (
     structlog.stdlib.add_logger_name,
     structlog.stdlib.add_log_level,
 )
+
+
+class Logger(typing.Protocol):
+    def debug(self, __message: str, *args: typing.Any, **kwargs: typing.Any) -> None: ...
+
+    def info(self, __message: str, *args: typing.Any, **kwargs: typing.Any) -> None: ...
+
+    def warning(self, __message: str, *args: typing.Any, **kwargs: typing.Any) -> None: ...
+
+    def error(self, __message: str, *args: typing.Any, **kwargs: typing.Any) -> None: ...
+
+    def critical(self, __message: str, *args: typing.Any, **kwargs: typing.Any) -> None: ...
+
+    def exception(self, __message: str, *args: typing.Any, **kwargs: typing.Any) -> None: ...
+
+    async def adebug(self, __message: str, *args: typing.Any, **kwargs: typing.Any) -> None: ...
+
+    async def ainfo(self, __message: str, *args: typing.Any, **kwargs: typing.Any) -> None: ...
+
+    async def awarning(self, __message: str, *args: typing.Any, **kwargs: typing.Any) -> None: ...
+
+    async def aerror(self, __message: str, *args: typing.Any, **kwargs: typing.Any) -> None: ...
+
+    async def acritical(self, __message: str, *args: typing.Any, **kwargs: typing.Any) -> None: ...
+
+    async def aexception(self, __message: str, *args: typing.Any, **kwargs: typing.Any) -> None: ...
 
 
 class Colors:
@@ -60,6 +86,19 @@ class Colors:
     LIGHT_CYAN = "\033[96m"
     LIGHT_WHITE = "\033[97m"
     LIGHT_BLACK = "\033[90m"
+
+
+class _BoundLogger:
+    def __init__(self, logger: Logger, /) -> None:
+        self._logger = logger
+
+    def __getattr__(self, name: str, /) -> typing.Any:
+        if not _STRUCTLOG_IS_CONFIGURED:
+            return self
+        return getattr(self._logger, name)
+
+    def __call__(self, *args: typing.Any, **kwargs: typing.Any) -> typing.Self:
+        return self
 
 
 class _CallsiteParameterAdder(structlog.processors.CallsiteParameterAdder):
@@ -146,7 +185,7 @@ def configure(
         elif stream is not None:
             renderers.append(structlog.dev.ConsoleRenderer(colors=colors))
 
-        for logger in _LOGGERS.values():
+        for logger, bound_logger in _LOGGERS.values():
             if module != _ALL and not logger.name.startswith(module):
                 continue
 
@@ -157,12 +196,8 @@ def configure(
                     handler.setFormatter(logging.Formatter("%(message)s"))
 
             logger.handlers.extend(handlers)
-
-        if not _STRUCTLOG_IS_CONFIGURED:
-            _STRUCTLOG_IS_CONFIGURED = True  # type: ignore
-
-            structlog.contextvars.clear_contextvars()
-            structlog.configure(
+            bound_logger._logger = structlog.wrap_logger(  # type: ignore
+                logger,
                 processors=(
                     *STDLIB_PROCESSORS,
                     _SLF4JStyleFormatter(colors=colors),
@@ -171,21 +206,25 @@ def configure(
                 ),
                 wrapper_class=structlog.stdlib.BoundLogger,
                 context_class=dict,
-                logger_factory=structlog.stdlib.LoggerFactory(),
                 cache_logger_on_first_use=True,
             )
 
-        _ = structlog.contextvars.bind_contextvars(**kwargs.get("context", {}))
+        if not _STRUCTLOG_IS_CONFIGURED:
+            _STRUCTLOG_IS_CONFIGURED = True  # type: ignore
+
+            structlog.contextvars.clear_contextvars()
+            _ = structlog.contextvars.bind_contextvars(**kwargs.get("context", {}))
 
 
-def get_logger(name: str, /) -> structlog.stdlib.BoundLogger:
+def get_logger(name: str, /) -> Logger:
     with _LOCK:
-        logger = logging.getLogger(name)
-
         if name not in _LOGGERS:
-            _LOGGERS[name] = logger
+            logger = logging.getLogger(name)
+            bound_logger = _BoundLogger(logger)  # type: ignore
+            _LOGGERS[name] = (logger, bound_logger)
+            return bound_logger  # type: ignore
 
-    return structlog.wrap_logger(logger)
+        return _LOGGERS[name][1]  # type: ignore
 
 
 class _SLF4JStyleFormatter:
@@ -386,7 +425,10 @@ class _SLF4JStyleFormatter:
         return full_message
 
 
-structlog.configure(wrapper_class=structlog.stdlib.BoundLogger)
+structlog.configure(
+    logger_factory=structlog.stdlib.LoggerFactory(),
+    cache_logger_on_first_use=True,
+)
 
 
 __all__ = ("configure", "get_logger")

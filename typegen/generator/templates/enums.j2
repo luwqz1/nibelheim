@@ -1,14 +1,9 @@
-import enum
-
-
-class StrEnum(str, enum.Enum):
-    def __str__(self) -> str:
-        return self.value
+from nibel.model.msgspec_utils.custom_types.enum import BaseEnumMeta, FloatEnum, IntEnum, StrEnum
 
 
 {% for name, description, type, enum_dict, enumerations_descriptions in enums %}
 {% if type == "string" %}
-class {{ pascal_case(name) }}(StrEnum):
+class {{ pascal_case(name) }}(StrEnum, metaclass=BaseEnumMeta):
     {% if description %}
     """{{ chunks_str(refactor_field_description(description)) }}"""
     {% endif %}
@@ -21,12 +16,12 @@ class {{ pascal_case(name) }}(StrEnum):
     {% endif %}
     {% endfor %}
 {% elif type == "integer" %}
-class {{ pascal_case(name) }}(enum.IntEnum):
+class {{ pascal_case(name) }}(IntEnum, metaclass=BaseEnumMeta):
     {% for enum_name, enum_value in enum_dict.items() %}
     {{ enum_name }} = {{ enum_value }}
     {% endfor %}
 {% elif type == "number" %}
-class {{ pascal_case(name) }}(float, enum.Enum):
+class {{ pascal_case(name) }}(FloatEnum, metaclass=BaseEnumMeta):
     {% for enum_name, enum_value in enum_dict.items() %}
     {{ enum_name }} = {{ enum_value }}
     {% endfor %}
