@@ -1,5 +1,6 @@
 import pathlib
 import typing
+from collections import deque
 
 from jinja2 import Environment
 from packaging.version import parse
@@ -7,9 +8,13 @@ from packaging.version import parse
 from nibel.logger import get_logger
 from typegen.cfg.config import Config
 from typegen.generator.abc import ABCGenerator, Context
-from typegen.schema.oas.v3.oas_3_1_1.components import (
+from typegen.generator.utils import makesafe_name_from_enum_value
+from typegen.schema.oas.v3.oas_3_1_1.properties import (
+    ArrayPropertySchema,
     IntegerPropertySchema,
     NumberPropertySchema,
+    ObjectPropertySchema,
+    PropertyType,
     StringPropertySchema,
 )
 from typegen.schema.oas.v3.oas_3_1_1.remna import RemnaAPI
@@ -30,6 +35,52 @@ class ObjectsGenerator(ABCGenerator):
 
 
 class EnumsGenerator(ABCGenerator):
+    @staticmethod
+    def get_enums_props_from_components(api: RemnaAPI) -> list[tuple[str, StringPropertySchema | IntegerPropertySchema | NumberPropertySchema]]:
+        props: list[tuple[str, StringPropertySchema | IntegerPropertySchema | NumberPropertySchema]] = []
+
+        for component in api.components.schemas.values():
+            if component.type != "object":
+                continue
+
+            stack = deque((tuple(component.properties.items()),))
+
+            while stack:
+                properties = stack.pop()
+
+                for name, prop in properties:
+                    match prop:
+                        case StringPropertySchema() | IntegerPropertySchema() | NumberPropertySchema():
+                            if prop.enum_values:
+                                props.append((name, prop))
+                            elif prop.properties:
+                                stack.append(tuple(prop.properties.items()))
+                        case ObjectPropertySchema() if prop.properties:
+                            stack.append(tuple(prop.properties.items()))
+                        case ArrayPropertySchema() if prop.items:
+                            stack.append(((name, prop.items),))
+                        case _:
+                            continue
+
+        return props
+
+    @staticmethod
+    def get_enums_props_from_paths(api: RemnaAPI) -> list[tuple[str, StringPropertySchema | IntegerPropertySchema | NumberPropertySchema]]:
+        props: list[tuple[str, StringPropertySchema | IntegerPropertySchema | NumberPropertySchema]] = []
+
+        for method in api.paths.values():
+            if method.method is None:
+                continue
+
+            for param in method.method.parameters:
+                match param.schema:
+                    case StringPropertySchema() | IntegerPropertySchema() | NumberPropertySchema() if param.schema.enum_values:
+                        props.append((param.name, param.schema))
+                    case _:
+                        continue
+
+        return props
+
     def generate(
         self,
         api: RemnaAPI,
@@ -39,43 +90,87 @@ class EnumsGenerator(ABCGenerator):
     ) -> None:
         LOG.info("Generating enums...")
 
-        config: Config = context["config"]
-        enums: list[tuple[str, str | None, str, dict[str, typing.Any], dict[str, str] | None]] = []
-        enums_dicts: list[dict[str, typing.Any]] = []
-        enums_descriptions: dict[str, str] = {}
         enums_template = environment.get_template("enums.j2")
         enums_path = workdir / "enums.py"
 
-        for component in api.components.schemas.values():
-            if component.type != "object":
+        config: Config = context["config"]
+        props = [
+            *self.get_enums_props_from_components(api),
+            *self.get_enums_props_from_paths(api),
+        ]
+
+        enums: list[tuple[str, str | None, str, dict[str, typing.Any], dict[str, str] | None]] = []
+        enums_dicts: dict[str, dict[str, typing.Any]] = {}
+        enums_descriptions: dict[str, str] = {}
+
+        for prop_name, prop in props:
+            if prop_name in config.generator.enums.custom_enums:
+                enum = config.generator.enums.custom_enums[prop_name]
+            elif prop.enum_names and prop.enum_values:
+                enum = dict(zip(prop.enum_names, prop.enum_values))
+            elif prop.enum_values and prop.type == PropertyType.STRING:
+                skip = False
+
+                for enum_name, *_, enum_dict, _ in enums:
+                    pname = config.generator.enums.renames.get(prop_name, prop_name)
+                    if enum_name == pname and pname not in context.get("enums", {}):
+                        if all(x in enum_dict for x in prop.enum_values):
+                            context.setdefault("enums", {})[pname] = tuple(map(makesafe_name_from_enum_value, prop.enum_values))
+                        else:
+                            LOG.warning("Repeated enum values {!r} found with similar name: {!r}", prop.enum_values, prop_name)
+
+                        skip = True
+                        break
+
+                if skip:
+                    continue
+
+                enum = dict(zip(map(makesafe_name_from_enum_value, prop.enum_values), prop.enum_values))
+            else:
                 continue
 
-            for name, prop in component.properties.items():
-                match prop:
-                    case StringPropertySchema() | IntegerPropertySchema() | NumberPropertySchema() if prop.enum_names and prop.enum_values:
-                        enum = dict(zip(prop.enum_names, prop.enum_values))
-                        if enum not in enums_dicts:
-                            enums_dicts.append(enum)
+            if prop_name not in enums_dicts:
+                is_similar_enum = False
 
-                            name = config.generator.enums.renames.get(name, name)
-                            prop_description = config.generator.enums.class_descriptions.get(name, prop.description)
+                for enum_dict in enums_dicts.values():
+                    if all(x in enum_dict for x in enum.values()):
+                        is_similar_enum = True
+                        break
 
-                            if prop_description and name not in enums_descriptions:
-                                enums_descriptions[name] = prop_description
+                if is_similar_enum:
+                    continue
 
-                            enums.append(
-                                (
-                                    name,
-                                    enums_descriptions.get(name),
-                                    prop.type.value,
-                                    enum,
-                                    config.generator.enums.enumerations_descriptions.get(name),
-                                ),
-                            )
-                    case _:
-                        continue
+                enums_dicts[prop_name] = enum
 
-        enums_path.write_text(enums_template.render(enums=enums), encoding="utf-8")
+                name = config.generator.enums.renames.get(prop_name, prop_name)
+                prop_description = config.generator.enums.class_descriptions.get(name, prop.desc)
+
+                if prop_description and name not in enums_descriptions:
+                    if isinstance(prop_description, dict):
+                        if name not in config.generator.enums.enumerations_descriptions and "markdownEnumDescriptions" in prop_description:
+                            config.generator.enums.enumerations_descriptions[name] = dict(zip(enum.keys(), prop_description["markdownEnumDescriptions"]))
+
+                        prop_description = prop_description.get("title", prop_description.get("markdownDescription", None))
+
+                    if isinstance(prop_description, str):
+                        enums_descriptions[name] = prop_description
+
+                enums.append(
+                    (
+                        name,
+                        enums_descriptions.get(name),
+                        prop.type.value,
+                        enum,
+                        config.generator.enums.enumerations_descriptions.get(name),
+                    ),
+                )
+            else:
+                enums_dicts[prop_name].update(enum)
+
+        enums_path.write_text(
+            data=enums_template.render(enums=sorted(enums, key=lambda x: x[0])),
+            encoding="UTF-8",
+        )
         LOG.info("{} enums generated successfully!", len(enums))
 
 

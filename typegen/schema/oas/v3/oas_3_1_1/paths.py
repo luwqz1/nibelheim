@@ -1,9 +1,10 @@
 import typing
+from functools import cached_property
 
 import msgspec
 
 from typegen.model import Model
-from typegen.schema.oas.v3.oas_3_1_1.properties import PropertySchema
+from typegen.schema.oas.v3.oas_3_1_1.properties import Property
 from typegen.schema.oas.v3.oas_3_1_1.security import Security
 
 type Paths = dict[str, PathMethods]
@@ -16,7 +17,7 @@ class SecuritySchema(Model):
 class Schema(Model):
     ref: str | None = msgspec.field(default=None, name="$ref")
     type: str | None = msgspec.field(default=None)
-    properties: dict[str, PropertySchema] | None = msgspec.field(default=None)
+    properties: dict[str, Property] | None = msgspec.field(default=None)
 
 
 class ApplicationJSON(Model):
@@ -41,7 +42,7 @@ class Parameter(Model):
     name: str
     required: bool
     in_: typing.Literal["query", "path"] = msgspec.field(name="in")
-    schema: PropertySchema | None = msgspec.field(default=None)
+    schema: Property | None = msgspec.field(default=None)
     description: str | None = msgspec.field(default=None)
 
 
@@ -62,6 +63,13 @@ class PathMethods(Model):
     delete: PathRequestMethod | None = msgspec.field(default=None)
     put: PathRequestMethod | None = msgspec.field(default=None)
     patch: PathRequestMethod | None = msgspec.field(default=None)
+
+    @cached_property
+    def method(self) -> PathRequestMethod | None:
+        return next(
+            (method for field in self.__struct_fields__ if (method := getattr(self, field)) is not None),
+            None,
+        )
 
 
 __all__ = ("Paths",)

@@ -13,6 +13,8 @@ class ALPN(StrEnum, metaclass=BaseEnumMeta):
 
 
 class ClientType(StrEnum, metaclass=BaseEnumMeta):
+    """Client type of subscription."""
+
     STASH = "stash"
     SINGBOX = "singbox"
     MIHOMO = "mihomo"
@@ -53,12 +55,70 @@ class Fingerprint(StrEnum, metaclass=BaseEnumMeta):
     with `TLS 1.3` using `X25519`)."""
 
 
+class Operator(StrEnum, metaclass=BaseEnumMeta):
+    """Operator to use for combining conditions in the rule."""
+
+    AND = "AND"
+    OR = "OR"
+    EQUALS = "EQUALS"
+    NOT_EQUALS = "NOT_EQUALS"
+    CONTAINS = "CONTAINS"
+    NOT_CONTAINS = "NOT_CONTAINS"
+    STARTS_WITH = "STARTS_WITH"
+    NOT_STARTS_WITH = "NOT_STARTS_WITH"
+    ENDS_WITH = "ENDS_WITH"
+    NOT_ENDS_WITH = "NOT_ENDS_WITH"
+    REGEX = "REGEX"
+    NOT_REGEX = "NOT_REGEX"
+
+
 class Provider(StrEnum, metaclass=BaseEnumMeta):
     """OAuth2 authorization provider."""
 
     GITHUB = "github"
     POCKETID = "pocketid"
     YANDEX = "yandex"
+
+
+class ResponseType(StrEnum, metaclass=BaseEnumMeta):
+    """Type of the response. Determines the type of `response` to be returned when
+    the rule is matched."""
+
+    XRAY_JSON = "XRAY_JSON"
+    """Return `subscription` in XRAY-JSON format. (Using `Xray Json` template)."""
+
+    XRAY_BASE64 = "XRAY_BASE64"
+    """Return `subscription` in BASE64 encoded string. Compatible with most
+    client application with Xray core."""
+
+    MIHOMO = "MIHOMO"
+    """Return `subscription` in Mihomo format. (Using `Mihomo` template)."""
+
+    STASH = "STASH"
+    """Return `subscription` in Stash format. (Using `Stash` template)."""
+
+    CLASH = "CLASH"
+    """Return `subscription` in Clash format. (Using `Clash` template) Useful
+    for client application that use Legacy Clash core."""
+
+    SINGBOX = "SINGBOX"
+    """Return `subscription` in Singbox format. (Using `Singbox` template)
+    Format which is used by Singbox client application."""
+
+    BROWSER = "BROWSER"
+    """Return `subscription` as browser format. The same as on `/info` route."""
+
+    BLOCK = "BLOCK"
+    """`Drop` request and return `403` status code."""
+
+    STATUS_CODE_404 = "STATUS_CODE_404"
+    """`Drop` request and return `404` status code."""
+
+    STATUS_CODE_451 = "STATUS_CODE_451"
+    """`Drop` request and return `451` status code."""
+
+    SOCKET_DROP = "SOCKET_DROP"
+    """`Drop` the socket connection."""
 
 
 class SecurityLayer(StrEnum, metaclass=BaseEnumMeta):
@@ -98,4 +158,23 @@ class TrafficLimitStrategy(StrEnum, metaclass=BaseEnumMeta):
     MONTH = "MONTH"
 
 
-__all__ = ("ALPN", "ClientType", "Fingerprint", "Provider", "SecurityLayer", "Status", "TemplateType", "TrafficLimitStrategy")
+class Version(StrEnum, metaclass=BaseEnumMeta):
+    """Version of the `response rules` config. Currently supported version is
+    `1`."""
+
+    V1 = "1"
+
+
+__all__ = (
+    "ALPN",
+    "ClientType",
+    "Fingerprint",
+    "Operator",
+    "Provider",
+    "ResponseType",
+    "SecurityLayer",
+    "Status",
+    "TemplateType",
+    "TrafficLimitStrategy",
+    "Version",
+)

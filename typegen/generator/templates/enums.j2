@@ -11,7 +11,7 @@ class {{ pascal_case(name) }}(StrEnum, metaclass=BaseEnumMeta):
     {% for enum_name, enum_value in enum_dict.items() %}
     {{ enum_name }} = "{{ enum_value }}"
     {% if enumerations_descriptions and enum_name in enumerations_descriptions %}
-    """{{ chunks_str(enumerations_descriptions[enum_name]) }}"""
+    """{{ chunks_str(refactor_field_description(enumerations_descriptions[enum_name])) }}"""
 
     {% endif %}
     {% endfor %}

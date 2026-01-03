@@ -56,7 +56,7 @@ def refactor_field_description_for_class_docstring(description: str, /) -> str:
     description = DEFAULTS_IN_DESCRIPTION_PATTERN.sub("", description)
     if not description.endswith("."):
         description += "."
-    return description.strip()
+    return description.replace("**", "`").strip()
 
 
 def run_ruff_formatter(workdir: pathlib.Path, /) -> None:
