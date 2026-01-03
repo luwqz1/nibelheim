@@ -159,8 +159,7 @@ class TrafficLimitStrategy(StrEnum, metaclass=BaseEnumMeta):
 
 
 class Version(StrEnum, metaclass=BaseEnumMeta):
-    """Version of the `response rules` config. Currently supported version is
-    `1`."""
+    """Response Rules Config Version."""
 
     V1 = "1"
 

@@ -1,3 +1,7 @@
+[remnawave-api]
+version = "2.4.3"
+oas_url = "https://cdn.remna.st/docs/openapi.json"
+
 # Generator :: Enums
 [generator.enums.renames]
 alpn = "ALPN"

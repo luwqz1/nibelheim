@@ -10,7 +10,6 @@ import niquests
 from packaging.version import parse
 
 from nibel.logger import get_logger
-from src.__remna__ import __api_spec_url__, __version__
 from typegen.cfg.config import Config
 from typegen.config import read_config
 from typegen.generator.oas import OAS as OAS_GENERATOR
@@ -21,7 +20,6 @@ from typegen.schema.remna_oas import RemnaOAS
 if typing.TYPE_CHECKING:
     from typegen.generator.abc import Context
 
-REMNA_API_VERSION: typing.Final = parse(__version__)
 LOG: typing.Final = get_logger(__name__)
 MAX_LENGTH_LINE_CHUNK: typing.Final = 60
 DEFAULTS_IN_DESCRIPTION_PATTERN: typing.Final = re.compile(r"\s*Defaults to\b[^.;:\n\r]*[.;:]?")
@@ -84,8 +82,14 @@ def generate(
     config_path: pathlib.Path,
     templates_loader: jinja2.FileSystemLoader | None = None,
 ) -> int:
+    LOG.debug("Reading config from `{!s}`...", config_path)
+    config = read_config(config_path).as_model(Config)
+    LOG.debug("Config read successfully!")
+
     try:
-        raw_response = niquests.get(url=__api_spec_url__).content  # type: ignore
+        LOG.debug("Downloading Remnawave API schema from `{!s}`...", config.remnawave.oas_url)
+        raw_response = niquests.get(url=config.remnawave.oas_url).content  # type: ignore
+        LOG.debug("Remnawave API schema downloaded successfully!")
     except Exception as e:
         LOG.error("Failed to download Remnawave API schema with error: '{!s}'", e)
         return 1
@@ -112,7 +116,7 @@ def generate(
     schema = OAS_SCHEMA[remna_oas.version.major][remna_oas.version]
     remna_api = msgspec.json.decode(raw_response, type=schema.remna.RemnaAPI, dec_hook=decode_hook)
 
-    if remna_api.version == REMNA_API_VERSION:
+    if remna_api.version == parse(config.remnawave.version):
         LOG.info("Remnawave API version `{}` | OAS `{}` is up to date, skipping generation.", remna_api.version, remna_oas.version)
         return 0
 
@@ -131,7 +135,7 @@ def generate(
             refactor_field_description=refactor_field_description_for_class_docstring,
         ),
     )
-    context: Context = dict(config=read_config(config_path).as_model(Config))
+    context: Context = dict(config=config)
 
     for generator in OAS_GENERATOR[remna_oas.version.major][remna_oas.version]:
         generator.generate(remna_api, context, environment, workdir)  # type: ignore
