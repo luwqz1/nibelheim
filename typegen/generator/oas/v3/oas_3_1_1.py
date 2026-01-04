@@ -1,14 +1,19 @@
 import pathlib
+import sys
 import typing
 from collections import deque
 
+import msgspec
+import niquests
 from jinja2 import Environment
 from packaging.version import parse
 
 from nibel.logger import get_logger
 from typegen.cfg.config import Config
 from typegen.generator.abc import ABCGenerator, Context
+from typegen.generator.external.aes import generate_aes_to_oas_enum
 from typegen.generator.utils import makesafe_name_from_enum_value
+from typegen.schema.external.aes import RemnawaveAES
 from typegen.schema.oas.v3.oas_3_1_1.properties import (
     ArrayPropertySchema,
     IntegerPropertySchema,
@@ -81,24 +86,10 @@ class EnumsGenerator(ABCGenerator):
 
         return props
 
-    def generate(
-        self,
-        api: RemnaAPI,
-        context: Context,
-        environment: Environment,
-        workdir: pathlib.Path,
-    ) -> None:
-        LOG.info("Generating enums...")
-
-        enums_template = environment.get_template("enums.j2")
-        enums_path = workdir / "enums.py"
-
-        config: Config = context["config"]
-        props = [
-            *self.get_enums_props_from_components(api),
-            *self.get_enums_props_from_paths(api),
-        ]
-
+    @staticmethod
+    def prepare_enum_enumerations(
+        config: Config, context: Context, props: list[tuple[str, StringPropertySchema | IntegerPropertySchema | NumberPropertySchema]]
+    ) -> list[tuple[str, str | None, str, dict[str, typing.Any], dict[str, str] | None]]:
         enums: list[tuple[str, str | None, str, dict[str, typing.Any], dict[str, str] | None]] = []
         enums_dicts: dict[str, dict[str, typing.Any]] = {}
         enums_descriptions: dict[str, str] = {}
@@ -166,6 +157,38 @@ class EnumsGenerator(ABCGenerator):
                 )
             else:
                 enums_dicts[prop_name].update(enum)
+
+        return enums
+
+    def generate(
+        self,
+        api: RemnaAPI,
+        context: Context,
+        environment: Environment,
+        workdir: pathlib.Path,
+    ) -> None:
+        LOG.info("Generating enums...")
+
+        enums_template = environment.get_template("enums.j2")
+        enums_path = workdir / "enums.py"
+        config: Config = context["config"]
+
+        response = niquests.get(config.remnawave.aes_url).content  # type: ignore
+        if not response:
+            LOG.error("Failed to download Remnawave AES schema.")
+            sys.exit(-1)
+
+        aes_schema = msgspec.json.decode(response, type=RemnawaveAES)
+        if api.version != aes_schema.remna_version:
+            LOG.error("Remnawave API version `{}` does not match AES schema version `{}`.", api.version, aes_schema.remnawave)
+            sys.exit(-1)
+
+        props = [
+            *self.get_enums_props_from_components(api),
+            *self.get_enums_props_from_paths(api),
+        ]
+        enums = self.prepare_enum_enumerations(config, context, props)
+        enums.append(generate_aes_to_oas_enum(aes_schema))
 
         enums_path.write_text(
             data=enums_template.render(enums=sorted(enums, key=lambda x: x[0])),

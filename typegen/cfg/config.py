@@ -7,6 +7,7 @@ from typegen.model import Model
 class RemnawaveAPI(Model):
     version: str
     oas_url: str
+    aes_url: str
 
 
 class Config(Model):

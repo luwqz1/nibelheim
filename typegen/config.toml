@@ -1,6 +1,7 @@
 [remnawave-api]
 version = "2.4.3"
 oas_url = "https://cdn.remna.st/docs/openapi.json"
+aes_url = "https://raw.githubusercontent.com/luwqz1/remna-api-errors-spec/refs/heads/main/schema.min.json"
 
 # Generator :: Enums
 [generator.enums.renames]
