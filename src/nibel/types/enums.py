@@ -668,6 +668,23 @@ class ErrorCode(StrEnum, metaclass=BaseEnumMeta):
     INVALID_SUBSCRIPTION_PAGE_CONFIG = "A215"
     """Invalid subscription page config."""
 
+    NODE_ERROR_WITH_MSG = "N001"
+    """Error `NODE_ERROR_WITH_MSG` with a specific message."""
+
+    NODE_ERROR_500_WITH_MSG = "N002"
+    """Error `NODE_ERROR_500_WITH_MSG` with a specific message."""
+
+
+class TemplateType(StrEnum, metaclass=BaseEnumMeta):
+    """Type of template configuration for `Xray-Core`, `mihomo`, etc."""
+
+    XRAY_JSON = "XRAY_JSON"
+    XRAY_BASE64 = "XRAY_BASE64"
+    MIHOMO = "MIHOMO"
+    STASH = "STASH"
+    CLASH = "CLASH"
+    SINGBOX = "SINGBOX"
+
 
 class ClientType(StrEnum, metaclass=BaseEnumMeta):
     """Client type of subscription."""
@@ -678,6 +695,47 @@ class ClientType(StrEnum, metaclass=BaseEnumMeta):
     JSON = "json"
     V2RAY_JSON = "v2ray-json"
     CLASH = "clash"
+
+
+class ConditionsOperator(StrEnum, metaclass=BaseEnumMeta):
+    """Operator to use for comparing the `headerName` with `value`."""
+
+    EQUALS = "EQUALS"
+    """Performs an exact, comparison between the header value and specified string.
+    `string === value`."""
+
+    NOT_EQUALS = "NOT_EQUALS"
+    """Ensures the header value does not exactly match the specified string. `string
+    !== value`."""
+
+    CONTAINS = "CONTAINS"
+    """Checks if the header value contains the specified string as a substring.
+    `string.includes()`."""
+
+    NOT_CONTAINS = "NOT_CONTAINS"
+    """Verifies the header value does not contain the specified string as a substring.
+    `!string.includes()`."""
+
+    STARTS_WITH = "STARTS_WITH"
+    """Validates that the header value begins with the specified string. `string.startsWith()`."""
+
+    NOT_STARTS_WITH = "NOT_STARTS_WITH"
+    """Validates that the header value does not begin with the specified string.
+    `!string.startsWith()`."""
+
+    ENDS_WITH = "ENDS_WITH"
+    """Confirms the header value ends with the specified string. `string.endsWith()`."""
+
+    NOT_ENDS_WITH = "NOT_ENDS_WITH"
+    """Confirms the header value does not end with the specified string. `!string.endsWith()`."""
+
+    REGEX = "REGEX"
+    """Evaluates if the header value matches the specified regular expression
+    pattern. `regex.test()`."""
+
+    NOT_REGEX = "NOT_REGEX"
+    """Evaluates if the header value does not match the specified regular expression
+    pattern. `!regex.test()`."""
 
 
 class Fingerprint(StrEnum, metaclass=BaseEnumMeta):
@@ -712,23 +770,6 @@ class Fingerprint(StrEnum, metaclass=BaseEnumMeta):
     with `TLS 1.3` using `X25519`)."""
 
 
-class Operator(StrEnum, metaclass=BaseEnumMeta):
-    """Operator to use for combining conditions in the rule."""
-
-    AND = "AND"
-    OR = "OR"
-    EQUALS = "EQUALS"
-    NOT_EQUALS = "NOT_EQUALS"
-    CONTAINS = "CONTAINS"
-    NOT_CONTAINS = "NOT_CONTAINS"
-    STARTS_WITH = "STARTS_WITH"
-    NOT_STARTS_WITH = "NOT_STARTS_WITH"
-    ENDS_WITH = "ENDS_WITH"
-    NOT_ENDS_WITH = "NOT_ENDS_WITH"
-    REGEX = "REGEX"
-    NOT_REGEX = "NOT_REGEX"
-
-
 class Provider(StrEnum, metaclass=BaseEnumMeta):
     """OAuth2 authorization provider."""
 
@@ -737,7 +778,20 @@ class Provider(StrEnum, metaclass=BaseEnumMeta):
     YANDEX = "yandex"
 
 
-class ResponseType(StrEnum, metaclass=BaseEnumMeta):
+class ResponseRulesVersion(StrEnum, metaclass=BaseEnumMeta):
+    """Response Rules Config Version."""
+
+    V1 = "1"
+
+
+class RulesOperator(StrEnum, metaclass=BaseEnumMeta):
+    """Operator to use for combining conditions in the rule."""
+
+    AND = "AND"
+    OR = "OR"
+
+
+class RulesResponseType(StrEnum, metaclass=BaseEnumMeta):
     """Type of the response. Determines the type of `response` to be returned when
     the rule is matched."""
 
@@ -795,17 +849,6 @@ class Status(StrEnum, metaclass=BaseEnumMeta):
     EXPIRED = "EXPIRED"
 
 
-class TemplateType(StrEnum, metaclass=BaseEnumMeta):
-    """Type of template configuration for `Xray-Core`, `mihomo`, etc."""
-
-    XRAY_JSON = "XRAY_JSON"
-    XRAY_BASE64 = "XRAY_BASE64"
-    MIHOMO = "MIHOMO"
-    STASH = "STASH"
-    CLASH = "CLASH"
-    SINGBOX = "SINGBOX"
-
-
 class TrafficLimitStrategy(StrEnum, metaclass=BaseEnumMeta):
     """Available reset periods."""
 
@@ -815,23 +858,18 @@ class TrafficLimitStrategy(StrEnum, metaclass=BaseEnumMeta):
     MONTH = "MONTH"
 
 
-class Version(StrEnum, metaclass=BaseEnumMeta):
-    """Response Rules Config Version."""
-
-    V1 = "1"
-
-
 __all__ = (
     "ALPN",
     "ClientType",
+    "ConditionsOperator",
     "ErrorCode",
     "Fingerprint",
-    "Operator",
     "Provider",
-    "ResponseType",
+    "ResponseRulesVersion",
+    "RulesOperator",
+    "RulesResponseType",
     "SecurityLayer",
     "Status",
     "TemplateType",
     "TrafficLimitStrategy",
-    "Version",
 )

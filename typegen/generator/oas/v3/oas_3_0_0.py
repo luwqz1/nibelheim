@@ -48,22 +48,24 @@ class EnumsGenerator(ABCGenerator):
             if component.type != "object":
                 continue
 
-            stack = deque((tuple(component.properties.items()),))
+            stack = deque(
+                ((typing.cast("str | None", None), tuple(component.properties.items())),),
+            )
 
             while stack:
-                properties = stack.pop()
+                component_name, properties = stack.pop()
 
                 for name, prop in properties:
                     match prop:
                         case StringPropertySchema() | IntegerPropertySchema() | NumberPropertySchema():
                             if prop.enum_values:
-                                props.append((name, prop))
+                                props.append(((component_name if component_name else "") + (name[0].upper() + name[1:] if component_name else name), prop))
                             elif prop.properties:
-                                stack.append(tuple(prop.properties.items()))
+                                stack.append((name, tuple(prop.properties.items())))
                         case ObjectPropertySchema() if prop.properties:
-                            stack.append(tuple(prop.properties.items()))
+                            stack.append((name, tuple(prop.properties.items())))
                         case ArrayPropertySchema() if prop.items:
-                            stack.append(((name, prop.items),))
+                            stack.append((component_name, ((name, prop.items),)))
                         case _:
                             continue
 
@@ -87,8 +89,11 @@ class EnumsGenerator(ABCGenerator):
         return props
 
     @staticmethod
-    def prepare_enum_enumerations(
-        config: Config, context: Context, props: list[tuple[str, StringPropertySchema | IntegerPropertySchema | NumberPropertySchema]]
+    def generate_enum_enumerations(
+        api: RemnaAPI,
+        config: Config,
+        context: Context,
+        props: list[tuple[str, StringPropertySchema | IntegerPropertySchema | NumberPropertySchema]],
     ) -> list[tuple[str, str | None, str, dict[str, typing.Any], dict[str, str] | None]]:
         enums: list[tuple[str, str | None, str, dict[str, typing.Any], dict[str, str] | None]] = []
         enums_dicts: dict[str, dict[str, typing.Any]] = {}
@@ -158,21 +163,14 @@ class EnumsGenerator(ABCGenerator):
             else:
                 enums_dicts[prop_name].update(enum)
 
+        enums.append(EnumsGenerator.generate_aes_enum(api, config))
         return enums
 
-    def generate(
-        self,
+    @staticmethod
+    def generate_aes_enum(
         api: RemnaAPI,
-        context: Context,
-        environment: Environment,
-        workdir: pathlib.Path,
-    ) -> None:
-        LOG.info("Generating enums...")
-
-        enums_template = environment.get_template("enums.j2")
-        enums_path = workdir / "enums.py"
-        config: Config = context["config"]
-
+        config: Config,
+    ) -> tuple[str, str | None, str, dict[str, typing.Any], dict[str, str] | None]:
         response = niquests.get(config.remnawave.aes_url).content  # type: ignore
         if not response:
             LOG.error("Failed to download Remnawave AES schema.")
@@ -183,12 +181,26 @@ class EnumsGenerator(ABCGenerator):
             LOG.error("Remnawave API version `{}` does not match AES schema version `{}`.", api.version, aes_schema.remnawave)
             sys.exit(-1)
 
+        return generate_aes_to_oas_enum(aes_schema)
+
+    def generate(
+        self,
+        api: RemnaAPI,
+        context: Context,
+        environment: Environment,
+        workdir: pathlib.Path,
+    ) -> None:
+        LOG.info("Generating enums...")
+
+        config: Config = context["config"]
+        enums_template = environment.get_template("enums.j2")
+        enums_path = workdir / "enums.py"
+
         props = [
             *self.get_enums_props_from_components(api),
             *self.get_enums_props_from_paths(api),
         ]
-        enums = self.prepare_enum_enumerations(config, context, props)
-        enums.append(generate_aes_to_oas_enum(aes_schema))
+        enums = self.generate_enum_enumerations(api, config, context, props)
 
         enums_path.write_text(
             data=enums_template.render(enums=sorted(enums, key=lambda x: x[0])),
