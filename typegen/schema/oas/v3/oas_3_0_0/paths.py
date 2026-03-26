@@ -4,8 +4,7 @@ from functools import cached_property
 import msgspec
 
 from typegen.model import Model
-from typegen.schema.oas.v3.oas_3_0_0.components import Property
-from typegen.schema.oas.v3.oas_3_0_0.properties import PropertySchema
+from typegen.schema.oas.v3.oas_3_0_0.properties import Property
 from typegen.schema.oas.v3.oas_3_0_0.security import Security
 
 type Paths = dict[str, PathMethods]
@@ -18,7 +17,7 @@ class SecuritySchema(Model):
 class Schema(Model):
     ref: str | None = msgspec.field(default=None, name="$ref")
     type: str | None = msgspec.field(default=None)
-    properties: dict[str, PropertySchema] | None = msgspec.field(default=None)
+    properties: dict[str, Property] | None = msgspec.field(default=None)
 
 
 class ApplicationJSON(Model):
@@ -26,7 +25,7 @@ class ApplicationJSON(Model):
 
 
 class RequestBodyContent(Model):
-    application_json: ApplicationJSON = msgspec.field(name="application/json")
+    application_json: ApplicationJSON | None = msgspec.field(default=None, name="application/json")
 
 
 class RequestBodyResponse(Model):
@@ -66,6 +65,10 @@ class PathMethods(Model):
     delete: PathRequestMethod | None = msgspec.field(default=None)
     put: PathRequestMethod | None = msgspec.field(default=None)
     patch: PathRequestMethod | None = msgspec.field(default=None)
+
+    @cached_property
+    def methods(self) -> dict[str, PathRequestMethod]:
+        return {field: method for field in self.__struct_fields__ if (method := getattr(self, field)) is not None}
 
     @cached_property
     def method(self) -> PathRequestMethod | None:

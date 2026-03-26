@@ -1,13 +1,15 @@
 import keyword
-import os
 import pathlib
 import re
+import subprocess
+import sys
 import typing
 
 import jinja2
 import msgspec
 import niquests
 from packaging.version import parse
+from typegen.generator.code.property_type import CODEGEN_PROPERTY_TYPE_MAP, IMPORTS
 
 from nibel.logger import get_logger
 from typegen.cfg.config import Config
@@ -29,6 +31,10 @@ def to_pascal_case(s: str, /) -> str:
     if "_" in s:
         return "".join(to_pascal_case(c) for c in s.split("_"))
     return s[0].upper() + s[1:]
+
+
+def to_snake_case(s: str, /) -> str:
+    return "".join(f"_{c.lower()}" if c.isupper() else c for c in s).lstrip("_")
 
 
 def makesafe_name(s: str, /) -> str:
@@ -57,21 +63,32 @@ def refactor_field_description_for_class_docstring(description: str, /) -> str:
     return description.replace("**", "`").strip()
 
 
+def run_command(command: str, /) -> bool:
+    result = subprocess.run(
+        command,
+        shell=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        encoding="UTF-8",
+    )
+    return result.returncode == 0
+
+
 def run_ruff_formatter(workdir: pathlib.Path, /) -> None:
-    LOG.debug("Run ruff-format...")
-    if os.system(f"ruff format {workdir}") != 0:
+    LOG.info("Run ruff-format...")
+    if not run_command(f"ruff format {workdir}"):
         LOG.error("ruff formatter failed.")
     else:
         LOG.info("ruff formatter successfully formatted files!")
 
-    LOG.debug("Run ruff-isort...")
-    if os.system(f"ruff check {workdir} --select I --select F401 --fix") != 0:
+    LOG.info("Run ruff-isort...")
+    if not run_command(f"ruff check {workdir} --select I --select F401 --fix"):
         LOG.error("ruff-isort failed.")
     else:
         LOG.info("ruff-isort successfully sorted imports!")
 
-    LOG.debug("Run ruff-sortall...")
-    if os.system(f"ruff check {workdir} --select RUF022 --fix") != 0:
+    LOG.info("Run ruff-sortall...")
+    if not run_command(f"ruff check {workdir} --select RUF022 --fix"):
         LOG.error("ruff-sortall failed.")
     else:
         LOG.info("ruff-sortall successfully sorted dunder alls!")
@@ -130,17 +147,22 @@ def generate(
     environment.globals.update(
         dict(  # type: ignore
             pascal_case=to_pascal_case,
+            snake_case=to_snake_case,
             makesafe_name=makesafe_name,
+            codegen_property_type_map=CODEGEN_PROPERTY_TYPE_MAP,
+            imports="\n".join(IMPORTS),
             chunks_str=chunks_str,
             refactor_field_description=refactor_field_description_for_class_docstring,
         ),
     )
     context: Context = dict(config=config)
 
+    print("\n", file=sys.stderr)
+
     for generator in OAS_GENERATOR[remna_oas.version.major][remna_oas.version]:
         generator.generate(remna_api, context, environment, workdir)  # type: ignore
 
-    run_ruff_formatter(workdir)
+    # run_ruff_formatter(workdir)
     return 0
 
 

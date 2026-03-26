@@ -1,9 +1,10 @@
 [remnawave-api]
-version = "2.4.3"
+version = "2.4.4"
 oas_url = "https://cdn.remna.st/docs/openapi.json"
 aes_url = "https://raw.githubusercontent.com/luwqz1/remna-api-errors-spec/refs/heads/main/schema.min.json"
 
 # Generator :: Enums
+
 [generator.enums.renames]
 alpn = "ALPN"
 templatesTemplateType = "TemplateType"
@@ -29,3 +30,13 @@ RANDOMIZED = "Generate a completely random and unique fingerprint (100% compatib
 
 [generator.enums.custom_enums.responseRulesVersion]
 V1 = "1"
+
+# Generator :: Errors
+
+generator.errors.imports = [
+    "from http import HTTPStatus as StatusCode",
+]
+
+[generator.errors.classes]
+APIResponseError = { "error_code" = { "type" = "ErrorCode" } }
+APIResponseStatusError = { "status_code" = { "type" = "StatusCode" } }

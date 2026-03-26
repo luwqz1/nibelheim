@@ -7,18 +7,20 @@ import msgspec
 import niquests
 from jinja2 import Environment
 from packaging.version import parse
+from typegen.generator.abc import ABCGenerator, Context
+from typegen.generator.utils import makesafe_name_from_enum_value
 
 from nibel.logger import get_logger
 from typegen.cfg.config import Config
-from typegen.generator.abc import ABCGenerator, Context
 from typegen.generator.external.aes import generate_aes_to_oas_enum
-from typegen.generator.utils import makesafe_name_from_enum_value
 from typegen.schema.external.aes import RemnawaveAES
 from typegen.schema.oas.v3.oas_3_1_1.properties import (
     ArrayPropertySchema,
+    BooleanPropertySchema,
     IntegerPropertySchema,
     NumberPropertySchema,
     ObjectPropertySchema,
+    Property,
     PropertyType,
     StringPropertySchema,
 )
@@ -220,4 +222,16 @@ class ErrorsGenerator(ABCGenerator):
         pass
 
 
-__all__ = ("VERSION", "EnumsGenerator", "ErrorsGenerator", "ObjectsGenerator")
+__all__ = (
+    "VERSION",
+    "ArrayPropertySchema",
+    "BooleanPropertySchema",
+    "EnumsGenerator",
+    "ErrorsGenerator",
+    "IntegerPropertySchema",
+    "NumberPropertySchema",
+    "ObjectPropertySchema",
+    "ObjectsGenerator",
+    "Property",
+    "StringPropertySchema",
+)

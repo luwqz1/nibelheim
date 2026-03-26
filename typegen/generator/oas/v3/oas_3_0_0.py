@@ -7,18 +7,20 @@ import msgspec
 import niquests
 from jinja2 import Environment
 from packaging.version import parse
+from typegen.generator.abc import ABCGenerator, Context
+from typegen.generator.utils import makesafe_name_from_enum_value
 
 from nibel.logger import get_logger
 from typegen.cfg.config import Config
-from typegen.generator.abc import ABCGenerator, Context
 from typegen.generator.external.aes import generate_aes_to_oas_enum
-from typegen.generator.utils import makesafe_name_from_enum_value
 from typegen.schema.external.aes import RemnawaveAES
 from typegen.schema.oas.v3.oas_3_0_0.properties import (
     ArrayPropertySchema,
+    BooleanPropertySchema,
     IntegerPropertySchema,
     NumberPropertySchema,
     ObjectPropertySchema,
+    Property,
     PropertyType,
     StringPropertySchema,
 )
@@ -89,12 +91,14 @@ class EnumsGenerator(ABCGenerator):
         return props
 
     @staticmethod
-    def generate_enum_enumerations(
+    def generate_enumerations_from_props(
         api: RemnaAPI,
         config: Config,
         context: Context,
         props: list[tuple[str, StringPropertySchema | IntegerPropertySchema | NumberPropertySchema]],
     ) -> list[tuple[str, str | None, str, dict[str, typing.Any], dict[str, str] | None]]:
+        LOG.info("Generating enumerations from properties...")
+
         enums: list[tuple[str, str | None, str, dict[str, typing.Any], dict[str, str] | None]] = []
         enums_dicts: dict[str, dict[str, typing.Any]] = {}
         enums_descriptions: dict[str, str] = {}
@@ -164,6 +168,7 @@ class EnumsGenerator(ABCGenerator):
                 enums_dicts[prop_name].update(enum)
 
         enums.append(EnumsGenerator.generate_aes_enum(api, config))
+        LOG.info("{} enumerations from properties generated successfully!", len(enums))
         return enums
 
     @staticmethod
@@ -171,16 +176,34 @@ class EnumsGenerator(ABCGenerator):
         api: RemnaAPI,
         config: Config,
     ) -> tuple[str, str | None, str, dict[str, typing.Any], dict[str, str] | None]:
-        response = niquests.get(config.remnawave.aes_url).content  # type: ignore
+        LOG.info("Generating `{}` enum by an external AES schema...", "ErrorCode")
+
+        try:
+            LOG.debug("Downloading Remnawave AES schema from `{!s}`...", config.remnawave.aes_url)
+            response = niquests.get(config.remnawave.aes_url).content  # type: ignore
+        except Exception as e:
+            LOG.error("Failed to download Remnawave AES schema with error: '{!s}'", e)
+            sys.exit(-1)
+
         if not response:
             LOG.error("Failed to download Remnawave AES schema.")
             sys.exit(-1)
 
-        aes_schema = msgspec.json.decode(response, type=RemnawaveAES)
+        LOG.debug("Remnawave AES schema downloaded successfully, decoding...")
+
+        try:
+            aes_schema = msgspec.json.decode(response, type=RemnawaveAES)
+        except Exception as e:
+            LOG.error("Failed to decode Remnawave AES schema with error: '{!s}'", e)
+            sys.exit(-1)
+
+        LOG.debug("Remnawave AES schema decoded successfully!")
+
         if api.version != aes_schema.remna_version:
             LOG.error("Remnawave API version `{}` does not match AES schema version `{}`.", api.version, aes_schema.remnawave)
             sys.exit(-1)
 
+        LOG.debug("Generating from `{}` schema to `{}` schema", "AES", "OAS")
         return generate_aes_to_oas_enum(aes_schema)
 
     def generate(
@@ -190,7 +213,8 @@ class EnumsGenerator(ABCGenerator):
         environment: Environment,
         workdir: pathlib.Path,
     ) -> None:
-        LOG.info("Generating enums...")
+        return
+        LOG.info("Generating enumerations...")
 
         config: Config = context["config"]
         enums_template = environment.get_template("enums.j2")
@@ -200,16 +224,93 @@ class EnumsGenerator(ABCGenerator):
             *self.get_enums_props_from_components(api),
             *self.get_enums_props_from_paths(api),
         ]
-        enums = self.generate_enum_enumerations(api, config, context, props)
+        enums = self.generate_enumerations_from_props(api, config, context, props)
 
+        LOG.info("Rendering {} enumerations to `{}` file...", len(enums), enums_path)
         enums_path.write_text(
             data=enums_template.render(enums=sorted(enums, key=lambda x: x[0])),
             encoding="UTF-8",
         )
-        LOG.info("{} enums generated successfully!", len(enums))
+        LOG.info("{} enumerations rendered to `{}` file successfully!", len(enums), enums_path)
+        print("\n", file=sys.stderr)
 
 
 class ErrorsGenerator(ABCGenerator):
+    @staticmethod
+    def generate_errors_classes_components(
+        schema_errors: dict[str, dict[str, Property]],
+    ) -> dict[str, dict[str, Property]]:
+        classes: dict[str, typing.Any] = {}
+
+        for error_name, error_properties in schema_errors.items():
+            stack = deque(((error_name, tuple(error_properties.items())),))
+
+            while stack:
+                class_name, properties = stack.pop()
+                props: dict[str, Property] = {}
+
+                for property_name, property_value in properties:
+                    if isinstance(property_value, ArrayPropertySchema) and property_value.items.type == PropertyType.OBJECT:
+                        if property_name != "errors":
+                            LOG.warning(
+                                "Currently, only `{}` property is supported for array of errors in error responses, got `{}`, just skipping...",
+                                "errors",
+                                property_name,
+                            )
+                            continue
+
+                        new_class_name = class_name.replace("Response", "")
+                        stack.append((new_class_name, (("", property_value.items),)))
+                        property_value.ref = f"#/paths/errors/{new_class_name}"
+                        props[property_name] = property_value
+                        continue
+
+                    if not isinstance(property_value, ArrayPropertySchema) and property_value.properties:
+                        stack.append((class_name, tuple(property_value.properties.items())))
+                        property_value.ref = f"#/paths/errors/{class_name}"
+                        props[property_name] = property_value
+                        continue
+
+                    props[property_name] = property_value
+
+                classes[class_name] = props
+
+        return classes
+
+    @staticmethod
+    def get_schema_errors(api: RemnaAPI) -> dict[str, dict[str, Property]]:
+        schema_errors: dict[str, dict[str, Property]] = {}
+
+        for path in api.paths.values():
+            for method in path.methods.values():
+                if not method.responses:
+                    continue
+
+                for status_code, response in method.responses.items():
+                    if status_code == "default" or int(status_code) < 400 or not response.content:
+                        continue
+
+                    if not response.content.application_json:
+                        LOG.warning(
+                            "Currently, only `{}` content type is supported for error responses, skipping...",
+                            "application/json",
+                        )
+                        continue
+
+                    error_schema = response.content.application_json.schema
+                    if error_schema.type != "object" or not error_schema.properties:
+                        continue
+
+                    error_class_name = "APIResponse"
+                    error_class_name += "".join(x.capitalize() for x in response.description.split()).strip(".").replace("-", "")
+
+                    if not error_class_name.endswith("Error"):
+                        error_class_name += "Error"
+
+                    schema_errors.setdefault(error_class_name, error_schema.properties)
+
+        return schema_errors
+
     def generate(
         self,
         api: RemnaAPI,
@@ -217,7 +318,32 @@ class ErrorsGenerator(ABCGenerator):
         environment: Environment,
         workdir: pathlib.Path,
     ) -> None:
-        pass
+        LOG.info("Generating errors...")
+
+        errors_path = workdir / "errors.py"
+        errors_template = environment.get_template("errors.j2")
+
+        schema_errors = self.get_schema_errors(api)
+        errors_classes = self.generate_errors_classes_components(schema_errors)
+
+        LOG.info("Rendering {} errors classes to `{}` file...", len(errors_classes), errors_path)
+        errors_path.write_text(
+            data=errors_template.render(errors_classes=errors_classes),
+            encoding="UTF-8",
+        )
+        LOG.info("{} errors classes rendered to `{}` file successfully!", len(errors_classes), errors_path)
 
 
-__all__ = ("VERSION", "EnumsGenerator", "ErrorsGenerator", "ObjectsGenerator")
+__all__ = (
+    "VERSION",
+    "ArrayPropertySchema",
+    "BooleanPropertySchema",
+    "EnumsGenerator",
+    "ErrorsGenerator",
+    "IntegerPropertySchema",
+    "NumberPropertySchema",
+    "ObjectPropertySchema",
+    "ObjectsGenerator",
+    "Property",
+    "StringPropertySchema",
+)

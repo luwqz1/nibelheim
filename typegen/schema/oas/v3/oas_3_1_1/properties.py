@@ -99,6 +99,7 @@ class BooleanPropertySchema(ComponentPropertySchema, tag=get_tag):
 
 class ObjectPropertySchema(ComponentPropertyTaggedFieldType, tag=get_tag):
     additional_properties: PropertySchema | None = msgspec.field(default=None, name="additionalProperties")
+    ref: str | None = msgspec.field(default=None, name="$ref")
     properties: dict[str, Property] | None = msgspec.field(default=None)
     description: str | None = msgspec.field(default=None)
     required: list[str] = msgspec.field(default_factory=list)
@@ -107,6 +108,7 @@ class ObjectPropertySchema(ComponentPropertyTaggedFieldType, tag=get_tag):
 
 class ArrayPropertySchema(ComponentPropertyTaggedFieldType, tag=get_tag):
     items: Property
+    ref: str | None = msgspec.field(default=None, name="$ref")
     required: list[str] = msgspec.field(default_factory=list)
     description: str | None = msgspec.field(default=None)
 

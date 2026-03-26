@@ -6,7 +6,7 @@
   <h1 align="center">Nibelheim</h3>
 
   <p align="center">
-    Convenient and reliable Python SDK for <a href="https://github.com/remnawave">Remnawave</a>.
+    <i>A simple, fast, and reliable SDK for <a href="https://github.com/remnawave">Remnawave</i></a>.
   </p>
 
   <p align="center">
@@ -21,9 +21,9 @@
 
 Install with `pip`, `poetry`, or `uv`:
 ```shell
-pip install nibel
-poetry add nibel
-uv add nibel
+pip install nibelheim
+poetry add nibelheim
+uv add nibelheim
 ```
 
 Or install from [source](https://github.com/luwqz1/nibelheim):
@@ -32,3 +32,12 @@ pip install git+https://github.com/luwqz1/nibelheim.git@dev
 poetry add git+https://github.com/luwqz1/nibelheim.git@dev
 uv add "nibel @ git+https://github.com/luwqz1/nibelheim.git@dev"
 ```
+
+## Contributors
+
+<a href="https://github.com/luwqz1/nibelheim/graphs/contributors">
+ <img src="https://contrib.rocks/image?repo=luwqz1/nibelheim" />
+</a>
+
+\
+Nibel welcome your [pull requests](https://github.com/luwqz1/nibelheim/pulls), is built by the community ❤️
