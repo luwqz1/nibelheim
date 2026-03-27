@@ -33,6 +33,42 @@ poetry add git+https://github.com/luwqz1/nibelheim.git@dev
 uv add "nibel @ git+https://github.com/luwqz1/nibelheim.git@dev"
 ```
 
+Basic example:
+
+```python
+import asyncio
+import datetime
+from uuid import UUID, uuid4
+
+from kungfu import Error, Ok
+
+from nibel import Remnawave
+
+remnawave = Remnawave(token="abc123", panel_url="http://remnawave:3000")
+
+
+async def main() -> None:
+    result = await remnawave.users.create_user(
+        description="Nibel's chocobo.",
+        username="chocobo",
+        telegram_id=333,
+        expire_at=datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=30),
+        tag="NIBEL_REGION",
+        hwid_device_limit=1,
+        uuid=uuid4(),
+        external_squad_uuid=UUID("b077b4f1-2b5f-495b-a59d-56bb998d5853"),
+    )
+
+    match result:
+        case Ok(new_user):
+            print("New user:", new_user)
+        case Error(api_error):
+            print("API error:", api_error)
+
+
+asyncio.run(main())
+```
+
 ## Contributors
 
 <a href="https://github.com/luwqz1/nibelheim/graphs/contributors">
