@@ -8,10 +8,10 @@ import typing
 import jinja2
 import msgspec
 import niquests
+from nibel.logger import get_logger
 from packaging.version import parse
 from typegen.generator.code.property_type import CODEGEN_PROPERTY_TYPE_MAP, IMPORTS
 
-from nibel.logger import get_logger
 from typegen.cfg.config import Config
 from typegen.config import read_config
 from typegen.generator.oas import OAS as OAS_GENERATOR

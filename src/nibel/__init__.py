@@ -1,3 +1,4 @@
-from nibel.remna import Remnawave
+"""A simple, fast, and reliable SDK for [Remnawave](https://github.com/remnawave)."""
 
-__all__ = ("Remnawave",)
+from nibel.client import *
+from nibel.remna import *
