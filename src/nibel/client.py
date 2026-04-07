@@ -3,16 +3,16 @@ import pathlib
 import typing
 
 import certifi
-import rnet
+import wreq
 from saronia.client.base import DEFAULT_TIMEOUT, DEFAULT_USER_AGENT
-from saronia.client.rnet_client import RnetClient
+from saronia.client.wreq_client import WreqClient
 
 from nibel.__meta__ import __version__
 from nibel.remna import remnawave
 from nibel.remna.auth import Authorization, Prometheus
 from nibel.remna.controllers import APIControllers
 
-NIBEL_CLIENT_VERSION: typing.Final = f"rnet/3; Nibelheim/{__version__}"
+NIBEL_CLIENT_VERSION: typing.Final = f"wreq; Nibelheim/{__version__}"
 POOL_IDLE_TIMEOUT: typing.Final = datetime.timedelta(seconds=60.0)
 POOL_MAX_IDLE_PER_HOST: typing.Final = 32
 POOL_MAX_SIZE: typing.Final = POOL_MAX_IDLE_PER_HOST * 2
@@ -36,7 +36,7 @@ class Remnawave(APIControllers):
     def __init__(self, *, panel_url: str, **kwargs: typing.Unpack[ClientSettings]) -> None: ...
 
     @typing.overload
-    def __init__(self, *, panel_url: str, http_client: rnet.Client) -> None: ...
+    def __init__(self, *, panel_url: str, http_client: wreq.Client) -> None: ...
 
     @typing.overload
     def __init__(
@@ -54,7 +54,7 @@ class Remnawave(APIControllers):
         *,
         panel_url: str,
         token: str,
-        http_client: rnet.Client,
+        http_client: wreq.Client,
     ) -> None:
         pass
 
@@ -76,7 +76,7 @@ class Remnawave(APIControllers):
         panel_url: str,
         username: str,
         password: str,
-        http_client: rnet.Client,
+        http_client: wreq.Client,
     ) -> None:
         pass
 
@@ -100,7 +100,7 @@ class Remnawave(APIControllers):
         token: str,
         username: str,
         password: str,
-        http_client: rnet.Client,
+        http_client: wreq.Client,
     ) -> None:
         pass
 
@@ -111,13 +111,13 @@ class Remnawave(APIControllers):
         token: str | None = None,
         username: str | None = None,
         password: str | None = None,
-        http_client: rnet.Client | None = None,
+        http_client: wreq.Client | None = None,
         **kwargs: typing.Unpack[ClientSettings],
     ) -> None:
-        self.http = http_client or rnet.Client(
-            emulation=rnet.EmulationOption(
-                emulation=rnet.Emulation.Chrome145,
-                emulation_os=rnet.EmulationOS.Linux,
+        self.http = http_client or wreq.Client(
+            emulation=wreq.EmulationOption(
+                emulation=wreq.Emulation.Chrome145,
+                emulation_os=wreq.EmulationOS.Linux,
                 skip_http2=False,
                 skip_headers=False,
             ),
@@ -136,7 +136,7 @@ class Remnawave(APIControllers):
             connect_timeout=datetime.timedelta(seconds=kwargs.get("connect_timeout", DEFAULT_TIMEOUT)),
             read_timeout=datetime.timedelta(seconds=kwargs.get("read_timeout", DEFAULT_TIMEOUT)),
         )
-        self.client = RnetClient(
+        self.client = WreqClient(
             client=self.http,
             base_url=panel_url.removesuffix("/api"),
             user_agent=DEFAULT_USER_AGENT.format(http_client=NIBEL_CLIENT_VERSION),

@@ -1,5 +1,3 @@
-import typing
-
 import saronia
 
 from ..errors import BadRequestError, InternalServerError
@@ -38,17 +36,21 @@ class SubController:
         """
         ...
 
-    @saronia.get("/{shortUuid}/{clientType}", form=GetPublicSubscriptionControllerSubscriptionByClientTypeSignature)
+    @saronia.get(
+        "/{shortUuid}/{clientType}",
+        content_type="text",
+        form=GetPublicSubscriptionControllerSubscriptionByClientTypeSignature,
+    )
     async def get_subscription_by_client_type(self) -> saronia.APIResult[str]: ...
 
-    @saronia.get("/outline/{shortUuid}/{type}/{encodedTag}")
+    @saronia.get("/outline/{shortUuid}/{type}/{encodedTag}", content_type="text")
     async def get_subscription_with_type(
         self,
         *,
         type: str,
         encoded_tag: saronia.Param[str, saronia.Path, "encodedTag"],
         short_uuid: saronia.Param[str, saronia.Path, "shortUuid"],
-    ) -> saronia.APIResult[typing.Any]:
+    ) -> saronia.APIResult[str]:
         """Args:
         type: Subscription type (required if encodedTag is provided). Only SS is supported for now.
         encoded_tag: Base64 encoded tag for Outline config. This paramter is optional. It is required only when type=ss.
