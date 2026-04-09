@@ -3,7 +3,7 @@ from uuid import UUID
 import saronia
 
 from ..auth import Authorization
-from ..errors import BadRequestError, InternalServerError, SubscriptionsControllerNotFoundError
+from ..errors import BadRequestError, NotFoundInternalServerError, SubscriptionsControllerNotFoundError
 from ..remnawave import remnawave
 from ..responses import (
     GetAllSubscriptionsResponseDto,
@@ -29,7 +29,7 @@ class SubscriptionsController:
         start: int | None = None,
     ) -> saronia.APIResult[
         GetAllSubscriptionsResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]:
         """Args:
         size: Number of subscriptions to return, no more than 500
@@ -45,7 +45,7 @@ class SubscriptionsController:
         username: str,
     ) -> saronia.APIResult[
         GetSubscriptionByUsernameResponseDto,
-        BadRequestError | SubscriptionsControllerNotFoundError | InternalServerError,
+        BadRequestError | SubscriptionsControllerNotFoundError | NotFoundInternalServerError,
     ]:
         """Args:
         username: Username of the user
@@ -60,7 +60,7 @@ class SubscriptionsController:
         short_uuid: saronia.Param[str, saronia.Path, "shortUuid"],
     ) -> saronia.APIResult[
         GetSubscriptionByShortUuidProtectedResponseDto,
-        BadRequestError | SubscriptionsControllerNotFoundError | InternalServerError,
+        BadRequestError | SubscriptionsControllerNotFoundError | NotFoundInternalServerError,
     ]:
         """Args:
         short_uuid: Short uuid of the user
@@ -75,7 +75,7 @@ class SubscriptionsController:
         uuid: UUID,
     ) -> saronia.APIResult[
         GetSubscriptionByUuidResponseDto,
-        BadRequestError | SubscriptionsControllerNotFoundError | InternalServerError,
+        BadRequestError | SubscriptionsControllerNotFoundError | NotFoundInternalServerError,
     ]:
         """Args:
         uuid: Uuid of the user
@@ -91,7 +91,7 @@ class SubscriptionsController:
         with_disabled_hosts: saronia.Param[bool | None, saronia.Query, "withDisabledHosts"] = None,
     ) -> saronia.APIResult[
         GetRawSubscriptionByShortUuidResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]:
         """Args:
         short_uuid: Short UUID of the user
@@ -100,12 +100,12 @@ class SubscriptionsController:
         """
         ...
 
-    @saronia.get("/subpage-config/{shortUuid}", form=GetProtectedSubscriptionsControllerSubpageConfigByShortUuidSignature)
+    @saronia.get("/subpage-config/{shortUuid}", GetProtectedSubscriptionsControllerSubpageConfigByShortUuidSignature)
     async def get_subpage_config_by_short_uuid(
         self,
     ) -> saronia.APIResult[
         GetSubpageConfigByShortUuidResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
     @saronia.get("/connection-keys/{uuid}")
@@ -115,7 +115,7 @@ class SubscriptionsController:
         uuid: UUID,
     ) -> saronia.APIResult[
         GetConnectionKeysByUuidResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]:
         """Args:
         uuid: UUID of the user

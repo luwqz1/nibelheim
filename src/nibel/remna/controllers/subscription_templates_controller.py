@@ -3,7 +3,7 @@ from uuid import UUID
 import saronia
 
 from ..auth import Authorization
-from ..errors import BadRequestError, InternalServerError
+from ..errors import BadRequestError, NotFoundInternalServerError
 from ..objects import CreateSubscriptionTemplateRequestDto, ReorderSubscriptionTemplatesRequestDto, UpdateTemplateRequestDto
 from ..remnawave import remnawave
 from ..responses import (
@@ -25,23 +25,23 @@ class SubscriptionTemplatesController:
         self,
     ) -> saronia.APIResult[
         GetTemplatesResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
-    @saronia.post("/", form=CreateSubscriptionTemplateRequestDto)
+    @saronia.post("/", CreateSubscriptionTemplateRequestDto)
     async def create_template(
         self,
     ) -> saronia.APIResult[
         CreateSubscriptionTemplateResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
-    @saronia.patch("/", form=UpdateTemplateRequestDto)
+    @saronia.patch("/", UpdateTemplateRequestDto)
     async def update_template(
         self,
     ) -> saronia.APIResult[
         UpdateTemplateResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
     @saronia.get("/{uuid}")
@@ -51,7 +51,7 @@ class SubscriptionTemplatesController:
         uuid: UUID,
     ) -> saronia.APIResult[
         GetTemplateResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]:
         """Args:
         uuid: Template UUID
@@ -66,7 +66,7 @@ class SubscriptionTemplatesController:
         uuid: UUID,
     ) -> saronia.APIResult[
         DeleteSubscriptionTemplateResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]:
         """Args:
         uuid: Template UUID
@@ -74,12 +74,12 @@ class SubscriptionTemplatesController:
         """
         ...
 
-    @saronia.post("/actions/reorder", form=ReorderSubscriptionTemplatesRequestDto)
+    @saronia.post("/actions/reorder", ReorderSubscriptionTemplatesRequestDto)
     async def reorder_subscription_templates(
         self,
     ) -> saronia.APIResult[
         ReorderSubscriptionTemplatesResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
 

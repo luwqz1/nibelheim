@@ -1,0 +1,619 @@
+remnawave:
+  schema_document_type: json
+  schema_url: https://cdn.remna.st/docs/openapi.json
+  errors_schema_url: https://raw.githubusercontent.com/luwqz1/remna-api-errors-spec/refs/heads/main/schema.min.json
+  schema:
+    enums:
+    - alpn:
+        name: ALPN
+        members:
+          - H3
+          - H2
+          - HTTP_1_1
+          - H_COMBINED
+          - H3_H2_H1_COMBINED
+          - H3_H2_COMBINED
+        values:
+          - h3
+          - h2
+          - http/1.1
+          - h2,http/1.1
+          - h3,h2,http/1.1
+          - h3,h2
+        description: Application-Layer Protocol Negotiation.
+        member_descriptions:
+          H3: HTTP/3 only.
+          H2: HTTP/2 only.
+          HTTP_1_1: HTTP/1.1 only.
+          H_COMBINED: Combined HTTP/2 and HTTP/1.1 ALPN.
+          H3_H2_H1_COMBINED: Combined HTTP/3, HTTP/2, and HTTP/1.1 ALPN.
+          H3_H2_COMBINED: Combined HTTP/3 and HTTP/2 ALPN.
+    - template_type:
+        name: TemplateType
+        members:
+          - XRAY_JSON
+          - XRAY_BASE64
+          - MIHOMO
+          - STASH
+          - CLASH
+          - SINGBOX
+        values:
+          - XRAY_JSON
+          - XRAY_BASE64
+          - MIHOMO
+          - STASH
+          - CLASH
+          - SINGBOX
+        description: Type of template configuration for `Xray-Core`, `mihomo`, etc.
+        member_descriptions:
+          XRAY_JSON: Xray template in JSON format.
+          XRAY_BASE64: Xray template as Base64-encoded content.
+          MIHOMO: Template for Mihomo clients.
+          STASH: Template for Stash clients.
+          CLASH: Template for Clash clients.
+          SINGBOX: Template for Singbox clients.
+    - client_type:
+        name: ClientType
+        members:
+          - STASH
+          - SINGBOX
+          - MIHOMO
+          - JSON
+          - V2RAY_JSON
+          - CLASH
+        values:
+          - stash
+          - singbox
+          - mihomo
+          - json
+          - v2ray-json
+          - clash
+        description: Client type of subscription.
+        member_descriptions:
+          STASH: Subscription for Stash client.
+          SINGBOX: Subscription for Singbox client.
+          MIHOMO: Subscription for Mihomo client.
+          JSON: Subscription in JSON format.
+          V2RAY_JSON: Subscription in V2Ray JSON format.
+          CLASH: Subscription for Clash client.
+    - conditions_operator:
+        name: ConditionsOperator
+        members:
+          - EQUALS
+          - NOT_EQUALS
+          - CONTAINS
+          - NOT_CONTAINS
+          - STARTS_WITH
+          - NOT_STARTS_WITH
+          - ENDS_WITH
+          - NOT_ENDS_WITH
+          - REGEX
+          - NOT_REGEX
+        values:
+          - EQUALS
+          - NOT_EQUALS
+          - CONTAINS
+          - NOT_CONTAINS
+          - STARTS_WITH
+          - NOT_STARTS_WITH
+          - ENDS_WITH
+          - NOT_ENDS_WITH
+          - REGEX
+          - NOT_REGEX
+        description: Operator to use for comparing the `headerName` with `value`.
+        member_descriptions:
+          EQUALS: Performs an exact comparison between the header value and specified
+            string. `string === value`.
+          NOT_EQUALS: Ensures the header value does not exactly match the specified
+            string. `string !== value`.
+          CONTAINS: Checks if the header value contains the specified string as a
+            substring. `string.includes()`.
+          NOT_CONTAINS: Verifies the header value does not contain the specified string
+            as a substring. `!string.includes()`.
+          STARTS_WITH: Validates that the header value begins with the specified string.
+            `string.startsWith()`.
+          NOT_STARTS_WITH: Validates that the header value does not begin with the
+            specified string. `!string.startsWith()`.
+          ENDS_WITH: Confirms the header value ends with the specified string. `string.endsWith()`.
+          NOT_ENDS_WITH: Confirms the header value does not end with the specified
+            string. `!string.endsWith()`.
+          REGEX: Evaluates if the header value matches the specified regular expression
+            pattern. `regex.test()`.
+          NOT_REGEX: Evaluates if the header value does not match the specified regular
+            expression pattern. `!regex.test()`.
+    - fingerprint:
+        name: Fingerprint
+        members:
+          - CHROME
+          - FIREFOX
+          - SAFARI
+          - IOS
+          - ANDROID
+          - EDGE
+          - QQ
+          - RANDOM
+          - RANDOMIZED
+        values:
+          - chrome
+          - firefox
+          - safari
+          - ios
+          - android
+          - edge
+          - qq
+          - random
+          - randomized
+        description: Simulate the TLS fingerprint using the `uTLS` library or it generate
+          randomly.
+        member_descriptions:
+          CHROME: Simulate TLS fingerprint of the `Chrome` browser.
+          FIREFOX: Simulate TLS fingerprint of the `Firefox` browser.
+          SAFARI: Simulate TLS fingerprint of the `Safari` browser.
+          IOS: Simulate TLS fingerprint of the `iOS` browser.
+          ANDROID: Simulate TLS fingerprint of the `Android` browser.
+          EDGE: Simulate TLS fingerprint of the `Edge` browser.
+          QQ: Simulate TLS fingerprint of the `QQ` browser.
+          RANDOM: Rrandomly select one of the `up-to-date` browsers.
+          RANDOMIZED: Generate a completely random and unique fingerprint (100% compatible
+            with `TLS 1.3` using `X25519`).
+    - provider:
+        name: Provider
+        members:
+          - GITHUB
+          - POCKETID
+          - YANDEX
+          - KEYCLOAK
+          - GENERIC
+          - TELEGRAM
+        values:
+          - github
+          - pocketid
+          - yandex
+          - keycloak
+          - generic
+          - telegram
+        description: OAuth2 authorization provider.
+        member_descriptions:
+          GITHUB: GitHub OAuth2 provider.
+          POCKETID: Pocket ID OAuth2 provider.
+          YANDEX: Yandex OAuth2 provider.
+          KEYCLOAK: Keycloak OAuth2 provider.
+          GENERIC: Generic OAuth2 provider.
+          TELEGRAM: Telegram OAuth2 provider.
+    - response_rules_version:
+        name: ResponseRulesVersion
+        members:
+          - V1
+        values:
+          - '1'
+        description: Response Rules Config Version.
+        member_descriptions:
+          V1: Response rules configuration version 1.
+    - rules_operator:
+        name: RulesOperator
+        members:
+          - AND
+          - OR
+        values:
+          - AND
+          - OR
+        description: Operator to use for combining conditions in the rule.
+        member_descriptions:
+          AND: All conditions in the rule must match.
+          OR: Any condition in the rule may match.
+    - response_type:
+        name: ResponseType
+        members:
+          - XRAY_JSON
+          - XRAY_BASE64
+          - MIHOMO
+          - STASH
+          - CLASH
+          - SINGBOX
+          - BROWSER
+          - BLOCK
+          - STATUS_CODE_404
+          - STATUS_CODE_451
+          - SOCKET_DROP
+        values:
+          - XRAY_JSON
+          - XRAY_BASE64
+          - MIHOMO
+          - STASH
+          - CLASH
+          - SINGBOX
+          - BROWSER
+          - BLOCK
+          - STATUS_CODE_404
+          - STATUS_CODE_451
+          - SOCKET_DROP
+        description: Type of the response. Determines the type of `response` to be
+          returned when the rule is matched.
+        member_descriptions:
+          XRAY_JSON: Return `subscription` in XRAY-JSON format. (Using `Xray Json`
+            template).
+          XRAY_BASE64: Return `subscription` in BASE64 encoded string. Compatible
+            with most client application with Xray core.
+          MIHOMO: Return `subscription` in Mihomo format. (Using `Mihomo` template).
+          STASH: Return `subscription` in Stash format. (Using `Stash` template).
+          CLASH: Return `subscription` in Clash format. (Using `Clash` template) Useful
+            for client application that use Legacy Clash core.
+          SINGBOX: Return `subscription` in Singbox format. (Using `Singbox` template)
+            Format which is used by Singbox client application.
+          BROWSER: Return `subscription` as browser format. The same as on `/info`
+            route.
+          BLOCK: '`Drop` request and return `403` status code.'
+          STATUS_CODE_404: '`Drop` request and return `404` status code.'
+          STATUS_CODE_451: '`Drop` request and return `451` status code.'
+          SOCKET_DROP: '`Drop` the socket connection.'
+    - security_layer:
+        name: SecurityLayer
+        members:
+          - DEFAULT
+          - TLS
+          - NONE
+        values:
+          - DEFAULT
+          - TLS
+          - NONE
+        description: Transport layer encryption.
+        member_descriptions:
+          DEFAULT: Use the default transport layer encryption behavior.
+          TLS: Use TLS transport layer encryption.
+          NONE: Disable transport layer encryption.
+    - status:
+        name: Status
+        members:
+          - ACTIVE
+          - DISABLED
+          - LIMITED
+          - EXPIRED
+        values:
+          - ACTIVE
+          - DISABLED
+          - LIMITED
+          - EXPIRED
+        description: User account status.
+        member_descriptions:
+          ACTIVE: User account is active.
+          DISABLED: User account is disabled.
+          LIMITED: User account is limited.
+          EXPIRED: User account has expired.
+    - traffic_limit_strategy:
+        name: TrafficLimitStrategy
+        members:
+          - NO_RESET
+          - DAY
+          - WEEK
+          - MONTH
+          - MONTH_ROLLING
+        values:
+          - NO_RESET
+          - DAY
+          - WEEK
+          - MONTH
+          - MONTH_ROLLING
+        description: Available reset periods.
+        member_descriptions:
+          NO_RESET: Traffic limit is never reset.
+          DAY: Traffic limit resets daily.
+          WEEK: Traffic limit resets weekly.
+          MONTH: Traffic limit resets monthly.
+    - config_action:
+        name: ConfigAction
+        members:
+          - CREATED
+          - UPDATED
+          - DELETED
+        values:
+          - CREATED
+          - UPDATED
+          - DELETED
+        description: Action applied to the configuration.
+        member_descriptions:
+          CREATED: Configuration was created.
+          UPDATED: Configuration was updated.
+          DELETED: Configuration was deleted.
+    - nodes_action:
+        name: NodesAction
+        members:
+          - ENABLE
+          - DISABLE
+          - RESTART
+          - RESET_TRAFFIC
+        values:
+          - ENABLE
+          - DISABLE
+          - RESTART
+          - RESET_TRAFFIC
+        description: Action to apply to nodes.
+        member_descriptions:
+          ENABLE: Enable selected nodes.
+          DISABLE: Disable selected nodes.
+          RESTART: Restart selected nodes.
+          RESET_TRAFFIC: Reset traffic counters for selected nodes.
+    - drop_connections_target:
+        name: DropConnectionsTarget
+        members:
+          - USER_UUIDS
+          - IP_ADDRESSES
+          - ALL_NODES
+          - SPECIFIC_NODES
+        values:
+          - userUuids
+          - ipAddresses
+          - allNodes
+          - specificNodes
+        description: Target scope for dropping connections.
+        member_descriptions:
+          USER_UUIDS: Drop connections by user UUIDs.
+          IP_ADDRESSES: Drop connections by IP addresses.
+          ALL_NODES: Drop connections on all nodes.
+          SPECIFIC_NODES: Drop connections on specific nodes.
+    - event_scope_type:
+        name: EventScopeType
+        members:
+          - CRM
+          - SERVICE
+          - NODE
+          - USER
+          - USER_HWID_DEVICES
+          - TORRENT_BLOCKER
+          - ERRORS
+        values:
+          - crm
+          - service
+          - node
+          - user
+          - user_hwid_devices
+          - torrent_blocker
+          - errors
+        description: Scope of the emitted event.
+        member_descriptions:
+          CRM: CRM event scope.
+          SERVICE: Service event scope.
+          NODE: Node event scope.
+          USER: User event scope.
+          USER_HWID_DEVICES: User HWID devices event scope.
+          TORRENT_BLOCKER: Torrent blocker event scope.
+          ERRORS: Errors event scope.
+    - crm_event_type:
+        name: CRMEventType
+        members:
+          - CRM_INFRA_BILLING_NODE_PAYMENT_IN_7_DAYS
+          - CRM_INFRA_BILLING_NODE_PAYMENT_IN_48HRS
+          - CRM_INFRA_BILLING_NODE_PAYMENT_IN_24HRS
+          - CRM_INFRA_BILLING_NODE_PAYMENT_DUE_TODAY
+          - CRM_INFRA_BILLING_NODE_PAYMENT_OVERDUE_24HRS
+          - CRM_INFRA_BILLING_NODE_PAYMENT_OVERDUE_48HRS
+          - CRM_INFRA_BILLING_NODE_PAYMENT_OVERDUE_7_DAYS
+        values:
+          - crm.infra_billing_node_payment_in_7_days
+          - crm.infra_billing_node_payment_in_48hrs
+          - crm.infra_billing_node_payment_in_24hrs
+          - crm.infra_billing_node_payment_due_today
+          - crm.infra_billing_node_payment_overdue_24hrs
+          - crm.infra_billing_node_payment_overdue_48hrs
+          - crm.infra_billing_node_payment_overdue_7_days
+        description: CRM event type.
+        member_descriptions:
+          CRM_INFRA_BILLING_NODE_PAYMENT_IN_7_DAYS: Node payment is due in 7 days.
+          CRM_INFRA_BILLING_NODE_PAYMENT_IN_48HRS: Node payment is due in 48 hours.
+          CRM_INFRA_BILLING_NODE_PAYMENT_IN_24HRS: Node payment is due in 24 hours.
+          CRM_INFRA_BILLING_NODE_PAYMENT_DUE_TODAY: Node payment is due today.
+          CRM_INFRA_BILLING_NODE_PAYMENT_OVERDUE_24HRS: Node payment is overdue by
+            24 hours.
+          CRM_INFRA_BILLING_NODE_PAYMENT_OVERDUE_48HRS: Node payment is overdue by
+            48 hours.
+          CRM_INFRA_BILLING_NODE_PAYMENT_OVERDUE_7_DAYS: Node payment is overdue by
+            7 days.
+    - service_event_type:
+        name: ServiceEventType
+        members:
+          - SERVICE_PANEL_STARTED
+          - SERVICE_LOGIN_ATTEMPT_FAILED
+          - SERVICE_LOGIN_ATTEMPT_SUCCESS
+          - SERVICE_SUBPAGE_CONFIG_CHANGED
+        values:
+          - service.panel_started
+          - service.login_attempt_failed
+          - service.login_attempt_success
+          - service.subpage_config_changed
+        description: Service event type.
+        member_descriptions:
+          SERVICE_PANEL_STARTED: Panel service started.
+          SERVICE_LOGIN_ATTEMPT_FAILED: Login attempt failed.
+          SERVICE_LOGIN_ATTEMPT_SUCCESS: Login attempt succeeded.
+          SERVICE_SUBPAGE_CONFIG_CHANGED: Subpage configuration changed.
+    - node_event_type:
+        name: NodeEventType
+        members:
+          - NODE_CREATED
+          - NODE_MODIFIED
+          - NODE_DISABLED
+          - NODE_ENABLED
+          - NODE_DELETED
+          - NODE_CONNECTION_LOST
+          - NODE_CONNECTION_RESTORED
+          - NODE_TRAFFIC_NOTIFY
+        values:
+          - node.created
+          - node.modified
+          - node.disabled
+          - node.enabled
+          - node.deleted
+          - node.connection_lost
+          - node.connection_restored
+          - node.traffic_notify
+        description: Node event type.
+        member_descriptions:
+          NODE_CREATED: Node was created.
+          NODE_MODIFIED: Node was modified.
+          NODE_DISABLED: Node was disabled.
+          NODE_ENABLED: Node was enabled.
+          NODE_DELETED: Node was deleted.
+          NODE_CONNECTION_LOST: Node connection was lost.
+          NODE_CONNECTION_RESTORED: Node connection was restored.
+          NODE_TRAFFIC_NOTIFY: Node traffic notification was emitted.
+    - user_hwid_devices_event_type:
+        name: UserHwidDevicesEventType
+        members:
+          - USER_HWID_DEVICES_ADDED
+          - USER_HWID_DEVICES_DELETED
+        values:
+          - user_hwid_devices.added
+          - user_hwid_devices.deleted
+        description: User HWID devices event type.
+        member_descriptions:
+          USER_HWID_DEVICES_ADDED: User HWID device was added.
+          USER_HWID_DEVICES_DELETED: User HWID device was deleted.
+    - user_event_type:
+        name: UserEventType
+        members:
+          - USER_CREATED
+          - USER_MODIFIED
+          - USER_DELETED
+          - USER_REVOKED
+          - USER_DISABLED
+          - USER_ENABLED
+          - USER_LIMITED
+          - USER_EXPIRED
+          - USER_TRAFFIC_RESET
+          - USER_EXPIRES_IN_72_HOURS
+          - USER_EXPIRES_IN_48_HOURS
+          - USER_EXPIRES_IN_24_HOURS
+          - USER_EXPIRED_24_HOURS_AGO
+          - USER_FIRST_CONNECTED
+          - USER_BANDWIDTH_USAGE_THRESHOLD_REACHED
+          - USER_NOT_CONNECTED
+        values:
+          - user.created
+          - user.modified
+          - user.deleted
+          - user.revoked
+          - user.disabled
+          - user.enabled
+          - user.limited
+          - user.expired
+          - user.traffic_reset
+          - user.expires_in_72_hours
+          - user.expires_in_48_hours
+          - user.expires_in_24_hours
+          - user.expired_24_hours_ago
+          - user.first_connected
+          - user.bandwidth_usage_threshold_reached
+          - user.not_connected
+        description: User event type.
+        member_descriptions:
+          USER_CREATED: User was created.
+          USER_MODIFIED: User was modified.
+          USER_DELETED: User was deleted.
+          USER_REVOKED: User was revoked.
+          USER_DISABLED: User was disabled.
+          USER_ENABLED: User was enabled.
+          USER_LIMITED: User was limited.
+          USER_EXPIRED: User expired.
+          USER_TRAFFIC_RESET: User traffic was reset.
+          USER_EXPIRES_IN_72_HOURS: User expires in 72 hours.
+          USER_EXPIRES_IN_48_HOURS: User expires in 48 hours.
+          USER_EXPIRES_IN_24_HOURS: User expires in 24 hours.
+          USER_EXPIRED_24_HOURS_AGO: User expired 24 hours ago.
+          USER_FIRST_CONNECTED: User connected for the first time.
+          USER_BANDWIDTH_USAGE_THRESHOLD_REACHED: User reached the bandwidth usage
+            threshold.
+          USER_NOT_CONNECTED: User has not connected.
+    - torrent_blocker_event_type:
+        name: TorrentBlockerEventType
+        members:
+          - TORRENT_BLOCKER_REPORT
+        values:
+          - torrent_blocker.report
+        description: Torrent blocker event type.
+    - errors_event_type:
+        name: ErrorsEventType
+        members:
+          - ERRORS_BANDWIDTH_USAGE_THRESHOLD_REACHED_MAX_NOTIFICATIONS
+        values:
+          - errors.bandwidth_usage_threshold_reached_max_notifications
+        description: Error event type.
+        member_descriptions:
+          ERRORS_BANDWIDTH_USAGE_THRESHOLD_REACHED_MAX_NOTIFICATIONS: Maximum bandwidth
+            usage threshold notifications reached.
+    - plugin_executor_command:
+        name: PluginExecutorCommand
+        members:
+          - BLOCK_IPS
+          - RECREATE_TABLES
+        values:
+          - blockIps
+          - recreateTables
+    - proxy_configs_protocol:
+        name: ProxyConfigsProtocol
+        members:
+          - VLESS
+          - TROJAN
+          - SHADOWSOCKS
+          - HYSTERIA
+        values:
+          - vless
+          - trojan
+          - shadowsocks
+          - hysteria
+    - proxy_configs_options_flow:
+        name: ProxyConfigsProtocolOptionsFlow
+        members:
+          - NOTHING
+          - XTLS_RPRX_VISION
+          - XTLS_RPRX_VISION_UDP443
+        values:
+          - ""
+          - xtls-rprx-vision
+          - xtls-rprx-vision-udp443
+    - proxy_configs_security:
+        name: ProxyConfigsSecurity
+        members:
+          - TLS
+          - REALITY
+          - NONE
+        values:
+          - tls
+          - reality
+          - "none"
+    - proxy_configs_transport:
+        name: ProxyConfigsTransport
+        members:
+          - TLS
+          - XHTTP
+          - WS
+          - HTTPUPGRADE
+          - GRPC
+          - KCP
+          - HYSTERIA
+        values:
+          - tcp
+          - xhttp
+          - ws
+          - httpupgrade
+          - grpc
+          - kcp
+          - hysteria
+    - proxy_configs_transport_options_header:
+        name: ProxyConfigsTransportOptionsHeader
+        members:
+          - HTTP
+          - NONE
+        values:
+          - http
+          - "none"
+    - proxy_configs_transport_options_mode:
+        name: ProxyConfigsTransportOptionsMode
+        members:
+          - AUTO
+          - PACKET_UP
+          - STREAM_UP
+          - STREAM_ONE
+        values:
+          - auto
+          - packet-up
+          - stream-up
+          - stream-one

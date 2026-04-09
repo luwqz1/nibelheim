@@ -1,7 +1,7 @@
 import saronia
 
 from ..auth import Authorization
-from ..errors import BadRequestError, InternalServerError
+from ..errors import BadRequestError, NotFoundInternalServerError
 from ..remnawave import remnawave
 from ..responses import GetSubscriptionRequestHistoryResponseDto, GetSubscriptionRequestHistoryStatsResponseDto
 
@@ -18,7 +18,7 @@ class SubscriptionRequestHistoryController:
         start: int | None = None,
     ) -> saronia.APIResult[
         GetSubscriptionRequestHistoryResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]:
         """Args:
         size: Page size for pagination
@@ -32,7 +32,7 @@ class SubscriptionRequestHistoryController:
         self,
     ) -> saronia.APIResult[
         GetSubscriptionRequestHistoryStatsResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
 

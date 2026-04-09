@@ -1,14 +1,7 @@
 import saronia
 
-from ..errors import AuthControllerAuthError, BadRequestError, InternalServerError
-from ..objects import (
-    LoginRequestDto,
-    OAuth2AuthorizeRequestDto,
-    OAuth2CallbackRequestDto,
-    RegisterRequestDto,
-    TelegramCallbackRequestDto,
-    VerifyPasskeyAuthenticationRequestDto,
-)
+from ..errors import AuthControllerAuthError, BadRequestError, NotFoundInternalServerError
+from ..objects import LoginRequestDto, OAuth2AuthorizeRequestDto, OAuth2CallbackRequestDto, RegisterRequestDto, VerifyPasskeyAuthenticationRequestDto
 from ..remnawave import remnawave
 from ..responses import (
     GetPasskeyAuthenticationOptionsResponseDto,
@@ -17,27 +10,26 @@ from ..responses import (
     OAuth2AuthorizeResponseDto,
     OAuth2CallbackResponseDto,
     RegisterResponseDto,
-    TelegramCallbackResponseDto,
     VerifyPasskeyAuthenticationResponseDto,
 )
 
 
 @remnawave("/auth")
 class AuthController:
-    @saronia.post("/login", form=LoginRequestDto)
+    @saronia.post("/login", LoginRequestDto)
     async def login(
         self,
     ) -> saronia.APIResult[
         LoginResponseDto,
-        BadRequestError | AuthControllerAuthError | InternalServerError,
+        BadRequestError | AuthControllerAuthError | NotFoundInternalServerError,
     ]: ...
 
-    @saronia.post("/register", form=RegisterRequestDto)
+    @saronia.post("/register", RegisterRequestDto)
     async def register(
         self,
     ) -> saronia.APIResult[
         RegisterResponseDto,
-        BadRequestError | AuthControllerAuthError | InternalServerError,
+        BadRequestError | AuthControllerAuthError | NotFoundInternalServerError,
     ]: ...
 
     @saronia.get("/status")
@@ -45,31 +37,23 @@ class AuthController:
         self,
     ) -> saronia.APIResult[
         GetStatusResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
-    @saronia.post("/oauth2/tg/callback", form=TelegramCallbackRequestDto)
-    async def telegram_callback(
-        self,
-    ) -> saronia.APIResult[
-        TelegramCallbackResponseDto,
-        BadRequestError | InternalServerError,
-    ]: ...
-
-    @saronia.post("/oauth2/authorize", form=OAuth2AuthorizeRequestDto)
+    @saronia.post("/oauth2/authorize", OAuth2AuthorizeRequestDto)
     async def oauth2_authorize(
         self,
     ) -> saronia.APIResult[
         OAuth2AuthorizeResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
-    @saronia.post("/oauth2/callback", form=OAuth2CallbackRequestDto)
+    @saronia.post("/oauth2/callback", OAuth2CallbackRequestDto)
     async def oauth2_callback(
         self,
     ) -> saronia.APIResult[
         OAuth2CallbackResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
     @saronia.get("/passkey/authentication/options")
@@ -77,15 +61,15 @@ class AuthController:
         self,
     ) -> saronia.APIResult[
         GetPasskeyAuthenticationOptionsResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
-    @saronia.post("/passkey/authentication/verify", form=VerifyPasskeyAuthenticationRequestDto)
+    @saronia.post("/passkey/authentication/verify", VerifyPasskeyAuthenticationRequestDto)
     async def passkey_authentication_verify(
         self,
     ) -> saronia.APIResult[
         VerifyPasskeyAuthenticationResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
 

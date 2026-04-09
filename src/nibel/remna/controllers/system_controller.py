@@ -1,7 +1,7 @@
 import saronia
 
 from ..auth import Authorization
-from ..errors import BadRequestError, InternalServerError
+from ..errors import BadRequestError, NotFoundInternalServerError
 from ..objects import DebugSrrMatcherRequestDto, EncryptHappCryptoLinkRequestDto
 from ..remnawave import remnawave
 from ..responses import (
@@ -12,6 +12,7 @@ from ..responses import (
     GetMetadataResponseDto,
     GetNodesMetricsResponseDto,
     GetNodesStatisticsResponseDto,
+    GetRecapResponseDto,
     GetRemnawaveHealthResponseDto,
     GetStatsResponseDto,
 )
@@ -26,7 +27,7 @@ class SystemController:
         self,
     ) -> saronia.APIResult[
         GetMetadataResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
     @saronia.get("/stats")
@@ -34,7 +35,7 @@ class SystemController:
         self,
     ) -> saronia.APIResult[
         GetStatsResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
     @saronia.get("/stats/bandwidth")
@@ -42,7 +43,7 @@ class SystemController:
         self,
     ) -> saronia.APIResult[
         GetBandwidthStatsResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
     @saronia.get("/stats/nodes")
@@ -50,7 +51,7 @@ class SystemController:
         self,
     ) -> saronia.APIResult[
         GetNodesStatisticsResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
     @saronia.get("/health")
@@ -58,7 +59,7 @@ class SystemController:
         self,
     ) -> saronia.APIResult[
         GetRemnawaveHealthResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
     @saronia.get("/nodes/metrics")
@@ -66,7 +67,7 @@ class SystemController:
         self,
     ) -> saronia.APIResult[
         GetNodesMetricsResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
     @saronia.get("/tools/x25519/generate")
@@ -74,23 +75,31 @@ class SystemController:
         self,
     ) -> saronia.APIResult[
         GenerateX25519ResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
-    @saronia.post("/tools/happ/encrypt", form=EncryptHappCryptoLinkRequestDto)
+    @saronia.post("/tools/happ/encrypt", EncryptHappCryptoLinkRequestDto)
     async def encrypt_happ_crypto_link(
         self,
     ) -> saronia.APIResult[
         EncryptHappCryptoLinkResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
-    @saronia.post("/testers/srr-matcher", form=DebugSrrMatcherRequestDto)
+    @saronia.post("/testers/srr-matcher", DebugSrrMatcherRequestDto)
     async def debug_srr_matcher(
         self,
     ) -> saronia.APIResult[
         DebugSrrMatcherResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
+    ]: ...
+
+    @saronia.get("/stats/recap")
+    async def get_recap(
+        self,
+    ) -> saronia.APIResult[
+        GetRecapResponseDto,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
 

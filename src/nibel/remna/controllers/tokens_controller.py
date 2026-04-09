@@ -3,7 +3,7 @@ from uuid import UUID
 import saronia
 
 from ..auth import Authorization
-from ..errors import BadRequestError, InternalServerError
+from ..errors import BadRequestError, NotFoundInternalServerError
 from ..objects import CreateApiTokenRequestDto
 from ..remnawave import remnawave
 from ..responses import CreateApiTokenResponseDto, DeleteApiTokenResponseDto, FindAllApiTokensResponseDto
@@ -18,17 +18,17 @@ class TokensController:
         self,
     ) -> saronia.APIResult[
         FindAllApiTokensResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]:
         """This endpoint is forbidden to use via "API-key". It can only be used with admin JWT-token."""
         ...
 
-    @saronia.post("/", form=CreateApiTokenRequestDto)
+    @saronia.post("/", CreateApiTokenRequestDto)
     async def create(
         self,
     ) -> saronia.APIResult[
         CreateApiTokenResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]:
         """This endpoint is forbidden to use via "API-key". It can only be used with an admin JWT-token."""
         ...
@@ -40,7 +40,7 @@ class TokensController:
         uuid: UUID,
     ) -> saronia.APIResult[
         DeleteApiTokenResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]:
         """This endpoint is forbidden to use via "API-key". It can be used only with an admin JWT-token.
 

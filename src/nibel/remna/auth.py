@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import dataclasses
 
-from saronia.security import *  # type: ignore
+from saronia.security import *
 
 Authorization = HTTPBearer
 Prometheus = HTTPBasic

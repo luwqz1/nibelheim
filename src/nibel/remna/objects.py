@@ -55,6 +55,12 @@ class RequestBase(msgspex.Model, kw_only=True):
     )
 
 
+class CloneNodePluginBase(msgspex.Model, kw_only=True):
+    uuid: UUID = msgspex.field(converter=msgspex.From[str | UUID])
+    view_position: int = msgspex.field(name="viewPosition")
+    name: str
+
+
 class CloneSubscriptionPageConfigBase(msgspex.Model, kw_only=True):
     uuid: UUID = msgspex.field(converter=msgspex.From[str | UUID])
     view_position: int = msgspex.field(name="viewPosition")
@@ -80,12 +86,6 @@ class CreateConfigProfileResponseDtoResponseNodesBase(msgspex.Model, kw_only=Tru
 
 class CreateBase(msgspex.Model, kw_only=True):
     uuid: UUID = msgspex.field(converter=msgspex.From[str | UUID])
-    view_position: int = msgspex.field(name="viewPosition")
-    name: str
-
-
-class CreateBase2(msgspex.Model, kw_only=True):
-    uuid: UUID = msgspex.field(converter=msgspex.From[str | UUID])
     name: str
     created_at: msgspex.isodatetime = msgspex.field(name="createdAt", converter=msgspex.From[str | datetime])
     updated_at: msgspex.isodatetime = msgspex.field(name="updatedAt", converter=msgspex.From[str | datetime])
@@ -93,10 +93,9 @@ class CreateBase2(msgspex.Model, kw_only=True):
     login_url: msgspex.NullableOption[str] = msgspex.field(default=NOTHING, name="loginUrl")
 
 
-class FetchIpsResultResponseDtoResponseResultNodesBase(msgspex.Model, kw_only=True):
-    node_uuid: UUID = msgspex.field(name="nodeUuid", converter=msgspex.From[str | UUID])
-    node_name: str = msgspex.field(name="nodeName")
-    country_code: str = msgspex.field(name="countryCode")
+class IpsResultBase(msgspex.Model, kw_only=True):
+    is_completed: bool = msgspex.field(name="isCompleted")
+    is_failed: bool = msgspex.field(name="isFailed")
 
 
 class NodesBase(msgspex.Model, kw_only=True):
@@ -105,6 +104,12 @@ class NodesBase(msgspex.Model, kw_only=True):
     country_code: str = msgspex.field(name="countryCode")
     config_profile_uuid: UUID = msgspex.field(name="configProfileUuid", converter=msgspex.From[str | UUID])
     config_profile_name: str = msgspex.field(name="configProfileName")
+
+
+class RawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsTransportBase(msgspex.Model, kw_only=True):
+    path: msgspex.NullableOption[str] = msgspex.field(default=NOTHING)
+    host: msgspex.NullableOption[str] = msgspex.field(default=NOTHING)
+    headers: msgspex.NullableOption[dict[str, str]] = msgspex.field(default=NOTHING)
 
 
 class RemnawaveSettingsResponseDtoResponseOauth2SettingsBase(msgspex.Model, kw_only=True):
@@ -116,6 +121,11 @@ class RemnawaveSettingsResponseDtoResponseOauth2SettingsBase(msgspex.Model, kw_o
 class UsageBase(msgspex.Model, kw_only=True):
     categories: list[str]
     sparkline_data: list[int] = msgspex.field(name="sparklineData")
+
+
+class GetBase(msgspex.Model, kw_only=True):
+    uuid: UUID = msgspex.field(converter=msgspex.From[str | UUID])
+    color: str
 
 
 class BulkAllExtendExpirationDateRequestDto(msgspex.Model, kw_only=True):
@@ -153,7 +163,12 @@ class BulkExtendExpirationDateRequestDto(msgspex.Model, kw_only=True):
 
 class BulkNodesActionsRequestDto(msgspex.Model, kw_only=True):
     uuids: typing.Annotated[list[UUID], msgspec.Meta(min_length=1)] = msgspex.field(converter=msgspex.From[list[str | UUID]])
-    action: BulkNodesActionsRequestDtoAction
+    action: NodesAction
+
+
+class BulkNodesUpdateRequestDto(msgspex.Model, kw_only=True):
+    uuids: typing.Annotated[list[UUID], msgspec.Meta(min_length=1)] = msgspex.field(converter=msgspex.From[list[str | UUID]])
+    fields: BulkNodesUpdateRequestDtoFields
 
 
 class BulkResetTrafficUsersRequestDto(msgspex.Model, kw_only=True):
@@ -172,6 +187,10 @@ class BulkUpdateUsersRequestDto(msgspex.Model, kw_only=True):
 class BulkUpdateUsersSquadsRequestDto(msgspex.Model, kw_only=True):
     uuids: typing.Annotated[list[UUID], msgspec.Meta(min_length=1, max_length=500)] = msgspex.field(converter=msgspex.From[list[str | UUID]])
     active_internal_squads: list[UUID] = msgspex.field(name="activeInternalSquads", converter=msgspex.From[list[str | UUID]])
+
+
+class CloneNodePluginRequestDto(msgspex.Model, kw_only=True):
+    clone_from_uuid: UUID = msgspex.field(name="cloneFromUuid", converter=msgspex.From[str | UUID])
 
 
 class CloneSubscriptionPageConfigRequestDto(msgspex.Model, kw_only=True):
@@ -199,13 +218,14 @@ class CreateHostRequestDto(msgspex.Model, kw_only=True):
     path: msgspex.Option[str] = msgspex.field(default=..., converter=msgspex.From[str | None])
     sni: msgspex.Option[str] = msgspex.field(default=..., converter=msgspex.From[str | None])
     host: msgspex.Option[str] = msgspex.field(default=..., converter=msgspex.From[str | None])
-    alpn: msgspex.NullableOption[HostRequestDtoAlpn] = msgspex.field(default=NOTHING, converter=msgspex.From["HostRequestDtoAlpn | None"])
-    fingerprint: msgspex.NullableOption[HostRequestDtoFingerprint] = msgspex.field(default=NOTHING, converter=msgspex.From["HostRequestDtoFingerprint | None"])
+    alpn: msgspex.NullableOption[ALPN] = msgspex.field(default=NOTHING, converter=msgspex.From["ALPN | None"])
+    fingerprint: msgspex.NullableOption[Fingerprint] = msgspex.field(default=NOTHING, converter=msgspex.From["Fingerprint | None"])
     is_disabled: msgspex.Option[bool] = msgspex.field(default=..., name="isDisabled", converter=msgspex.From[bool | None])
     security_layer: msgspex.Option[SecurityLayer] = msgspex.field(default=..., name="securityLayer", converter=msgspex.From["SecurityLayer | None"])
     x_http_extra_params: msgspex.NullableOption[typing.Any] = msgspex.field(default=NOTHING, name="xHttpExtraParams", converter=msgspex.From[typing.Any | None])
     mux_params: msgspex.NullableOption[typing.Any] = msgspex.field(default=NOTHING, name="muxParams", converter=msgspex.From[typing.Any | None])
     sockopt_params: msgspex.NullableOption[typing.Any] = msgspex.field(default=NOTHING, name="sockoptParams", converter=msgspex.From[typing.Any | None])
+    final_mask: msgspex.NullableOption[typing.Any] = msgspex.field(default=NOTHING, name="finalMask", converter=msgspex.From[typing.Any | None])
     server_description: msgspex.NullableOption[typing.Annotated[str, msgspec.Meta(max_length=30)]] = msgspex.field(
         default=NOTHING, name="serverDescription", converter=msgspex.From[str | None]
     )
@@ -232,8 +252,8 @@ class CreateHostRequestDto(msgspex.Model, kw_only=True):
     )
     """Optional. Internal squads from which the host will be excluded."""
 
-    exclude_from_subscription_types: msgspex.Option[list[BulkDeleteHostsResponseDtoResponseExcludeFromSubscriptionTypes]] = msgspex.field(
-        default=..., name="excludeFromSubscriptionTypes", converter=msgspex.From["list[BulkDeleteHostsResponseDtoResponseExcludeFromSubscriptionTypes] | None"]
+    exclude_from_subscription_types: msgspex.Option[list[TemplateType]] = msgspex.field(
+        default=..., name="excludeFromSubscriptionTypes", converter=msgspex.From["list[TemplateType] | None"]
     )
     """Optional. Subscription types from which the host will be excluded from."""
 
@@ -263,6 +283,10 @@ class CreateInternalSquadRequestDto(msgspex.Model, kw_only=True):
     inbounds: list[UUID] = msgspex.field(converter=msgspex.From[list[str | UUID]])
 
 
+class CreateNodePluginRequestDto(msgspex.Model, kw_only=True):
+    name: typing.Annotated[str, msgspec.Meta(pattern="^[A-Za-z0-9_\\s-]+$", min_length=2, max_length=30)]
+
+
 class CreateNodeRequestDto(msgspex.Model, kw_only=True):
     name: typing.Annotated[str, msgspec.Meta(min_length=3, max_length=30)]
     address: typing.Annotated[str, msgspec.Meta(min_length=2)]
@@ -288,6 +312,7 @@ class CreateNodeRequestDto(msgspex.Model, kw_only=True):
     tags: msgspex.Option[typing.Annotated[list[typing.Annotated[str, msgspec.Meta(pattern=r"^[A-Z0-9_:]+$", max_length=36)]], msgspec.Meta(max_length=10)]] = (
         msgspex.field(default=..., converter=msgspex.From[list[typing.Annotated[str, msgspec.Meta(pattern=r"^[A-Z0-9_:]+$", max_length=36)]] | None])
     )
+    active_plugin_uuid: msgspex.NullableOption[UUID] = msgspex.field(default=NOTHING, name="activePluginUuid", converter=msgspex.From[str | UUID | None])
 
 
 class CreateSnippetRequestDto(SnippetRequestBase, kw_only=True):
@@ -300,7 +325,7 @@ class CreateSubscriptionPageConfigRequestDto(msgspex.Model, kw_only=True):
 
 class CreateSubscriptionTemplateRequestDto(msgspex.Model, kw_only=True):
     name: typing.Annotated[str, msgspec.Meta(pattern="^[A-Za-z0-9_\\s-]+$", min_length=2, max_length=255)]
-    template_type: BulkDeleteHostsResponseDtoResponseExcludeFromSubscriptionTypes = msgspex.field(name="templateType")
+    template_type: TemplateType = msgspex.field(name="templateType")
 
 
 class CreateUserHwidDeviceRequestDto(CreateUserHwidDeviceBase, kw_only=True):
@@ -317,7 +342,7 @@ class CreateUserRequestDto(msgspex.Model, kw_only=True):
     expire_at: msgspex.isodatetime = msgspex.field(name="expireAt", converter=msgspex.From[str | datetime])
     """Account expiration date. Required. Format: 2025-01-17T15:38:45.065Z"""
 
-    status: msgspex.Option[CreateUserRequestDtoStatus] = msgspex.field(default=..., converter=msgspex.From["CreateUserRequestDtoStatus | None"])
+    status: msgspex.Option[Status] = msgspex.field(default=..., converter=msgspex.From["Status | None"])
     """Optional. User account status. Defaults to ACTIVE."""
 
     short_uuid: msgspex.Option[str] = msgspex.field(default=..., name="shortUuid", converter=msgspex.From[str | None])
@@ -341,8 +366,8 @@ class CreateUserRequestDto(msgspex.Model, kw_only=True):
     )
     """Optional. Traffic limit in bytes. Set to 0 for unlimited traffic."""
 
-    traffic_limit_strategy: msgspex.Option[TrafficLimitStrategy2] = msgspex.field(
-        default=..., name="trafficLimitStrategy", converter=msgspex.From["TrafficLimitStrategy2 | None"]
+    traffic_limit_strategy: msgspex.Option[TrafficLimitStrategy] = msgspex.field(
+        default=..., name="trafficLimitStrategy", converter=msgspex.From["TrafficLimitStrategy | None"]
     )
     """Available reset periods"""
 
@@ -425,13 +450,22 @@ class LoginRequestDto(msgspex.Model, kw_only=True):
 
 
 class OAuth2AuthorizeRequestDto(msgspex.Model, kw_only=True):
-    provider: RequestDtoProvider
+    provider: Provider
 
 
 class OAuth2CallbackRequestDto(msgspex.Model, kw_only=True):
-    provider: RequestDtoProvider
+    provider: Provider
     code: str
     state: str
+
+
+class PluginExecutorRequestDto(msgspex.Model, kw_only=True):
+    command: kungfu.Sum[PluginExecutorRequestDtoCommand, PluginExecutorRequestDtoCommand, PluginExecutorRequestDtoCommand2] = msgspex.field(
+        converter=msgspex.From["PluginExecutorRequestDtoCommand | PluginExecutorRequestDtoCommand | PluginExecutorRequestDtoCommand2"]
+    )
+    target_nodes: kungfu.Sum[DropConnectionsRequestDtoTargetNodes, DropConnectionsRequestDtoTargetNodes2] = msgspex.field(
+        name="targetNodes", converter=msgspex.From["DropConnectionsRequestDtoTargetNodes | DropConnectionsRequestDtoTargetNodes2"]
+    )
 
 
 class ProfileModificationRequestDto(msgspex.Model, kw_only=True):
@@ -445,44 +479,51 @@ class RegisterRequestDto(msgspex.Model, kw_only=True):
 
 
 class RemnawaveWebhookCrmEventsDto(msgspex.Model, kw_only=True):
-    scope: RemnawaveWebhookCrmEventsDtoScope
-    event: RemnawaveWebhookCrmEventsDtoEvent
+    scope: EventScopeType
+    event: CRMEventType
     timestamp: msgspex.isodatetime = msgspex.field(converter=msgspex.From[str | datetime])
     data: RemnawaveWebhookCrmEventsDtoData
 
 
 class RemnawaveWebhookErrorsEventsDto(msgspex.Model, kw_only=True):
-    scope: RemnawaveWebhookErrorsEventsDtoScope
-    event: RemnawaveWebhookErrorsEventsDtoEvent
+    scope: EventScopeType
+    event: ErrorsEventType
     timestamp: msgspex.isodatetime = msgspex.field(converter=msgspex.From[str | datetime])
     data: RemnawaveWebhookErrorsEventsDtoData
 
 
 class RemnawaveWebhookNodeEventsDto(msgspex.Model, kw_only=True):
-    scope: RemnawaveWebhookNodeEventsDtoScope
-    event: RemnawaveWebhookNodeEventsDtoEvent
+    scope: EventScopeType
+    event: NodeEventType
     timestamp: msgspex.isodatetime = msgspex.field(converter=msgspex.From[str | datetime])
     data: CreateNodeResponseDtoResponse
 
 
 class RemnawaveWebhookServiceEventsDto(msgspex.Model, kw_only=True):
-    scope: RemnawaveWebhookServiceEventsDtoScope
-    event: RemnawaveWebhookServiceEventsDtoEvent
+    scope: EventScopeType
+    event: ServiceEventType
     timestamp: msgspex.isodatetime = msgspex.field(converter=msgspex.From[str | datetime])
     data: RemnawaveWebhookServiceEventsDtoData
 
 
+class RemnawaveWebhookTorrentBlockerEventsDto(msgspex.Model, kw_only=True):
+    scope: EventScopeType
+    event: TorrentBlockerEventType
+    timestamp: msgspex.isodatetime = msgspex.field(converter=msgspex.From[str | datetime])
+    data: RemnawaveWebhookTorrentBlockerEventsDtoData
+
+
 class RemnawaveWebhookUserEventsDto(msgspex.Model, kw_only=True):
-    scope: RemnawaveWebhookUserEventsDtoScope
-    event: RemnawaveWebhookUserEventsDtoEvent
+    scope: EventScopeType
+    event: UserEventType
     timestamp: msgspex.isodatetime = msgspex.field(converter=msgspex.From[str | datetime])
     data: CreateUserResponseDtoResponse
     meta: msgspex.NullableOption[RemnawaveWebhookUserEventsDtoMeta] = msgspex.field(default=NOTHING)
 
 
 class RemnawaveWebhookUserHwidDevicesEventsDto(msgspex.Model, kw_only=True):
-    scope: RemnawaveWebhookUserHwidDevicesEventsDtoScope
-    event: RemnawaveWebhookUserHwidDevicesEventsDtoEvent
+    scope: EventScopeType
+    event: UserHwidDevicesEventType
     timestamp: msgspex.isodatetime = msgspex.field(converter=msgspex.From[str | datetime])
     data: RemnawaveWebhookUserHwidDevicesEventsDtoData
 
@@ -503,6 +544,10 @@ class ReorderInternalSquadsRequestDto(msgspex.Model, kw_only=True):
     items: list[ReorderConfigProfilesRequestDtoItems]
 
 
+class ReorderNodePluginsRequestDto(msgspex.Model, kw_only=True):
+    items: list[ReorderConfigProfilesRequestDtoItems]
+
+
 class ReorderNodeRequestDto(msgspex.Model, kw_only=True):
     nodes: list[ReorderConfigProfilesRequestDtoItems]
 
@@ -513,6 +558,13 @@ class ReorderSubscriptionPageConfigsRequestDto(msgspex.Model, kw_only=True):
 
 class ReorderSubscriptionTemplatesRequestDto(msgspex.Model, kw_only=True):
     items: list[ReorderConfigProfilesRequestDtoItems]
+
+
+class ResolveUserRequestBodyDto(msgspex.Model, kw_only=True):
+    uuid: msgspex.Option[UUID] = msgspex.field(default=..., converter=msgspex.From[str | UUID | None])
+    id: msgspex.Option[int] = msgspex.field(default=..., converter=msgspex.From[int | None])
+    short_uuid: msgspex.Option[str] = msgspex.field(default=..., name="shortUuid", converter=msgspex.From[str | None])
+    username: msgspex.Option[str] = msgspex.field(default=..., converter=msgspex.From[str | None])
 
 
 class RestartAllNodesRequestBodyDto(msgspex.Model, kw_only=True):
@@ -528,16 +580,6 @@ class SetInboundToManyHostsRequestDto(msgspex.Model, kw_only=True):
 class SetPortToManyHostsRequestDto(msgspex.Model, kw_only=True):
     uuids: list[UUID] = msgspex.field(converter=msgspex.From[list[str | UUID]])
     port: typing.Annotated[int, msgspec.Meta(ge=1, le=65535)]
-
-
-class TelegramCallbackRequestDto(msgspex.Model, kw_only=True):
-    id: int
-    first_name: str
-    auth_date: int
-    hash: str
-    last_name: msgspex.Option[str] = msgspex.field(default=..., converter=msgspex.From[str | None])
-    username: msgspex.Option[str] = msgspex.field(default=..., converter=msgspex.From[str | None])
-    photo_url: msgspex.Option[str] = msgspex.field(default=..., converter=msgspex.From[str | None])
 
 
 class UpdateConfigProfileRequestDto(RequestBase, kw_only=True):
@@ -575,13 +617,14 @@ class UpdateHostRequestDto(msgspex.Model, kw_only=True):
     path: msgspex.Option[str] = msgspex.field(default=..., converter=msgspex.From[str | None])
     sni: msgspex.Option[str] = msgspex.field(default=..., converter=msgspex.From[str | None])
     host: msgspex.Option[str] = msgspex.field(default=..., converter=msgspex.From[str | None])
-    alpn: msgspex.NullableOption[HostRequestDtoAlpn] = msgspex.field(default=NOTHING, converter=msgspex.From["HostRequestDtoAlpn | None"])
-    fingerprint: msgspex.NullableOption[HostRequestDtoFingerprint] = msgspex.field(default=NOTHING, converter=msgspex.From["HostRequestDtoFingerprint | None"])
+    alpn: msgspex.NullableOption[ALPN] = msgspex.field(default=NOTHING, converter=msgspex.From["ALPN | None"])
+    fingerprint: msgspex.NullableOption[Fingerprint] = msgspex.field(default=NOTHING, converter=msgspex.From["Fingerprint | None"])
     is_disabled: msgspex.Option[bool] = msgspex.field(default=..., name="isDisabled", converter=msgspex.From[bool | None])
     security_layer: msgspex.Option[SecurityLayer] = msgspex.field(default=..., name="securityLayer", converter=msgspex.From["SecurityLayer | None"])
     x_http_extra_params: msgspex.NullableOption[typing.Any] = msgspex.field(default=NOTHING, name="xHttpExtraParams", converter=msgspex.From[typing.Any | None])
     mux_params: msgspex.NullableOption[typing.Any] = msgspex.field(default=NOTHING, name="muxParams", converter=msgspex.From[typing.Any | None])
     sockopt_params: msgspex.NullableOption[typing.Any] = msgspex.field(default=NOTHING, name="sockoptParams", converter=msgspex.From[typing.Any | None])
+    final_mask: msgspex.NullableOption[typing.Any] = msgspex.field(default=NOTHING, name="finalMask", converter=msgspex.From[typing.Any | None])
     server_description: msgspex.NullableOption[typing.Annotated[str, msgspec.Meta(max_length=30)]] = msgspex.field(
         default=NOTHING, name="serverDescription", converter=msgspex.From[str | None]
     )
@@ -608,8 +651,8 @@ class UpdateHostRequestDto(msgspex.Model, kw_only=True):
     )
     """Optional. Internal squads from which the host will be excluded."""
 
-    exclude_from_subscription_types: msgspex.Option[list[BulkDeleteHostsResponseDtoResponseExcludeFromSubscriptionTypes]] = msgspex.field(
-        default=..., name="excludeFromSubscriptionTypes", converter=msgspex.From["list[BulkDeleteHostsResponseDtoResponseExcludeFromSubscriptionTypes] | None"]
+    exclude_from_subscription_types: msgspex.Option[list[TemplateType]] = msgspex.field(
+        default=..., name="excludeFromSubscriptionTypes", converter=msgspex.From["list[TemplateType] | None"]
     )
     """Optional. Subscription types from which the host will be excluded from."""
 
@@ -628,6 +671,10 @@ class UpdateInfraProviderRequestDto(msgspex.Model, kw_only=True):
 
 class UpdateInternalSquadRequestDto(RequestBase, kw_only=True):
     inbounds: msgspex.Option[list[UUID]] = msgspex.field(default=..., converter=msgspex.From[list[str | UUID] | None])
+
+
+class UpdateNodePluginRequestDto(RequestBase, kw_only=True):
+    plugin_config: msgspex.Option[typing.Any] = msgspex.field(default=..., name="pluginConfig", converter=msgspex.From[typing.Any | None])
 
 
 class UpdateNodeRequestDto(msgspex.Model, kw_only=True):
@@ -658,6 +705,7 @@ class UpdateNodeRequestDto(msgspex.Model, kw_only=True):
     tags: msgspex.Option[typing.Annotated[list[typing.Annotated[str, msgspec.Meta(pattern=r"^[A-Z0-9_:]+$", max_length=36)]], msgspec.Meta(max_length=10)]] = (
         msgspex.field(default=..., converter=msgspex.From[list[typing.Annotated[str, msgspec.Meta(pattern=r"^[A-Z0-9_:]+$", max_length=36)]] | None])
     )
+    active_plugin_uuid: msgspex.NullableOption[UUID] = msgspex.field(default=NOTHING, name="activePluginUuid", converter=msgspex.From[str | UUID | None])
 
 
 class UpdatePasskeyRequestDto(msgspex.Model, kw_only=True):
@@ -671,9 +719,6 @@ class UpdateRemnawaveSettingsRequestDto(msgspex.Model, kw_only=True):
     )
     oauth2_settings: msgspex.Option[GetRemnawaveSettingsResponseDtoResponseOauth2Settings] = msgspex.field(
         default=..., name="oauth2Settings", converter=msgspex.From["GetRemnawaveSettingsResponseDtoResponseOauth2Settings | None"]
-    )
-    tg_auth_settings: msgspex.Option[GetRemnawaveSettingsResponseDtoResponseTgAuthSettings] = msgspex.field(
-        default=..., name="tgAuthSettings", converter=msgspex.From["GetRemnawaveSettingsResponseDtoResponseTgAuthSettings | None"]
     )
     password_settings: msgspex.Option[GetRemnawaveSettingsResponseDtoResponsePasswordSettings] = msgspex.field(
         default=..., name="passwordSettings", converter=msgspex.From["GetRemnawaveSettingsResponseDtoResponsePasswordSettings | None"]
@@ -734,14 +779,14 @@ class UpdateUserRequestDto(msgspex.Model, kw_only=True):
     uuid: msgspex.Option[UUID] = msgspex.field(default=..., converter=msgspex.From[str | UUID | None])
     """UUID of the user. UUID has higher priority than username, so if both are provided, username will be ignored."""
 
-    status: msgspex.Option[UpdateUserRequestDtoStatus] = msgspex.field(default=..., converter=msgspex.From["UpdateUserRequestDtoStatus | None"])
+    status: msgspex.Option[Status] = msgspex.field(default=..., converter=msgspex.From["Status | None"])
     traffic_limit_bytes: msgspex.Option[typing.Annotated[int, msgspec.Meta(ge=0)]] = msgspex.field(
         default=..., name="trafficLimitBytes", converter=msgspex.From[int | None]
     )
     """Traffic limit in bytes. 0 - unlimited"""
 
-    traffic_limit_strategy: msgspex.Option[TrafficLimitStrategy2] = msgspex.field(
-        default=..., name="trafficLimitStrategy", converter=msgspex.From["TrafficLimitStrategy2 | None"]
+    traffic_limit_strategy: msgspex.Option[TrafficLimitStrategy] = msgspex.field(
+        default=..., name="trafficLimitStrategy", converter=msgspex.From["TrafficLimitStrategy | None"]
     )
     """Available reset periods"""
 
@@ -762,6 +807,10 @@ class UpdateUserRequestDto(msgspex.Model, kw_only=True):
     )
     external_squad_uuid: msgspex.NullableOption[UUID] = msgspex.field(default=NOTHING, name="externalSquadUuid", converter=msgspex.From[str | UUID | None])
     """Optional. External squad UUID."""
+
+
+class UpsertUserMetadataRequestBodyDto(msgspex.Model, kw_only=True):
+    metadata: dict[str, typing.Any]
 
 
 class VerifyPasskeyAuthenticationRequestDto(msgspex.Model, kw_only=True):
@@ -804,6 +853,7 @@ class BulkDeleteHostsResponseDtoResponse(msgspex.Model, kw_only=True):
     x_http_extra_params: msgspex.NullableOption[typing.Any] = msgspex.field(default=NOTHING, name="xHttpExtraParams")
     mux_params: msgspex.NullableOption[typing.Any] = msgspex.field(default=NOTHING, name="muxParams")
     sockopt_params: msgspex.NullableOption[typing.Any] = msgspex.field(default=NOTHING, name="sockoptParams")
+    final_mask: msgspex.NullableOption[typing.Any] = msgspex.field(default=NOTHING, name="finalMask")
     server_description: msgspex.NullableOption[typing.Annotated[str, msgspec.Meta(max_length=30)]] = msgspex.field(default=NOTHING, name="serverDescription")
     tag: msgspex.NullableOption[str] = msgspex.field(default=NOTHING)
     is_hidden: msgspex.Option[bool] = msgspex.field(default=..., name="isHidden", converter=msgspex.From[bool | None])
@@ -814,8 +864,8 @@ class BulkDeleteHostsResponseDtoResponse(msgspex.Model, kw_only=True):
     xray_json_template_uuid: msgspex.NullableOption[UUID] = msgspex.field(
         default=NOTHING, name="xrayJsonTemplateUuid", converter=msgspex.From[str | UUID | None]
     )
-    exclude_from_subscription_types: msgspex.Option[list[BulkDeleteHostsResponseDtoResponseExcludeFromSubscriptionTypes]] = msgspex.field(
-        default=..., name="excludeFromSubscriptionTypes", converter=msgspex.From["list[BulkDeleteHostsResponseDtoResponseExcludeFromSubscriptionTypes] | None"]
+    exclude_from_subscription_types: msgspex.Option[list[TemplateType]] = msgspex.field(
+        default=..., name="excludeFromSubscriptionTypes", converter=msgspex.From["list[TemplateType] | None"]
     )
 
 
@@ -823,9 +873,27 @@ class BulkDeleteUsersByStatusResponseDtoResponse(msgspex.Model, kw_only=True):
     affected_rows: int = msgspex.field(name="affectedRows")
 
 
+class BulkNodesUpdateRequestDtoFields(msgspex.Model, kw_only=True):
+    country_code: msgspex.Option[typing.Annotated[str, msgspec.Meta(max_length=2)]] = msgspex.field(
+        default=..., name="countryCode", converter=msgspex.From[str | None]
+    )
+    consumption_multiplier: msgspex.Option[typing.Annotated[int, msgspec.Meta(ge=0, le=100)]] = msgspex.field(
+        default=..., name="consumptionMultiplier", converter=msgspex.From[int | None]
+    )
+    provider_uuid: msgspex.NullableOption[UUID] = msgspex.field(default=NOTHING, name="providerUuid", converter=msgspex.From[str | UUID | None])
+    tags: msgspex.Option[typing.Annotated[list[typing.Annotated[str, msgspec.Meta(pattern=r"^[A-Z0-9_:]+$", max_length=36)]], msgspec.Meta(max_length=10)]] = (
+        msgspex.field(default=..., converter=msgspex.From[list[typing.Annotated[str, msgspec.Meta(pattern=r"^[A-Z0-9_:]+$", max_length=36)]] | None])
+    )
+    active_plugin_uuid: msgspex.NullableOption[UUID] = msgspex.field(default=NOTHING, name="activePluginUuid", converter=msgspex.From[str | UUID | None])
+
+
 class BulkUpdateUsersRequestDtoFields(BulkBase, kw_only=True):
     external_squad_uuid: msgspex.NullableOption[UUID] = msgspex.field(default=NOTHING, name="externalSquadUuid", converter=msgspex.From[str | UUID | None])
     """Optional. External squad UUID."""
+
+
+class CloneNodePluginResponseDtoResponse(CloneNodePluginBase, kw_only=True):
+    plugin_config: typing.Any = msgspex.field(name="pluginConfig")
 
 
 class CloneSubscriptionPageConfigResponseDtoResponse(CloneSubscriptionPageConfigBase, kw_only=True):
@@ -858,7 +926,7 @@ class CreateExternalSquadResponseDtoResponseInfo(msgspex.Model, kw_only=True):
 
 class CreateExternalSquadResponseDtoResponseTemplates(msgspex.Model, kw_only=True):
     template_uuid: UUID = msgspex.field(name="templateUuid", converter=msgspex.From[str | UUID])
-    template_type: BulkDeleteHostsResponseDtoResponseExcludeFromSubscriptionTypes = msgspex.field(name="templateType")
+    template_type: TemplateType = msgspex.field(name="templateType")
 
 
 class CreateExternalSquadResponseDtoResponseSubscriptionSettings(msgspex.Model, kw_only=True):
@@ -901,7 +969,7 @@ class CreateExternalSquadResponseDtoResponseCustomRemarks(msgspex.Model, kw_only
     hwid_not_supported: typing.Annotated[list[str], msgspec.Meta(min_length=1)] = msgspex.field(name="HWIDNotSupported")
 
 
-class CreateExternalSquadResponseDtoResponse(CreateBase, kw_only=True):
+class CreateExternalSquadResponseDtoResponse(CloneNodePluginBase, kw_only=True):
     info: CreateExternalSquadResponseDtoResponseInfo
     templates: list[CreateExternalSquadResponseDtoResponseTemplates]
     created_at: msgspex.isodatetime = msgspex.field(name="createdAt", converter=msgspex.From[str | datetime])
@@ -981,7 +1049,7 @@ class CreateInfraProviderResponseDtoResponseBillingNodes(msgspex.Model, kw_only=
     country_code: str = msgspex.field(name="countryCode")
 
 
-class CreateInfraProviderResponseDtoResponse(CreateBase2, kw_only=True):
+class CreateInfraProviderResponseDtoResponse(CreateBase, kw_only=True):
     billing_history: CreateInfraProviderResponseDtoResponseBillingHistory = msgspex.field(name="billingHistory")
     billing_nodes: list[CreateInfraProviderResponseDtoResponseBillingNodes] = msgspex.field(name="billingNodes")
 
@@ -991,11 +1059,15 @@ class CreateInternalSquadResponseDtoResponseInfo(msgspex.Model, kw_only=True):
     inbounds_count: int = msgspex.field(name="inboundsCount")
 
 
-class CreateInternalSquadResponseDtoResponse(CreateBase, kw_only=True):
+class CreateInternalSquadResponseDtoResponse(CloneNodePluginBase, kw_only=True):
     info: CreateInternalSquadResponseDtoResponseInfo
     inbounds: list[CreateConfigProfileResponseDtoResponseInbounds]
     created_at: msgspex.isodatetime = msgspex.field(name="createdAt", converter=msgspex.From[str | datetime])
     updated_at: msgspex.isodatetime = msgspex.field(name="updatedAt", converter=msgspex.From[str | datetime])
+
+
+class CreateNodePluginResponseDtoResponse(CloneNodePluginBase, kw_only=True):
+    plugin_config: msgspex.NullableOption[typing.Any] = msgspex.field(default=NOTHING, name="pluginConfig")
 
 
 class CreateNodeRequestDtoConfigProfile(msgspex.Model, kw_only=True):
@@ -1010,8 +1082,47 @@ class CreateNodeResponseDtoResponseConfigProfile(msgspex.Model, kw_only=True):
     )
 
 
-class CreateNodeResponseDtoResponseProvider(CreateBase2, kw_only=True):
+class CreateNodeResponseDtoResponseProvider(CreateBase, kw_only=True):
     pass
+
+
+class CreateNodeResponseDtoResponseSystemInfo(msgspex.Model, kw_only=True):
+    arch: str
+    cpus: int
+    cpu_model: str = msgspex.field(name="cpuModel")
+    memory_total: int = msgspex.field(name="memoryTotal")
+    hostname: str
+    platform: str
+    release: str
+    type: str
+    version: str
+    network_interfaces: list[str] = msgspex.field(name="networkInterfaces")
+
+
+class CreateNodeResponseDtoResponseSystemStatsInterface(msgspex.Model, kw_only=True):
+    interface: str
+    rx_bytes_per_sec: int = msgspex.field(name="rxBytesPerSec")
+    tx_bytes_per_sec: int = msgspex.field(name="txBytesPerSec")
+    rx_total: int = msgspex.field(name="rxTotal")
+    tx_total: int = msgspex.field(name="txTotal")
+
+
+class CreateNodeResponseDtoResponseSystemStats(msgspex.Model, kw_only=True):
+    memory_free: int = msgspex.field(name="memoryFree")
+    memory_used: int = msgspex.field(name="memoryUsed")
+    uptime: int
+    load_avg: list[int] = msgspex.field(name="loadAvg")
+    interface: msgspex.NullableOption[CreateNodeResponseDtoResponseSystemStatsInterface] = msgspex.field(default=NOTHING)
+
+
+class CreateNodeResponseDtoResponseSystem(msgspex.Model, kw_only=True):
+    info: CreateNodeResponseDtoResponseSystemInfo
+    stats: CreateNodeResponseDtoResponseSystemStats
+
+
+class CreateNodeResponseDtoResponseVersions(msgspex.Model, kw_only=True):
+    xray: str
+    node: str
 
 
 class CreateNodeResponseDtoResponse(CreateConfigProfileResponseDtoResponseNodesBase, kw_only=True):
@@ -1019,7 +1130,6 @@ class CreateNodeResponseDtoResponse(CreateConfigProfileResponseDtoResponseNodesB
     is_connected: bool = msgspex.field(name="isConnected")
     is_disabled: bool = msgspex.field(name="isDisabled")
     is_connecting: bool = msgspex.field(name="isConnecting")
-    xray_uptime: str = msgspex.field(name="xrayUptime")
     is_traffic_tracking_active: bool = msgspex.field(name="isTrafficTrackingActive")
     view_position: int = msgspex.field(name="viewPosition")
     country_code: str = msgspex.field(name="countryCode")
@@ -1028,23 +1138,22 @@ class CreateNodeResponseDtoResponse(CreateConfigProfileResponseDtoResponseNodesB
     created_at: msgspex.isodatetime = msgspex.field(name="createdAt", converter=msgspex.From[str | datetime])
     updated_at: msgspex.isodatetime = msgspex.field(name="updatedAt", converter=msgspex.From[str | datetime])
     config_profile: CreateNodeResponseDtoResponseConfigProfile = msgspex.field(name="configProfile")
+    xray_uptime: int = msgspex.field(name="xrayUptime")
+    users_online: int = msgspex.field(name="usersOnline")
     port: msgspex.NullableOption[int] = msgspex.field(default=NOTHING)
     last_status_change: msgspex.NullableOption[msgspex.isodatetime] = msgspex.field(
         default=NOTHING, name="lastStatusChange", converter=msgspex.From[str | datetime | None]
     )
     last_status_message: msgspex.NullableOption[str] = msgspex.field(default=NOTHING, name="lastStatusMessage")
-    xray_version: msgspex.NullableOption[str] = msgspex.field(default=NOTHING, name="xrayVersion")
-    node_version: msgspex.NullableOption[str] = msgspex.field(default=NOTHING, name="nodeVersion")
     traffic_reset_day: msgspex.NullableOption[int] = msgspex.field(default=NOTHING, name="trafficResetDay")
     traffic_limit_bytes: msgspex.NullableOption[int] = msgspex.field(default=NOTHING, name="trafficLimitBytes")
     traffic_used_bytes: msgspex.NullableOption[int] = msgspex.field(default=NOTHING, name="trafficUsedBytes")
     notify_percent: msgspex.NullableOption[int] = msgspex.field(default=NOTHING, name="notifyPercent")
-    users_online: msgspex.NullableOption[int] = msgspex.field(default=NOTHING, name="usersOnline")
-    cpu_count: msgspex.NullableOption[int] = msgspex.field(default=NOTHING, name="cpuCount")
-    cpu_model: msgspex.NullableOption[str] = msgspex.field(default=NOTHING, name="cpuModel")
-    total_ram: msgspex.NullableOption[str] = msgspex.field(default=NOTHING, name="totalRam")
     provider_uuid: msgspex.NullableOption[UUID] = msgspex.field(default=NOTHING, name="providerUuid", converter=msgspex.From[str | UUID | None])
     provider: msgspex.NullableOption[CreateNodeResponseDtoResponseProvider] = msgspex.field(default=NOTHING)
+    active_plugin_uuid: msgspex.NullableOption[UUID] = msgspex.field(default=NOTHING, name="activePluginUuid", converter=msgspex.From[str | UUID | None])
+    system: msgspex.NullableOption[CreateNodeResponseDtoResponseSystem] = msgspex.field(default=NOTHING)
+    versions: msgspex.NullableOption[CreateNodeResponseDtoResponseVersions] = msgspex.field(default=NOTHING)
 
 
 class CreateSnippetResponseDtoResponseSnippets(msgspex.Model, kw_only=True):
@@ -1057,12 +1166,12 @@ class CreateSnippetResponseDtoResponse(msgspex.Model, kw_only=True):
     snippets: list[CreateSnippetResponseDtoResponseSnippets]
 
 
-class CreateSubscriptionPageConfigResponseDtoResponse(CreateBase, kw_only=True):
+class CreateSubscriptionPageConfigResponseDtoResponse(CloneNodePluginBase, kw_only=True):
     config: msgspex.NullableOption[typing.Any] = msgspex.field(default=NOTHING)
 
 
-class CreateSubscriptionTemplateResponseDtoResponse(CreateBase, kw_only=True):
-    template_type: BulkDeleteHostsResponseDtoResponseExcludeFromSubscriptionTypes = msgspex.field(name="templateType")
+class CreateSubscriptionTemplateResponseDtoResponse(CloneNodePluginBase, kw_only=True):
+    template_type: TemplateType = msgspex.field(name="templateType")
     template_json: msgspex.NullableOption[typing.Any] = msgspex.field(default=NOTHING, name="templateJson")
     encoded_template_yaml: msgspex.NullableOption[str] = msgspex.field(default=NOTHING, name="encodedTemplateYaml")
 
@@ -1113,8 +1222,8 @@ class CreateUserResponseDtoResponse(msgspex.Model, kw_only=True):
     user_traffic: CreateUserResponseDtoResponseUserTraffic = msgspex.field(name="userTraffic")
     status: msgspex.Option[Status] = msgspex.field(default=..., converter=msgspex.From["Status | None"])
     traffic_limit_bytes: msgspex.Option[int] = msgspex.field(default=..., name="trafficLimitBytes", converter=msgspex.From[int | None])
-    traffic_limit_strategy: msgspex.Option[TrafficLimitStrategy2] = msgspex.field(
-        default=..., name="trafficLimitStrategy", converter=msgspex.From["TrafficLimitStrategy2 | None"]
+    traffic_limit_strategy: msgspex.Option[TrafficLimitStrategy] = msgspex.field(
+        default=..., name="trafficLimitStrategy", converter=msgspex.From["TrafficLimitStrategy | None"]
     )
     """Available reset periods"""
 
@@ -1127,10 +1236,6 @@ class CreateUserResponseDtoResponse(msgspex.Model, kw_only=True):
     last_triggered_threshold: msgspex.Option[int] = msgspex.field(default=..., name="lastTriggeredThreshold", converter=msgspex.From[int | None])
     sub_revoked_at: msgspex.NullableOption[msgspex.isodatetime] = msgspex.field(
         default=NOTHING, name="subRevokedAt", converter=msgspex.From[str | datetime | None]
-    )
-    sub_last_user_agent: msgspex.NullableOption[str] = msgspex.field(default=NOTHING, name="subLastUserAgent")
-    sub_last_opened_at: msgspex.NullableOption[msgspex.isodatetime] = msgspex.field(
-        default=NOTHING, name="subLastOpenedAt", converter=msgspex.From[str | datetime | None]
     )
     last_traffic_reset_at: msgspex.NullableOption[msgspex.isodatetime] = msgspex.field(
         default=NOTHING, name="lastTrafficResetAt", converter=msgspex.From[str | datetime | None]
@@ -1152,7 +1257,7 @@ class DebugSrrMatcherRequestDtoResponseRulesRulesConditions(msgspex.Model, kw_on
     header_name: typing.Annotated[str, msgspec.Meta(pattern="^[!#$%&'*+\\-.0-9A-Z^_`a-z|~]+$")] = msgspex.field(name="headerName")
     """{"markdownDescription":"**Name** of the HTTP header to check. Must comply with RFC 7230."}"""
 
-    operator: DebugSrrMatcherRequestDtoResponseRulesRulesConditionsOperator
+    operator: ConditionsOperator
     """{"errorMessage":"Invalid operator. Please select a valid operator.","markdownDescription":"Operator to use for comparing the `headerName` with `value`.","markdownEnumDescriptions":["Performs an exact, comparison between the header value and specified string. `string === value`","Ensures the header value does not exactly match the specified string. `string !== value`","Checks if the header value contains the specified string as a substring. `string.includes()`","Verifies the header value does not contain the specified string as a substring. `!string.includes()`","Validates that the header value begins with the specified string. `string.startsWith()`","Validates that the header value does not begin with the specified string. `!string.startsWith()`","Confirms the header value ends with the specified string. `string.endsWith()`","Confirms the header value does not end with the specified string. `!string.endsWith()`","Evaluates if the header value matches the specified regular expression pattern. `regex.test()`","Evaluates if the header value does not match the specified regular expression pattern. `!regex.test()`"]}"""
 
     value: typing.Annotated[str, msgspec.Meta(min_length=1, max_length=255)]
@@ -1196,6 +1301,11 @@ class DebugSrrMatcherRequestDtoResponseRulesRulesResponseModifications(msgspex.M
     )
     """{"markdownDescription":"If you set this flag to **true**, the **Serve JSON at Base Subscription** setting will be ignored (set to **false**)."}"""
 
+    additional_extended_clients_regex: msgspex.Option[list[typing.Annotated[str, msgspec.Meta(min_length=1)]]] = msgspex.field(
+        default=..., name="additionalExtendedClientsRegex", converter=msgspex.From[list[typing.Annotated[str, msgspec.Meta(min_length=1)]] | None]
+    )
+    """{"markdownDescription":"Additional regex patterns to match extended clients. Matched clients will receive `serverDescription` in the subscription response.\n\n**Default Mihomo extended clients:**\n- `^FlClash ?X/`\n- `^Flowvy/`\n- `^prizrak-box/`\n- `^koala-clash/`\n\n**Default Xray extended clients:**\n- `^Happ/`\n- `^INCY/`\n\n**Example:** `[\"^MyClient/\", \"^CustomApp\\\\/v2\"]`"}"""
+
 
 class DebugSrrMatcherRequestDtoResponseRulesRules(msgspex.Model, kw_only=True):
     r"""{"defaultSnippets":[{"label":"Examples: Blank rule","markdownDescription":"Simple blank rule with no conditions or modifications.\n```json\n{\n  \"name\": \"Blank rule\",\n  \"description\": \"Blank rule\",\n  \"operator\": \"AND\",\n  \"enabled\": true,\n  \"conditions\": [],\n  \"responseType\": \"BLOCK\",\n  \"responseModifications\": {\n    \"headers\": []\n  }\n}\n```","body":{"name":"Blank rule","description":"Blank rule","operator":"AND","enabled":true,"conditions":[],"responseType":"BLOCK","responseModifications":{"headers":[]}}},{"label":"Examples: Block Legacy Clients","markdownDescription":"Block requests from legacy clients\n```json\n{\n  \"name\": \"Block Legacy Clients\",\n  \"description\": \"Block requests from legacy clients\",\n  \"enabled\": true,\n  \"operator\": \"OR\",\n  \"conditions\": [\n    {\n      \"headerName\": \"user-agent\",\n      \"operator\": \"CONTAINS\",\n      \"value\": \"Hiddify\",\n      \"caseSensitive\": true\n    },\n    {\n      \"headerName\": \"user-agent\",\n      \"operator\": \"CONTAINS\",\n      \"value\": \"FoxRay\",\n      \"caseSensitive\": true\n    }\n  ],\n  \"responseType\": \"BLOCK\"\n}\n```","body":{"name":"Block Legacy Clients","description":"Block requests from legacy clients","enabled":true,"operator":"OR","conditions":[{"headerName":"user-agent","operator":"CONTAINS","value":"Hiddify","caseSensitive":true},{"headerName":"user-agent","operator":"CONTAINS","value":"FoxRay","caseSensitive":true}],"responseType":"BLOCK"}}],"title":"Response Rule","markdownDescription":"Response rule configuration.\n\n**Fields:**\n- **name**: Name of the response rule.\n- **description**: Description of the response rule. Optional.\n- **enabled**: Control whether the response rule is enabled or disabled. \n\n - `true` the rule will be applied. \n\n - `false` the rule will be always ignored.\n- **operator**: Operator to use for combining conditions in the rule.\n- **conditions**: Array of conditions to check against the request headers. Conditions are applied with **operator**. If conditions are empty, the rule will be matched.\n- **responseType**: Type of the response. Determines the type of **response** to be returned when the rule is matched.\n- **responseModifications**: Response modifications to be applied when the rule is matched. Optional.\n\n**Example:**\n```json\n{\n  \"name\": \"Block Legacy Clients\",\n  \"description\": \"Block requests from legacy clients\",\n  \"enabled\": true,\n  \"operator\": \"OR\",\n  \"conditions\": [\n    {\n      \"headerName\": \"user-agent\",\n      \"operator\": \"CONTAINS\",\n      \"value\": \"Hiddify\",\n      \"caseSensitive\": true\n    },\n    {\n      \"headerName\": \"user-agent\",\n      \"operator\": \"CONTAINS\",\n      \"value\": \"FoxRay\",\n      \"caseSensitive\": true\n    }\n  ],\n  \"responseType\": \"BLOCK\"\n}\n```"}"""
@@ -1206,13 +1316,13 @@ class DebugSrrMatcherRequestDtoResponseRulesRules(msgspex.Model, kw_only=True):
     enabled: bool
     """{"markdownDescription":"Control whether the response rule is enabled or disabled. \n\n - `true` the rule will be applied. \n\n - `false` the rule will be always ignored."}"""
 
-    operator: DebugSrrMatcherRequestDtoResponseRulesRulesOperator
+    operator: RulesOperator
     """{"markdownDescription":"Operator to use for combining conditions in the rule."}"""
 
     conditions: list[DebugSrrMatcherRequestDtoResponseRulesRulesConditions]
     """{"markdownDescription":"Array of conditions to check against the request headers. Conditions are applied with **operator**. If conditions are empty, the rule will be matched."}"""
 
-    response_type: DebugSrrMatcherRequestDtoResponseRulesRulesResponseType = msgspex.field(name="responseType")
+    response_type: ResponseType = msgspex.field(name="responseType")
     """{"errorMessage":"Invalid response type. Please select a valid response type.","markdownDescription":"Type of the response. Determines the type of **response** to be returned when the rule is matched.","markdownEnumDescriptions":["Return **subscription** in XRAY-JSON format. (Using `Xray Json` template)","Return **subscription** in BASE64 encoded string. Compatible with most client application with Xray core.","Return **subscription** in Mihomo format. (Using `Mihomo` template)","Return **subscription** in Stash format. (Using `Stash` template)","Return **subscription** in Clash format. (Using `Clash` template) Useful for client application that use Legacy Clash core.","Return **subscription** in Singbox format. (Using `Singbox` template) Format which is used by Singbox client application.","Return **subscription** as browser format. The same as on `/info` route.","**Drop** request and return `403` status code.","**Drop** request and return `404` status code.","**Drop** request and return `451` status code.","**Drop** the socket connection."]}"""
 
     description: msgspex.Option[typing.Annotated[str, msgspec.Meta(min_length=1, max_length=250)]] = msgspex.field(
@@ -1227,7 +1337,7 @@ class DebugSrrMatcherRequestDtoResponseRulesRules(msgspex.Model, kw_only=True):
 
 
 class DebugSrrMatcherRequestDtoResponseRules(msgspex.Model, kw_only=True):
-    version: DebugSrrMatcherRequestDtoResponseRulesVersion
+    version: ResponseRulesVersion
     """{"title":"Response Rules Config Version","markdownDescription":"Version of the **response rules** config. Currently supported version is **1**."}"""
 
     rules: list[DebugSrrMatcherRequestDtoResponseRulesRules]
@@ -1241,7 +1351,7 @@ class DebugSrrMatcherRequestDtoResponseRules(msgspex.Model, kw_only=True):
 
 class DebugSrrMatcherResponseDtoResponse(msgspex.Model, kw_only=True):
     matched: bool
-    response_type: DebugSrrMatcherResponseDtoResponseResponseType = msgspex.field(name="responseType")
+    response_type: ResponseType = msgspex.field(name="responseType")
     input_headers: dict[str, str] = msgspex.field(name="inputHeaders")
     output_headers: dict[str, str] = msgspex.field(name="outputHeaders")
     matched_rule: msgspex.NullableOption[DebugSrrMatcherRequestDtoResponseRulesRules] = msgspex.field(default=NOTHING, name="matchedRule")
@@ -1269,27 +1379,27 @@ class DeletePasskeyResponseDtoResponse(msgspex.Model, kw_only=True):
 class DropConnectionsRequestDtoDropBy(msgspex.Model, kw_only=True):
     """Drop by user UUIDs"""
 
-    by: DropConnectionsRequestDtoDropByBy
+    by: DropConnectionsTarget
     user_uuids: typing.Annotated[list[UUID], msgspec.Meta(min_length=1)] = msgspex.field(name="userUuids", converter=msgspex.From[list[str | UUID]])
 
 
 class DropConnectionsRequestDtoDropBy2(msgspex.Model, kw_only=True):
     """Drop by IP addresses"""
 
-    by: DropConnectionsRequestDtoDropBy2By
+    by: DropConnectionsTarget
     ip_addresses: typing.Annotated[list[str], msgspec.Meta(min_length=1)] = msgspex.field(name="ipAddresses")
 
 
 class DropConnectionsRequestDtoTargetNodes(msgspex.Model, kw_only=True):
     """Target all connected nodes"""
 
-    target: DropConnectionsRequestDtoTargetNodesTarget
+    target: DropConnectionsTarget
 
 
 class DropConnectionsRequestDtoTargetNodes2(msgspex.Model, kw_only=True):
     """Target specific nodes"""
 
-    target: DropConnectionsRequestDtoTargetNodes2Target
+    target: DropConnectionsTarget
     node_uuids: typing.Annotated[list[UUID], msgspec.Meta(min_length=1)] = msgspex.field(name="nodeUuids", converter=msgspex.From[list[str | UUID]])
 
 
@@ -1307,8 +1417,16 @@ class FetchIpsResultResponseDtoResponseProgress(msgspex.Model, kw_only=True):
     percent: int
 
 
-class FetchIpsResultResponseDtoResponseResultNodes(FetchIpsResultResponseDtoResponseResultNodesBase, kw_only=True):
-    ips: list[str]
+class FetchIpsResultResponseDtoResponseResultNodesIps(msgspex.Model, kw_only=True):
+    ip: str
+    last_seen: msgspex.isodatetime = msgspex.field(name="lastSeen", converter=msgspex.From[str | datetime])
+
+
+class FetchIpsResultResponseDtoResponseResultNodes(msgspex.Model, kw_only=True):
+    node_uuid: UUID = msgspex.field(name="nodeUuid", converter=msgspex.From[str | UUID])
+    node_name: str = msgspex.field(name="nodeName")
+    country_code: str = msgspex.field(name="countryCode")
+    ips: list[FetchIpsResultResponseDtoResponseResultNodesIps]
 
 
 class FetchIpsResultResponseDtoResponseResult(msgspex.Model, kw_only=True):
@@ -1318,11 +1436,24 @@ class FetchIpsResultResponseDtoResponseResult(msgspex.Model, kw_only=True):
     nodes: list[FetchIpsResultResponseDtoResponseResultNodes]
 
 
-class FetchIpsResultResponseDtoResponse(msgspex.Model, kw_only=True):
-    is_completed: bool = msgspex.field(name="isCompleted")
-    is_failed: bool = msgspex.field(name="isFailed")
+class FetchIpsResultResponseDtoResponse(IpsResultBase, kw_only=True):
     progress: FetchIpsResultResponseDtoResponseProgress
     result: msgspex.NullableOption[FetchIpsResultResponseDtoResponseResult] = msgspex.field(default=NOTHING)
+
+
+class FetchUsersIpsResultResponseDtoResponseResultUsers(msgspex.Model, kw_only=True):
+    user_id: str = msgspex.field(name="userId")
+    ips: list[FetchIpsResultResponseDtoResponseResultNodesIps]
+
+
+class FetchUsersIpsResultResponseDtoResponseResult(msgspex.Model, kw_only=True):
+    success: bool
+    node_uuid: UUID = msgspex.field(name="nodeUuid", converter=msgspex.From[str | UUID])
+    users: list[FetchUsersIpsResultResponseDtoResponseResultUsers]
+
+
+class FetchUsersIpsResultResponseDtoResponse(IpsResultBase, kw_only=True):
+    result: msgspex.NullableOption[FetchUsersIpsResultResponseDtoResponseResult] = msgspex.field(default=NOTHING)
 
 
 class FindAllApiTokensResponseDtoResponseApiKeys(msgspex.Model, kw_only=True):
@@ -1379,7 +1510,7 @@ class GetAllSubscriptionsResponseDtoResponseSubscriptionsUser(msgspex.Model, kw_
     expires_at: msgspex.isodatetime = msgspex.field(name="expiresAt", converter=msgspex.From[str | datetime])
     is_active: bool = msgspex.field(name="isActive")
     user_status: Status = msgspex.field(name="userStatus")
-    traffic_limit_strategy: GetAllSubscriptionsResponseDtoResponseSubscriptionsUserTrafficLimitStrategy = msgspex.field(name="trafficLimitStrategy")
+    traffic_limit_strategy: TrafficLimitStrategy = msgspex.field(name="trafficLimitStrategy")
 
 
 class GetAllSubscriptionsResponseDtoResponseSubscriptions(msgspex.Model, kw_only=True):
@@ -1515,6 +1646,11 @@ class GetMetadataResponseDtoResponse(msgspex.Model, kw_only=True):
     git: GetMetadataResponseDtoResponseGit
 
 
+class GetNodePluginsResponseDtoResponse(msgspex.Model, kw_only=True):
+    total: int
+    node_plugins: list[CreateNodePluginResponseDtoResponse] = msgspex.field(name="nodePlugins")
+
+
 class GetNodesStatisticsResponseDtoResponseLastSevenDays(msgspex.Model, kw_only=True):
     node_name: str = msgspex.field(name="nodeName")
     date: date = msgspex.field(converter=msgspex.From[str | date])
@@ -1537,110 +1673,249 @@ class GetRawSubscriptionByShortUuidResponseDtoResponseConvertedUserInfo(msgspex.
     is_hwid_limited: bool = msgspex.field(name="isHwidLimited")
 
 
-class GetRawSubscriptionByShortUuidResponseDtoResponseRawHostsPassword(msgspex.Model, kw_only=True):
-    ss_password: str = msgspex.field(name="ssPassword")
-    trojan_password: str = msgspex.field(name="trojanPassword")
-    vless_password: str = msgspex.field(name="vlessPassword")
+class GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsProtocolOptions(msgspex.Model, kw_only=True):
+    encryption: str
+    id: str
+    flow: ProxyConfigsProtocolOptionsFlow
 
 
-class GetRawSubscriptionByShortUuidResponseDtoResponseRawHostsRawSettings(msgspex.Model, kw_only=True):
-    header_type: msgspex.NullableOption[str] = msgspex.field(default=NOTHING, name="headerType", converter=msgspex.From[str | None])
-    request: msgspex.NullableOption[dict[str, typing.Any]] = msgspex.field(default=NOTHING, converter=msgspex.From[dict[str, typing.Any] | None])
+class GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsProtocolOptions2(msgspex.Model, kw_only=True):
+    password: str
 
 
-class GetRawSubscriptionByShortUuidResponseDtoResponseRawHostsAdditionalParams(msgspex.Model, kw_only=True):
-    mode: msgspex.NullableOption[str] = msgspex.field(default=NOTHING, converter=msgspex.From[str | None])
-    heartbeat_period: msgspex.NullableOption[int] = msgspex.field(default=NOTHING, name="heartbeatPeriod", converter=msgspex.From[int | None])
+class GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsProtocolOptions3(msgspex.Model, kw_only=True):
+    method: str
+    password: str
+    uot: bool
+    uot_version: int = msgspex.field(name="uotVersion")
 
 
-class GetRawSubscriptionByShortUuidResponseDtoResponseRawHostsProtocolOptionsSs(msgspex.Model, kw_only=True):
-    method: msgspex.NullableOption[str] = msgspex.field(default=NOTHING, converter=msgspex.From[str | None])
+class GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsProtocolOptions4(msgspex.Model, kw_only=True):
+    version: int
 
 
-class GetRawSubscriptionByShortUuidResponseDtoResponseRawHostsProtocolOptions(msgspex.Model, kw_only=True):
-    ss: msgspex.NullableOption[GetRawSubscriptionByShortUuidResponseDtoResponseRawHostsProtocolOptionsSs] = msgspex.field(
-        default=NOTHING, converter=msgspex.From["GetRawSubscriptionByShortUuidResponseDtoResponseRawHostsProtocolOptionsSs | None"]
+class GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsTransportOptionsHeader(msgspex.Model, kw_only=True):
+    type: ProxyConfigsTransportOptionsHeader
+
+
+class GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsTransportOptionsHeader2Request(msgspex.Model, kw_only=True):
+    version: msgspex.Option[str] = msgspex.field(default=..., converter=msgspex.From[str | None])
+    method: msgspex.Option[str] = msgspex.field(default=..., converter=msgspex.From[str | None])
+    path: msgspex.Option[list[str]] = msgspex.field(default=..., converter=msgspex.From[list[str] | None])
+    headers: msgspex.Option[dict[str, typing.Any]] = msgspex.field(default=..., converter=msgspex.From[dict[str, typing.Any] | None])
+
+
+class GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsTransportOptionsHeader2Response(msgspex.Model, kw_only=True):
+    version: msgspex.Option[str] = msgspex.field(default=..., converter=msgspex.From[str | None])
+    status: msgspex.Option[str] = msgspex.field(default=..., converter=msgspex.From[str | None])
+    reason: msgspex.Option[str] = msgspex.field(default=..., converter=msgspex.From[str | None])
+    headers: msgspex.Option[dict[str, typing.Any]] = msgspex.field(default=..., converter=msgspex.From[dict[str, typing.Any] | None])
+
+
+class GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsTransportOptionsHeader2(msgspex.Model, kw_only=True):
+    type: ProxyConfigsTransportOptionsHeader
+    request: msgspex.Option[GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsTransportOptionsHeader2Request] = msgspex.field(
+        default=..., converter=msgspex.From["GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsTransportOptionsHeader2Request | None"]
+    )
+    response: msgspex.Option[GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsTransportOptionsHeader2Response] = msgspex.field(
+        default=..., converter=msgspex.From["GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsTransportOptionsHeader2Response | None"]
     )
 
 
-class GetRawSubscriptionByShortUuidResponseDtoResponseRawHostsDbData(msgspex.Model, kw_only=True):
-    inbound_tag: str = msgspex.field(name="inboundTag")
+class GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsTransportOptions(msgspex.Model, kw_only=True):
+    header: (
+        kungfu.Sum[
+            GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsTransportOptionsHeader,
+            GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsTransportOptionsHeader2,
+        ]
+        | None
+    ) = msgspex.field(
+        converter=msgspex.From[
+            "GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsTransportOptionsHeader | GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsTransportOptionsHeader2"
+        ]
+    )
+
+
+class GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsTransportOptions2(msgspex.Model, kw_only=True):
+    mode: ProxyConfigsTransportOptionsMode
+    path: msgspex.NullableOption[str] = msgspex.field(default=NOTHING)
+    host: msgspex.NullableOption[str] = msgspex.field(default=NOTHING)
+    extra: msgspex.NullableOption[dict[str, typing.Any]] = msgspex.field(default=NOTHING)
+
+
+class GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsTransportOptions3(
+    RawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsTransportBase, kw_only=True
+):
+    heartbeat_period: msgspex.NullableOption[int] = msgspex.field(default=NOTHING, name="heartbeatPeriod")
+
+
+class GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsTransportOptions4(
+    RawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsTransportBase, kw_only=True
+):
+    pass
+
+
+class GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsTransportOptions5(msgspex.Model, kw_only=True):
+    multi_mode: bool = msgspex.field(name="multiMode")
+    authority: msgspex.NullableOption[str] = msgspex.field(default=NOTHING)
+    service_name: msgspex.NullableOption[str] = msgspex.field(default=NOTHING, name="serviceName")
+
+
+class GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsTransportOptions6(msgspex.Model, kw_only=True):
+    client_mtu: int = msgspex.field(name="clientMtu")
+    tti: int
+    congestion: bool
+
+
+class GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsTransportOptions7(msgspex.Model, kw_only=True):
+    version: int
+    auth: str
+
+
+class GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsSecurityOptions(msgspex.Model, kw_only=True):
+    allow_insecure: bool = msgspex.field(name="allowInsecure")
+    enable_session_resumption: bool = msgspex.field(name="enableSessionResumption")
+    alpn: msgspex.NullableOption[str] = msgspex.field(default=NOTHING)
+    fingerprint: msgspex.NullableOption[str] = msgspex.field(default=NOTHING)
+    server_name: msgspex.NullableOption[str] = msgspex.field(default=NOTHING, name="serverName")
+    ech_config_list: msgspex.NullableOption[str] = msgspex.field(default=NOTHING, name="echConfigList")
+    ech_force_query: msgspex.NullableOption[str] = msgspex.field(default=NOTHING, name="echForceQuery")
+
+
+class GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsSecurityOptions2(msgspex.Model, kw_only=True):
+    fingerprint: str
+    public_key: str = msgspex.field(name="publicKey")
+    server_name: str = msgspex.field(name="serverName")
+    short_id: msgspex.NullableOption[str] = msgspex.field(default=NOTHING, name="shortId")
+    spider_x: msgspex.NullableOption[str] = msgspex.field(default=NOTHING, name="spiderX")
+    mldsa65_verify: msgspex.NullableOption[str] = msgspex.field(default=NOTHING, name="mldsa65Verify")
+
+
+class GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsStreamOverrides(msgspex.Model, kw_only=True):
+    final_mask: msgspex.NullableOption[typing.Any] = msgspex.field(default=NOTHING, name="finalMask")
+    sockopt: msgspex.NullableOption[typing.Any] = msgspex.field(default=NOTHING)
+
+
+class GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsClientOverrides(msgspex.Model, kw_only=True):
+    shuffle_host: bool = msgspex.field(name="shuffleHost")
+    mihomo_x25519: bool = msgspex.field(name="mihomoX25519")
+    server_description: msgspex.NullableOption[str] = msgspex.field(default=NOTHING, name="serverDescription")
+    xray_json_template: msgspex.NullableOption[typing.Any] = msgspex.field(default=NOTHING, name="xrayJsonTemplate")
+
+
+class GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsMetadata(msgspex.Model, kw_only=True):
     uuid: UUID = msgspex.field(converter=msgspex.From[str | UUID])
+    exclude_from_subscription_types: list[TemplateType] = msgspex.field(name="excludeFromSubscriptionTypes")
+    inbound_tag: str = msgspex.field(name="inboundTag")
     is_disabled: bool = msgspex.field(name="isDisabled")
+    is_hidden: bool = msgspex.field(name="isHidden")
     view_position: int = msgspex.field(name="viewPosition")
     remark: str
-    is_hidden: bool = msgspex.field(name="isHidden")
-    raw_inbound: msgspex.NullableOption[dict[str, typing.Any]] = msgspex.field(default=NOTHING, name="rawInbound")
-    config_profile_uuid: msgspex.NullableOption[str] = msgspex.field(default=NOTHING, name="configProfileUuid")
-    config_profile_inbound_uuid: msgspex.NullableOption[str] = msgspex.field(default=NOTHING, name="configProfileInboundUuid")
     tag: msgspex.NullableOption[str] = msgspex.field(default=NOTHING)
+    config_profile_uuid: msgspex.NullableOption[UUID] = msgspex.field(default=NOTHING, name="configProfileUuid", converter=msgspex.From[str | UUID | None])
+    config_profile_inbound_uuid: msgspex.NullableOption[UUID] = msgspex.field(
+        default=NOTHING, name="configProfileInboundUuid", converter=msgspex.From[str | UUID | None]
+    )
     vless_route_id: msgspex.NullableOption[int] = msgspex.field(default=NOTHING, name="vlessRouteId")
+    raw_inbound: msgspex.NullableOption[typing.Any] = msgspex.field(default=NOTHING, name="rawInbound")
 
 
-class GetRawSubscriptionByShortUuidResponseDtoResponseRawHosts(msgspex.Model, kw_only=True):
-    password: GetRawSubscriptionByShortUuidResponseDtoResponseRawHostsPassword
-    address: msgspex.NullableOption[str] = msgspex.field(default=NOTHING, converter=msgspex.From[str | None])
-    alpn: msgspex.NullableOption[str] = msgspex.field(default=NOTHING, converter=msgspex.From[str | None])
-    fingerprint: msgspex.NullableOption[str] = msgspex.field(default=NOTHING, converter=msgspex.From[str | None])
-    host: msgspex.NullableOption[str] = msgspex.field(default=NOTHING, converter=msgspex.From[str | None])
-    network: msgspex.NullableOption[str] = msgspex.field(default=NOTHING, converter=msgspex.From[str | None])
-    path: msgspex.NullableOption[str] = msgspex.field(default=NOTHING, converter=msgspex.From[str | None])
-    public_key: msgspex.NullableOption[str] = msgspex.field(default=NOTHING, name="publicKey", converter=msgspex.From[str | None])
-    port: msgspex.NullableOption[int] = msgspex.field(default=NOTHING, converter=msgspex.From[int | None])
-    protocol: msgspex.NullableOption[str] = msgspex.field(default=NOTHING, converter=msgspex.From[str | None])
-    remark: msgspex.NullableOption[str] = msgspex.field(default=NOTHING, converter=msgspex.From[str | None])
-    short_id: msgspex.NullableOption[str] = msgspex.field(default=NOTHING, name="shortId", converter=msgspex.From[str | None])
-    sni: msgspex.NullableOption[str] = msgspex.field(default=NOTHING, converter=msgspex.From[str | None])
-    spider_x: msgspex.NullableOption[str] = msgspex.field(default=NOTHING, name="spiderX", converter=msgspex.From[str | None])
-    tls: msgspex.NullableOption[str] = msgspex.field(default=NOTHING, converter=msgspex.From[str | None])
-    raw_settings: msgspex.NullableOption[GetRawSubscriptionByShortUuidResponseDtoResponseRawHostsRawSettings] = msgspex.field(
-        default=NOTHING, name="rawSettings", converter=msgspex.From["GetRawSubscriptionByShortUuidResponseDtoResponseRawHostsRawSettings | None"]
+class GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigs(msgspex.Model, kw_only=True):
+    final_remark: str = msgspex.field(name="finalRemark")
+    address: str
+    port: typing.Annotated[int, msgspec.Meta(gt=0)]
+    protocol: ProxyConfigsProtocol
+    protocol_options: kungfu.Sum[
+        GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsProtocolOptions,
+        GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsProtocolOptions2,
+        GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsProtocolOptions3,
+        GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsProtocolOptions4,
+    ] = msgspex.field(
+        name="protocolOptions",
+        converter=msgspex.From[
+            "GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsProtocolOptions | GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsProtocolOptions2 | GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsProtocolOptions3 | GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsProtocolOptions4"
+        ],
     )
-    additional_params: msgspex.NullableOption[GetRawSubscriptionByShortUuidResponseDtoResponseRawHostsAdditionalParams] = msgspex.field(
-        default=NOTHING, name="additionalParams", converter=msgspex.From["GetRawSubscriptionByShortUuidResponseDtoResponseRawHostsAdditionalParams | None"]
+    transport: ProxyConfigsTransport
+    transport_options: kungfu.Sum[
+        GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsTransportOptions,
+        GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsTransportOptions2,
+        GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsTransportOptions3,
+        GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsTransportOptions4,
+        GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsTransportOptions5,
+        GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsTransportOptions6,
+        GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsTransportOptions7,
+    ] = msgspex.field(
+        name="transportOptions",
+        converter=msgspex.From[
+            "GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsTransportOptions | GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsTransportOptions2 | GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsTransportOptions3 | GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsTransportOptions4 | GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsTransportOptions5 | GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsTransportOptions6 | GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsTransportOptions7"
+        ],
     )
-    x_http_extra_params: msgspex.NullableOption[dict[str, typing.Any]] = msgspex.field(
-        default=NOTHING, name="xHttpExtraParams", converter=msgspex.From[dict[str, typing.Any] | None]
+    security: ProxyConfigsSecurity
+    stream_overrides: GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsStreamOverrides = msgspex.field(name="streamOverrides")
+    client_overrides: GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsClientOverrides = msgspex.field(name="clientOverrides")
+    metadata: GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsMetadata
+    security_options: msgspex.Option[
+        kungfu.Sum[
+            GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsSecurityOptions,
+            GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsSecurityOptions2,
+        ]
+    ] = msgspex.field(
+        default=...,
+        name="securityOptions",
+        converter=msgspex.From[
+            "GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsSecurityOptions | GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsSecurityOptions2 | None"
+        ],
     )
-    mux_params: msgspex.NullableOption[dict[str, typing.Any]] = msgspex.field(
-        default=NOTHING, name="muxParams", converter=msgspex.From[dict[str, typing.Any] | None]
-    )
-    sockopt_params: msgspex.NullableOption[dict[str, typing.Any]] = msgspex.field(
-        default=NOTHING, name="sockoptParams", converter=msgspex.From[dict[str, typing.Any] | None]
-    )
-    server_description: msgspex.NullableOption[str] = msgspex.field(default=NOTHING, name="serverDescription", converter=msgspex.From[str | None])
-    flow: msgspex.NullableOption[str] = msgspex.field(default=NOTHING, converter=msgspex.From[str | None])
-    allow_insecure: msgspex.NullableOption[bool] = msgspex.field(default=NOTHING, name="allowInsecure", converter=msgspex.From[bool | None])
-    shuffle_host: msgspex.NullableOption[bool] = msgspex.field(default=NOTHING, name="shuffleHost", converter=msgspex.From[bool | None])
-    mihomo_x25519: msgspex.NullableOption[bool] = msgspex.field(default=NOTHING, name="mihomoX25519", converter=msgspex.From[bool | None])
-    mldsa65_verify: msgspex.NullableOption[str] = msgspex.field(default=NOTHING, name="mldsa65Verify", converter=msgspex.From[str | None])
-    encryption: msgspex.NullableOption[str] = msgspex.field(default=NOTHING, converter=msgspex.From[str | None])
-    protocol_options: msgspex.NullableOption[GetRawSubscriptionByShortUuidResponseDtoResponseRawHostsProtocolOptions] = msgspex.field(
-        default=NOTHING, name="protocolOptions", converter=msgspex.From["GetRawSubscriptionByShortUuidResponseDtoResponseRawHostsProtocolOptions | None"]
-    )
-    db_data: msgspex.Option[GetRawSubscriptionByShortUuidResponseDtoResponseRawHostsDbData] = msgspex.field(
-        default=..., name="dbData", converter=msgspex.From["GetRawSubscriptionByShortUuidResponseDtoResponseRawHostsDbData | None"]
-    )
-    xray_json_template: msgspex.NullableOption[dict[str, typing.Any]] = msgspex.field(
-        default=NOTHING, name="xrayJsonTemplate", converter=msgspex.From[dict[str, typing.Any] | None]
-    )
+    mux: msgspex.NullableOption[typing.Any] = msgspex.field(default=NOTHING)
 
 
 class GetRawSubscriptionByShortUuidResponseDtoResponse(msgspex.Model, kw_only=True):
     user: CreateUserResponseDtoResponse
     converted_user_info: GetRawSubscriptionByShortUuidResponseDtoResponseConvertedUserInfo = msgspex.field(name="convertedUserInfo")
     headers: dict[str, str]
-    raw_hosts: list[GetRawSubscriptionByShortUuidResponseDtoResponseRawHosts] = msgspex.field(name="rawHosts")
+    resolved_proxy_configs: list[GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigs] = msgspex.field(name="resolvedProxyConfigs")
 
 
-class GetRemnawaveHealthResponseDtoResponsePm2Stats(msgspex.Model, kw_only=True):
-    name: str
-    memory: str
-    cpu: str
+class GetRecapResponseDtoResponseThisMonth(msgspex.Model, kw_only=True):
+    users: int
+    traffic: str
+
+
+class GetRecapResponseDtoResponseTotal(msgspex.Model, kw_only=True):
+    users: int
+    nodes: int
+    traffic: str
+    nodes_ram: str = msgspex.field(name="nodesRam")
+    nodes_cpu_cores: int = msgspex.field(name="nodesCpuCores")
+    distinct_countries: int = msgspex.field(name="distinctCountries")
+
+
+class GetRecapResponseDtoResponse(msgspex.Model, kw_only=True):
+    this_month: GetRecapResponseDtoResponseThisMonth = msgspex.field(name="thisMonth")
+    total: GetRecapResponseDtoResponseTotal
+    version: str
+    init_date: msgspex.isodatetime = msgspex.field(name="initDate", converter=msgspex.From[str | datetime])
+
+
+class GetRemnawaveHealthResponseDtoResponseRuntimeMetrics(msgspex.Model, kw_only=True):
+    rss: int
+    heap_used: int = msgspex.field(name="heapUsed")
+    heap_total: int = msgspex.field(name="heapTotal")
+    external: int
+    array_buffers: int = msgspex.field(name="arrayBuffers")
+    event_loop_delay_ms: int = msgspex.field(name="eventLoopDelayMs")
+    event_loop_p99_ms: int = msgspex.field(name="eventLoopP99Ms")
+    active_handles: int = msgspex.field(name="activeHandles")
+    uptime: int
+    pid: int
+    timestamp: msgspex.IntTimestampDatetime = msgspex.field(converter=msgspex.From[int | datetime])
+    instance_id: str = msgspex.field(name="instanceId")
+    instance_type: str = msgspex.field(name="instanceType")
 
 
 class GetRemnawaveHealthResponseDtoResponse(msgspex.Model, kw_only=True):
-    pm2_stats: list[GetRemnawaveHealthResponseDtoResponsePm2Stats] = msgspex.field(name="pm2Stats")
+    runtime_metrics: list[GetRemnawaveHealthResponseDtoResponseRuntimeMetrics] = msgspex.field(name="runtimeMetrics")
 
 
 class GetRemnawaveSettingsResponseDtoResponsePasskeySettings(msgspex.Model, kw_only=True):
@@ -1676,6 +1951,11 @@ class GetRemnawaveSettingsResponseDtoResponseOauth2SettingsGeneric(RemnawaveSett
     frontend_domain: msgspex.NullableOption[str] = msgspex.field(default=NOTHING, name="frontendDomain")
 
 
+class GetRemnawaveSettingsResponseDtoResponseOauth2SettingsTelegram(RemnawaveSettingsResponseDtoResponseOauth2SettingsBase, kw_only=True):
+    allowed_ids: list[str] = msgspex.field(name="allowedIds")
+    frontend_domain: msgspex.NullableOption[str] = msgspex.field(default=NOTHING, name="frontendDomain")
+
+
 class GetRemnawaveSettingsResponseDtoResponseOauth2Settings(msgspex.Model, kw_only=True):
     github: GetRemnawaveSettingsResponseDtoResponseOauth2SettingsGithub
     pocketid: GetRemnawaveSettingsResponseDtoResponseOauth2SettingsPocketid
@@ -1686,12 +1966,9 @@ class GetRemnawaveSettingsResponseDtoResponseOauth2Settings(msgspex.Model, kw_on
     generic: msgspex.Option[GetRemnawaveSettingsResponseDtoResponseOauth2SettingsGeneric] = msgspex.field(
         default=..., converter=msgspex.From["GetRemnawaveSettingsResponseDtoResponseOauth2SettingsGeneric | None"]
     )
-
-
-class GetRemnawaveSettingsResponseDtoResponseTgAuthSettings(msgspex.Model, kw_only=True):
-    enabled: bool
-    admin_ids: list[str] = msgspex.field(name="adminIds")
-    bot_token: msgspex.NullableOption[str] = msgspex.field(default=NOTHING, name="botToken")
+    telegram: msgspex.Option[GetRemnawaveSettingsResponseDtoResponseOauth2SettingsTelegram] = msgspex.field(
+        default=..., converter=msgspex.From["GetRemnawaveSettingsResponseDtoResponseOauth2SettingsTelegram | None"]
+    )
 
 
 class GetRemnawaveSettingsResponseDtoResponsePasswordSettings(msgspex.Model, kw_only=True):
@@ -1706,7 +1983,6 @@ class GetRemnawaveSettingsResponseDtoResponseBrandingSettings(msgspex.Model, kw_
 class GetRemnawaveSettingsResponseDtoResponse(msgspex.Model, kw_only=True):
     passkey_settings: msgspex.NullableOption[GetRemnawaveSettingsResponseDtoResponsePasskeySettings] = msgspex.field(default=NOTHING, name="passkeySettings")
     oauth2_settings: msgspex.NullableOption[GetRemnawaveSettingsResponseDtoResponseOauth2Settings] = msgspex.field(default=NOTHING, name="oauth2Settings")
-    tg_auth_settings: msgspex.NullableOption[GetRemnawaveSettingsResponseDtoResponseTgAuthSettings] = msgspex.field(default=NOTHING, name="tgAuthSettings")
     password_settings: msgspex.NullableOption[GetRemnawaveSettingsResponseDtoResponsePasswordSettings] = msgspex.field(default=NOTHING, name="passwordSettings")
     branding_settings: msgspex.NullableOption[GetRemnawaveSettingsResponseDtoResponseBrandingSettings] = msgspex.field(default=NOTHING, name="brandingSettings")
 
@@ -1721,18 +1997,7 @@ class GetStatsNodeUsersUsageResponseDtoResponse(UsageBase, kw_only=True):
     top_users: list[GetStatsNodeUsersUsageResponseDtoResponseTopUsers] = msgspex.field(name="topUsers")
 
 
-class GetStatsNodesRealtimeUsageResponseDtoResponse(FetchIpsResultResponseDtoResponseResultNodesBase, kw_only=True):
-    download_bytes: int = msgspex.field(name="downloadBytes")
-    upload_bytes: int = msgspex.field(name="uploadBytes")
-    total_bytes: int = msgspex.field(name="totalBytes")
-    download_speed_bps: int = msgspex.field(name="downloadSpeedBps")
-    upload_speed_bps: int = msgspex.field(name="uploadSpeedBps")
-    total_speed_bps: int = msgspex.field(name="totalSpeedBps")
-
-
-class GetStatsNodesUsageResponseDtoResponseTopNodes(msgspex.Model, kw_only=True):
-    uuid: UUID = msgspex.field(converter=msgspex.From[str | UUID])
-    color: str
+class GetStatsNodesUsageResponseDtoResponseTopNodes(GetBase, kw_only=True):
     name: str
     country_code: str = msgspex.field(name="countryCode")
     total: int
@@ -1752,15 +2017,12 @@ class GetStatsNodesUsageResponseDtoResponse(UsageBase, kw_only=True):
 
 class GetStatsResponseDtoResponseCpu(msgspex.Model, kw_only=True):
     cores: int
-    physical_cores: int = msgspex.field(name="physicalCores")
 
 
 class GetStatsResponseDtoResponseMemory(msgspex.Model, kw_only=True):
     total: int
     free: int
     used: int
-    active: int
-    available: int
 
 
 class GetStatsResponseDtoResponseUsers(msgspex.Model, kw_only=True):
@@ -1790,18 +2052,12 @@ class GetStatsResponseDtoResponse(msgspex.Model, kw_only=True):
     nodes: GetStatsResponseDtoResponseNodes
 
 
-class GetStatusResponseDtoResponseAuthenticationTgAuth(msgspex.Model, kw_only=True):
-    enabled: bool
-    bot_id: msgspex.NullableOption[int] = msgspex.field(default=NOTHING, name="botId")
-
-
 class GetStatusResponseDtoResponseAuthenticationOauth2(msgspex.Model, kw_only=True):
     providers: dict[str, bool]
 
 
 class GetStatusResponseDtoResponseAuthentication(msgspex.Model, kw_only=True):
     passkey: GetRemnawaveSettingsResponseDtoResponsePasswordSettings
-    tg_auth: GetStatusResponseDtoResponseAuthenticationTgAuth = msgspex.field(name="tgAuth")
     oauth2: GetStatusResponseDtoResponseAuthenticationOauth2
     password: GetRemnawaveSettingsResponseDtoResponsePasswordSettings
 
@@ -1862,6 +2118,24 @@ class GetTemplatesResponseDtoResponse(msgspex.Model, kw_only=True):
     templates: list[CreateSubscriptionTemplateResponseDtoResponse]
 
 
+class GetTorrentBlockerReportsStatsResponseDtoResponseStats(msgspex.Model, kw_only=True):
+    distinct_nodes: int = msgspex.field(name="distinctNodes")
+    distinct_users: int = msgspex.field(name="distinctUsers")
+    total_reports: int = msgspex.field(name="totalReports")
+    reports_last24_hours: int = msgspex.field(name="reportsLast24Hours")
+
+
+class GetTorrentBlockerReportsStatsResponseDtoResponseTopUsers(GetBase, kw_only=True):
+    username: str
+    total: int
+
+
+class GetTorrentBlockerReportsStatsResponseDtoResponse(msgspex.Model, kw_only=True):
+    stats: GetTorrentBlockerReportsStatsResponseDtoResponseStats
+    top_users: list[GetTorrentBlockerReportsStatsResponseDtoResponseTopUsers] = msgspex.field(name="topUsers")
+    top_nodes: list[GetStatsNodesUsageResponseDtoResponseTopNodes] = msgspex.field(name="topNodes")
+
+
 class GetUserAccessibleNodesResponseDtoResponseActiveNodesActiveSquads(msgspex.Model, kw_only=True):
     squad_name: str = msgspex.field(name="squadName")
     active_inbounds: list[str] = msgspex.field(name="activeInbounds")
@@ -1886,6 +2160,24 @@ class OAuth2AuthorizeResponseDtoResponse(msgspex.Model, kw_only=True):
     )
 
 
+class PluginExecutorRequestDtoCommandIps(msgspex.Model, kw_only=True):
+    ip: str
+    timeout: int
+
+
+class PluginExecutorRequestDtoCommand(msgspex.Model, kw_only=True):
+    """Block IPs"""
+
+    command: PluginExecutorCommand
+    ips: typing.Annotated[list[PluginExecutorRequestDtoCommandIps], msgspec.Meta(min_length=1)]
+
+
+class PluginExecutorRequestDtoCommand2(msgspex.Model, kw_only=True):
+    """Recreate tables"""
+
+    command: PluginExecutorCommand
+
+
 class RemnawaveWebhookCrmEventsDtoData(msgspex.Model, kw_only=True):
     provider_name: str = msgspex.field(name="providerName")
     node_name: str = msgspex.field(name="nodeName")
@@ -1906,7 +2198,7 @@ class RemnawaveWebhookServiceEventsDtoDataLoginAttempt(msgspex.Model, kw_only=Tr
 
 
 class RemnawaveWebhookServiceEventsDtoDataSubpageConfig(msgspex.Model, kw_only=True):
-    action: RemnawaveWebhookServiceEventsDtoDataSubpageConfigAction
+    action: ConfigAction
     uuid: UUID = msgspex.field(converter=msgspex.From[str | UUID])
 
 
@@ -1918,6 +2210,42 @@ class RemnawaveWebhookServiceEventsDtoData(msgspex.Model, kw_only=True):
     subpage_config: msgspex.Option[RemnawaveWebhookServiceEventsDtoDataSubpageConfig] = msgspex.field(
         default=..., name="subpageConfig", converter=msgspex.From["RemnawaveWebhookServiceEventsDtoDataSubpageConfig | None"]
     )
+
+
+class RemnawaveWebhookTorrentBlockerEventsDtoDataReportActionReport(msgspex.Model, kw_only=True):
+    blocked: bool
+    ip: str
+    block_duration: int = msgspex.field(name="blockDuration")
+    will_unblock_at: msgspex.isodatetime = msgspex.field(name="willUnblockAt", converter=msgspex.From[str | datetime])
+    user_id: str = msgspex.field(name="userId")
+    processed_at: msgspex.isodatetime = msgspex.field(name="processedAt", converter=msgspex.From[str | datetime])
+
+
+class RemnawaveWebhookTorrentBlockerEventsDtoDataReportXrayReport(msgspex.Model, kw_only=True):
+    network: str
+    destination: str
+    ts: int
+    email: msgspex.NullableOption[str] = msgspex.field(default=NOTHING)
+    level: msgspex.NullableOption[int] = msgspex.field(default=NOTHING)
+    protocol: msgspex.NullableOption[str] = msgspex.field(default=NOTHING)
+    source: msgspex.NullableOption[str] = msgspex.field(default=NOTHING)
+    route_target: msgspex.NullableOption[str] = msgspex.field(default=NOTHING, name="routeTarget")
+    original_target: msgspex.NullableOption[str] = msgspex.field(default=NOTHING, name="originalTarget")
+    inbound_tag: msgspex.NullableOption[str] = msgspex.field(default=NOTHING, name="inboundTag")
+    inbound_name: msgspex.NullableOption[str] = msgspex.field(default=NOTHING, name="inboundName")
+    inbound_local: msgspex.NullableOption[str] = msgspex.field(default=NOTHING, name="inboundLocal")
+    outbound_tag: msgspex.NullableOption[str] = msgspex.field(default=NOTHING, name="outboundTag")
+
+
+class RemnawaveWebhookTorrentBlockerEventsDtoDataReport(msgspex.Model, kw_only=True):
+    action_report: RemnawaveWebhookTorrentBlockerEventsDtoDataReportActionReport = msgspex.field(name="actionReport")
+    xray_report: RemnawaveWebhookTorrentBlockerEventsDtoDataReportXrayReport = msgspex.field(name="xrayReport")
+
+
+class RemnawaveWebhookTorrentBlockerEventsDtoData(msgspex.Model, kw_only=True):
+    node: CreateNodeResponseDtoResponse
+    user: CreateUserResponseDtoResponse
+    report: RemnawaveWebhookTorrentBlockerEventsDtoDataReport
 
 
 class RemnawaveWebhookUserEventsDtoMeta(msgspex.Model, kw_only=True):
@@ -1936,6 +2264,13 @@ class ReorderConfigProfilesRequestDtoItems(msgspex.Model, kw_only=True):
 
 class ReorderHostResponseDtoResponse(msgspex.Model, kw_only=True):
     is_updated: bool = msgspex.field(name="isUpdated")
+
+
+class ResolveUserResponseDtoResponse(msgspex.Model, kw_only=True):
+    uuid: UUID = msgspex.field(converter=msgspex.From[str | UUID])
+    username: str
+    id: int
+    short_uuid: str = msgspex.field(name="shortUuid")
 
 
 class VerifyPasskeyRegistrationResponseDtoResponse(msgspex.Model, kw_only=True):
@@ -1964,11 +2299,15 @@ __all__ = (
     "BulkEnableHostsRequestDto",
     "BulkExtendExpirationDateRequestDto",
     "BulkNodesActionsRequestDto",
+    "BulkNodesUpdateRequestDto",
+    "BulkNodesUpdateRequestDtoFields",
     "BulkResetTrafficUsersRequestDto",
     "BulkRevokeUsersSubscriptionRequestDto",
     "BulkUpdateUsersRequestDto",
     "BulkUpdateUsersRequestDtoFields",
     "BulkUpdateUsersSquadsRequestDto",
+    "CloneNodePluginRequestDto",
+    "CloneNodePluginResponseDtoResponse",
     "CloneSubscriptionPageConfigRequestDto",
     "CloneSubscriptionPageConfigResponseDtoResponse",
     "CreateApiTokenRequestDto",
@@ -2003,11 +2342,18 @@ __all__ = (
     "CreateInternalSquadRequestDto",
     "CreateInternalSquadResponseDtoResponse",
     "CreateInternalSquadResponseDtoResponseInfo",
+    "CreateNodePluginRequestDto",
+    "CreateNodePluginResponseDtoResponse",
     "CreateNodeRequestDto",
     "CreateNodeRequestDtoConfigProfile",
     "CreateNodeResponseDtoResponse",
     "CreateNodeResponseDtoResponseConfigProfile",
     "CreateNodeResponseDtoResponseProvider",
+    "CreateNodeResponseDtoResponseSystem",
+    "CreateNodeResponseDtoResponseSystemInfo",
+    "CreateNodeResponseDtoResponseSystemStats",
+    "CreateNodeResponseDtoResponseSystemStatsInterface",
+    "CreateNodeResponseDtoResponseVersions",
     "CreateSnippetRequestDto",
     "CreateSnippetResponseDtoResponse",
     "CreateSnippetResponseDtoResponseSnippets",
@@ -2049,6 +2395,10 @@ __all__ = (
     "FetchIpsResultResponseDtoResponseProgress",
     "FetchIpsResultResponseDtoResponseResult",
     "FetchIpsResultResponseDtoResponseResultNodes",
+    "FetchIpsResultResponseDtoResponseResultNodesIps",
+    "FetchUsersIpsResultResponseDtoResponse",
+    "FetchUsersIpsResultResponseDtoResponseResult",
+    "FetchUsersIpsResultResponseDtoResponseResultUsers",
     "FindAllApiTokensResponseDtoResponse",
     "FindAllApiTokensResponseDtoResponseApiKeys",
     "FindAllApiTokensResponseDtoResponseDocs",
@@ -2081,20 +2431,38 @@ __all__ = (
     "GetMetadataResponseDtoResponseGit",
     "GetMetadataResponseDtoResponseGitBackend",
     "GetMetadataResponseDtoResponseGitFrontend",
+    "GetNodePluginsResponseDtoResponse",
     "GetNodesStatisticsResponseDtoResponse",
     "GetNodesStatisticsResponseDtoResponseLastSevenDays",
     "GetPubKeyResponseDtoResponse",
     "GetRawSubscriptionByShortUuidResponseDtoResponse",
     "GetRawSubscriptionByShortUuidResponseDtoResponseConvertedUserInfo",
-    "GetRawSubscriptionByShortUuidResponseDtoResponseRawHosts",
-    "GetRawSubscriptionByShortUuidResponseDtoResponseRawHostsAdditionalParams",
-    "GetRawSubscriptionByShortUuidResponseDtoResponseRawHostsDbData",
-    "GetRawSubscriptionByShortUuidResponseDtoResponseRawHostsPassword",
-    "GetRawSubscriptionByShortUuidResponseDtoResponseRawHostsProtocolOptions",
-    "GetRawSubscriptionByShortUuidResponseDtoResponseRawHostsProtocolOptionsSs",
-    "GetRawSubscriptionByShortUuidResponseDtoResponseRawHostsRawSettings",
+    "GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigs",
+    "GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsClientOverrides",
+    "GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsMetadata",
+    "GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsProtocolOptions",
+    "GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsProtocolOptions2",
+    "GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsProtocolOptions3",
+    "GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsProtocolOptions4",
+    "GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsSecurityOptions",
+    "GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsSecurityOptions2",
+    "GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsStreamOverrides",
+    "GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsTransportOptions",
+    "GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsTransportOptions2",
+    "GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsTransportOptions3",
+    "GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsTransportOptions4",
+    "GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsTransportOptions5",
+    "GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsTransportOptions6",
+    "GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsTransportOptions7",
+    "GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsTransportOptionsHeader",
+    "GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsTransportOptionsHeader2",
+    "GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsTransportOptionsHeader2Request",
+    "GetRawSubscriptionByShortUuidResponseDtoResponseResolvedProxyConfigsTransportOptionsHeader2Response",
+    "GetRecapResponseDtoResponse",
+    "GetRecapResponseDtoResponseThisMonth",
+    "GetRecapResponseDtoResponseTotal",
     "GetRemnawaveHealthResponseDtoResponse",
-    "GetRemnawaveHealthResponseDtoResponsePm2Stats",
+    "GetRemnawaveHealthResponseDtoResponseRuntimeMetrics",
     "GetRemnawaveSettingsResponseDtoResponse",
     "GetRemnawaveSettingsResponseDtoResponseBrandingSettings",
     "GetRemnawaveSettingsResponseDtoResponseOauth2Settings",
@@ -2102,12 +2470,11 @@ __all__ = (
     "GetRemnawaveSettingsResponseDtoResponseOauth2SettingsGithub",
     "GetRemnawaveSettingsResponseDtoResponseOauth2SettingsKeycloak",
     "GetRemnawaveSettingsResponseDtoResponseOauth2SettingsPocketid",
+    "GetRemnawaveSettingsResponseDtoResponseOauth2SettingsTelegram",
     "GetRemnawaveSettingsResponseDtoResponsePasskeySettings",
     "GetRemnawaveSettingsResponseDtoResponsePasswordSettings",
-    "GetRemnawaveSettingsResponseDtoResponseTgAuthSettings",
     "GetStatsNodeUsersUsageResponseDtoResponse",
     "GetStatsNodeUsersUsageResponseDtoResponseTopUsers",
-    "GetStatsNodesRealtimeUsageResponseDtoResponse",
     "GetStatsNodesUsageResponseDtoResponse",
     "GetStatsNodesUsageResponseDtoResponseSeries",
     "GetStatsNodesUsageResponseDtoResponseTopNodes",
@@ -2120,7 +2487,6 @@ __all__ = (
     "GetStatusResponseDtoResponse",
     "GetStatusResponseDtoResponseAuthentication",
     "GetStatusResponseDtoResponseAuthenticationOauth2",
-    "GetStatusResponseDtoResponseAuthenticationTgAuth",
     "GetStatusResponseDtoResponseBranding",
     "GetSubpageConfigByShortUuidResponseDtoResponse",
     "GetSubscriptionPageConfigsResponseDtoResponse",
@@ -2128,6 +2494,9 @@ __all__ = (
     "GetSubscriptionRequestHistoryStatsResponseDtoResponseHourlyRequestStats",
     "GetSubscriptionSettingsResponseDtoResponse",
     "GetTemplatesResponseDtoResponse",
+    "GetTorrentBlockerReportsStatsResponseDtoResponse",
+    "GetTorrentBlockerReportsStatsResponseDtoResponseStats",
+    "GetTorrentBlockerReportsStatsResponseDtoResponseTopUsers",
     "GetUserAccessibleNodesResponseDtoResponse",
     "GetUserAccessibleNodesResponseDtoResponseActiveNodes",
     "GetUserAccessibleNodesResponseDtoResponseActiveNodesActiveSquads",
@@ -2136,6 +2505,10 @@ __all__ = (
     "OAuth2AuthorizeRequestDto",
     "OAuth2AuthorizeResponseDtoResponse",
     "OAuth2CallbackRequestDto",
+    "PluginExecutorRequestDto",
+    "PluginExecutorRequestDtoCommand",
+    "PluginExecutorRequestDtoCommand2",
+    "PluginExecutorRequestDtoCommandIps",
     "ProfileModificationRequestDto",
     "RegisterRequestDto",
     "RemnawaveWebhookCrmEventsDto",
@@ -2147,6 +2520,11 @@ __all__ = (
     "RemnawaveWebhookServiceEventsDtoData",
     "RemnawaveWebhookServiceEventsDtoDataLoginAttempt",
     "RemnawaveWebhookServiceEventsDtoDataSubpageConfig",
+    "RemnawaveWebhookTorrentBlockerEventsDto",
+    "RemnawaveWebhookTorrentBlockerEventsDtoData",
+    "RemnawaveWebhookTorrentBlockerEventsDtoDataReport",
+    "RemnawaveWebhookTorrentBlockerEventsDtoDataReportActionReport",
+    "RemnawaveWebhookTorrentBlockerEventsDtoDataReportXrayReport",
     "RemnawaveWebhookUserEventsDto",
     "RemnawaveWebhookUserEventsDtoMeta",
     "RemnawaveWebhookUserHwidDevicesEventsDto",
@@ -2157,19 +2535,22 @@ __all__ = (
     "ReorderHostRequestDto",
     "ReorderHostResponseDtoResponse",
     "ReorderInternalSquadsRequestDto",
+    "ReorderNodePluginsRequestDto",
     "ReorderNodeRequestDto",
     "ReorderSubscriptionPageConfigsRequestDto",
     "ReorderSubscriptionTemplatesRequestDto",
+    "ResolveUserRequestBodyDto",
+    "ResolveUserResponseDtoResponse",
     "RestartAllNodesRequestBodyDto",
     "SetInboundToManyHostsRequestDto",
     "SetPortToManyHostsRequestDto",
-    "TelegramCallbackRequestDto",
     "UpdateConfigProfileRequestDto",
     "UpdateExternalSquadRequestDto",
     "UpdateHostRequestDto",
     "UpdateInfraBillingNodeRequestDto",
     "UpdateInfraProviderRequestDto",
     "UpdateInternalSquadRequestDto",
+    "UpdateNodePluginRequestDto",
     "UpdateNodeRequestDto",
     "UpdatePasskeyRequestDto",
     "UpdateRemnawaveSettingsRequestDto",
@@ -2178,6 +2559,7 @@ __all__ = (
     "UpdateSubscriptionSettingsRequestDto",
     "UpdateTemplateRequestDto",
     "UpdateUserRequestDto",
+    "UpsertUserMetadataRequestBodyDto",
     "VerifyPasskeyAuthenticationRequestDto",
     "VerifyPasskeyRegistrationRequestDto",
     "VerifyPasskeyRegistrationResponseDtoResponse",

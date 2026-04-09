@@ -1,7 +1,7 @@
 import saronia
 
 from ..auth import Authorization
-from ..errors import BadRequestError, InternalServerError
+from ..errors import BadRequestError, NotFoundInternalServerError
 from ..objects import UpdateRemnawaveSettingsRequestDto
 from ..remnawave import remnawave
 from ..responses import GetRemnawaveSettingsResponseDto, UpdateRemnawaveSettingsResponseDto
@@ -16,15 +16,15 @@ class RemnawaveSettingsController:
         self,
     ) -> saronia.APIResult[
         GetRemnawaveSettingsResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
-    @saronia.patch("/", form=UpdateRemnawaveSettingsRequestDto)
+    @saronia.patch("/", UpdateRemnawaveSettingsRequestDto)
     async def update_settings(
         self,
     ) -> saronia.APIResult[
         UpdateRemnawaveSettingsResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
 

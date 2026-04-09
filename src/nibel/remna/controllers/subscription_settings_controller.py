@@ -1,7 +1,7 @@
 import saronia
 
 from ..auth import Authorization
-from ..errors import BadRequestError, InternalServerError
+from ..errors import BadRequestError, NotFoundInternalServerError
 from ..objects import UpdateSubscriptionSettingsRequestDto
 from ..remnawave import remnawave
 from ..responses import GetSubscriptionSettingsResponseDto, UpdateSubscriptionSettingsResponseDto
@@ -16,15 +16,15 @@ class SubscriptionSettingsController:
         self,
     ) -> saronia.APIResult[
         GetSubscriptionSettingsResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
-    @saronia.patch("/", form=UpdateSubscriptionSettingsRequestDto)
+    @saronia.patch("/", UpdateSubscriptionSettingsRequestDto)
     async def update_settings(
         self,
     ) -> saronia.APIResult[
         UpdateSubscriptionSettingsResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
 

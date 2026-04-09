@@ -3,7 +3,7 @@ from uuid import UUID
 import saronia
 
 from ..auth import Authorization
-from ..errors import BadRequestError, InternalServerError
+from ..errors import BadRequestError, NotFoundInternalServerError
 from ..objects import CreateInternalSquadRequestDto, ReorderInternalSquadsRequestDto, UpdateInternalSquadRequestDto
 from ..remnawave import remnawave
 from ..responses import (
@@ -36,23 +36,23 @@ class InternalSquadsController:
         self,
     ) -> saronia.APIResult[
         GetInternalSquadsResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
-    @saronia.post("/", form=CreateInternalSquadRequestDto)
+    @saronia.post("/", CreateInternalSquadRequestDto)
     async def create_internal_squad(
         self,
     ) -> saronia.APIResult[
         CreateInternalSquadResponseDto,
-        BadRequestError | InternalSquadConflictError | InternalServerError,
+        BadRequestError | InternalSquadConflictError | NotFoundInternalServerError,
     ]: ...
 
-    @saronia.patch("/", form=UpdateInternalSquadRequestDto)
+    @saronia.patch("/", UpdateInternalSquadRequestDto)
     async def update_internal_squad(
         self,
     ) -> saronia.APIResult[
         UpdateInternalSquadResponseDto,
-        BadRequestError | InternalSquadNotFoundError | InternalSquadConflictError | InternalServerError,
+        BadRequestError | InternalSquadNotFoundError | InternalSquadConflictError | NotFoundInternalServerError,
     ]: ...
 
     @saronia.get("/{uuid}")
@@ -62,7 +62,7 @@ class InternalSquadsController:
         uuid: UUID,
     ) -> saronia.APIResult[
         GetInternalSquadByUuidResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
     @saronia.delete("/{uuid}")
@@ -72,7 +72,7 @@ class InternalSquadsController:
         uuid: UUID,
     ) -> saronia.APIResult[
         DeleteInternalSquadResponseDto,
-        BadRequestError | InternalSquadNotFoundError | InternalServerError,
+        BadRequestError | InternalSquadNotFoundError | NotFoundInternalServerError,
     ]: ...
 
     @saronia.get("/{uuid}/accessible-nodes")
@@ -82,7 +82,7 @@ class InternalSquadsController:
         uuid: UUID,
     ) -> saronia.APIResult[
         GetInternalSquadAccessibleNodesResponseDto,
-        BadRequestError | InternalSquadNotFoundError | InternalServerError,
+        BadRequestError | InternalSquadNotFoundError | NotFoundInternalServerError,
     ]:
         """Args:
         uuid: UUID of the internal squad
@@ -97,7 +97,7 @@ class InternalSquadsController:
         uuid: UUID,
     ) -> saronia.APIResult[
         AddUsersToInternalSquadResponseDto,
-        BadRequestError | InternalSquadNotFoundError | InternalServerError,
+        BadRequestError | InternalSquadNotFoundError | NotFoundInternalServerError,
     ]: ...
 
     @saronia.delete("/{uuid}/bulk-actions/remove-users")
@@ -107,15 +107,15 @@ class InternalSquadsController:
         uuid: UUID,
     ) -> saronia.APIResult[
         RemoveUsersFromInternalSquadResponseDto,
-        BadRequestError | InternalSquadNotFoundError | InternalServerError,
+        BadRequestError | InternalSquadNotFoundError | NotFoundInternalServerError,
     ]: ...
 
-    @saronia.post("/actions/reorder", form=ReorderInternalSquadsRequestDto)
+    @saronia.post("/actions/reorder", ReorderInternalSquadsRequestDto)
     async def reorder_internal_squads(
         self,
     ) -> saronia.APIResult[
         ReorderInternalSquadsResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
 

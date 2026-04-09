@@ -14,7 +14,7 @@ class AuthControllerAuthBase(msgspex.Model, kw_only=True):
     status_code: msgspex.Option[int] = msgspex.field(default=..., name="statusCode", converter=msgspex.From[int | None])
 
 
-class InternalServerBase(msgspex.Model, kw_only=True):
+class NotFoundInternalServerBase(msgspex.Model, kw_only=True):
     path: msgspex.Option[str] = msgspex.field(default=..., converter=msgspex.From[str | None])
     message: msgspex.Option[str] = msgspex.field(default=..., converter=msgspex.From[str | None])
     error_code: msgspex.Option[str] = msgspex.field(default=..., name="errorCode", converter=msgspex.From[str | None])
@@ -26,7 +26,7 @@ class BadRequestError(AuthControllerAuthBase, saronia.ModelStatusError[HTTPStatu
     errors: msgspex.Option[list[BadRequestErrorErrors]] = msgspex.field(default=..., converter=msgspex.From["list[BadRequestErrorErrors] | None"])
 
 
-class InternalServerError(InternalServerBase, saronia.ModelStatusError[HTTPStatus.INTERNAL_SERVER_ERROR], kw_only=True):
+class NotFoundInternalServerError(NotFoundInternalServerBase, saronia.ModelStatusError[HTTPStatus.NOT_FOUND, HTTPStatus.INTERNAL_SERVER_ERROR], kw_only=True):
     """Server error"""
 
     timestamp: msgspex.Option[msgspex.StringTimestampDatetime] = msgspex.field(default=..., converter=msgspex.From[str | datetime | None])
@@ -38,7 +38,7 @@ class AuthControllerAuthError(AuthControllerAuthBase, saronia.ModelStatusError[H
     error: msgspex.Option[str] = msgspex.field(default=..., converter=msgspex.From[str | None])
 
 
-class SubscriptionsControllerNotFoundError(InternalServerBase, saronia.ModelStatusError[HTTPStatus.NOT_FOUND], kw_only=True):
+class SubscriptionsControllerNotFoundError(NotFoundInternalServerBase, saronia.ModelStatusError[HTTPStatus.NOT_FOUND], kw_only=True):
     """User not found"""
 
     timestamp: msgspex.Option[msgspex.isodatetime] = msgspex.field(default=..., converter=msgspex.From[str | datetime | None])
@@ -47,6 +47,6 @@ class SubscriptionsControllerNotFoundError(InternalServerBase, saronia.ModelStat
 __all__ = (
     "AuthControllerAuthError",
     "BadRequestError",
-    "InternalServerError",
+    "NotFoundInternalServerError",
     "SubscriptionsControllerNotFoundError",
 )

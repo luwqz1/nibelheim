@@ -8,6 +8,7 @@ from .objects import (
     AddUsersToExternalSquadResponseDtoResponse,
     BulkDeleteHostsResponseDtoResponse,
     BulkDeleteUsersByStatusResponseDtoResponse,
+    CloneNodePluginResponseDtoResponse,
     CloneSubscriptionPageConfigResponseDtoResponse,
     CreateApiTokenResponseDtoResponse,
     CreateConfigProfileResponseDtoResponse,
@@ -16,6 +17,7 @@ from .objects import (
     CreateInfraBillingNodeResponseDtoResponse,
     CreateInfraProviderResponseDtoResponse,
     CreateInternalSquadResponseDtoResponse,
+    CreateNodePluginResponseDtoResponse,
     CreateNodeResponseDtoResponse,
     CreateSnippetResponseDtoResponse,
     CreateSubscriptionPageConfigResponseDtoResponse,
@@ -28,6 +30,7 @@ from .objects import (
     EncryptHappCryptoLinkResponseDtoResponse,
     FetchIpsResponseDtoResponse,
     FetchIpsResultResponseDtoResponse,
+    FetchUsersIpsResultResponseDtoResponse,
     FindAllApiTokensResponseDtoResponse,
     GenerateX25519ResponseDtoResponse,
     GetAllHostTagsResponseDtoResponse,
@@ -46,12 +49,13 @@ from .objects import (
     GetLegacyStatsNodesUsersUsageResponseDtoResponse,
     GetLegacyStatsUserUsageResponseDtoResponse,
     GetMetadataResponseDtoResponse,
+    GetNodePluginsResponseDtoResponse,
     GetNodesStatisticsResponseDtoResponse,
     GetPubKeyResponseDtoResponse,
     GetRawSubscriptionByShortUuidResponseDtoResponse,
+    GetRecapResponseDtoResponse,
     GetRemnawaveHealthResponseDtoResponse,
     GetRemnawaveSettingsResponseDtoResponse,
-    GetStatsNodesRealtimeUsageResponseDtoResponse,
     GetStatsNodesUsageResponseDtoResponse,
     GetStatsNodeUsersUsageResponseDtoResponse,
     GetStatsResponseDtoResponse,
@@ -61,11 +65,14 @@ from .objects import (
     GetSubscriptionRequestHistoryStatsResponseDtoResponse,
     GetSubscriptionSettingsResponseDtoResponse,
     GetTemplatesResponseDtoResponse,
+    GetTorrentBlockerReportsStatsResponseDtoResponse,
     GetUserAccessibleNodesResponseDtoResponse,
     LoginResponseDtoResponse,
     OAuth2AuthorizeResponseDtoResponse,
     ReorderHostResponseDtoResponse,
     ReorderNodeRequestDto,
+    ResolveUserResponseDtoResponse,
+    UpsertUserMetadataRequestBodyDto,
     VerifyPasskeyRegistrationResponseDtoResponse,
 )
 
@@ -118,6 +125,10 @@ class BulkNodesActionsResponseDto(msgspex.Model, kw_only=True):
     response: AddUsersToExternalSquadResponseDtoResponse
 
 
+class BulkNodesUpdateResponseDto(msgspex.Model, kw_only=True):
+    response: AddUsersToExternalSquadResponseDtoResponse
+
+
 class BulkResetTrafficUsersResponseDto(msgspex.Model, kw_only=True):
     response: BulkDeleteUsersByStatusResponseDtoResponse
 
@@ -132,6 +143,10 @@ class BulkUpdateUsersResponseDto(msgspex.Model, kw_only=True):
 
 class BulkUpdateUsersSquadsResponseDto(msgspex.Model, kw_only=True):
     response: BulkDeleteUsersByStatusResponseDtoResponse
+
+
+class CloneNodePluginResponseDto(msgspex.Model, kw_only=True):
+    response: CloneNodePluginResponseDtoResponse
 
 
 class CloneSubscriptionPageConfigResponseDto(msgspex.Model, kw_only=True):
@@ -168,6 +183,10 @@ class CreateInfraProviderResponseDto(msgspex.Model, kw_only=True):
 
 class CreateInternalSquadResponseDto(msgspex.Model, kw_only=True):
     response: CreateInternalSquadResponseDtoResponse
+
+
+class CreateNodePluginResponseDto(msgspex.Model, kw_only=True):
+    response: CreateNodePluginResponseDtoResponse
 
 
 class CreateNodeResponseDto(msgspex.Model, kw_only=True):
@@ -234,6 +253,10 @@ class DeleteInternalSquadResponseDto(msgspex.Model, kw_only=True):
     response: DeleteConfigProfileResponseDtoResponse
 
 
+class DeleteNodePluginResponseDto(msgspex.Model, kw_only=True):
+    response: DeleteConfigProfileResponseDtoResponse
+
+
 class DeleteNodeResponseDto(msgspex.Model, kw_only=True):
     response: DeleteConfigProfileResponseDtoResponse
 
@@ -292,6 +315,14 @@ class FetchIpsResponseDto(msgspex.Model, kw_only=True):
 
 class FetchIpsResultResponseDto(msgspex.Model, kw_only=True):
     response: FetchIpsResultResponseDtoResponse
+
+
+class FetchUsersIpsResponseDto(msgspex.Model, kw_only=True):
+    response: FetchIpsResponseDtoResponse
+
+
+class FetchUsersIpsResultResponseDto(msgspex.Model, kw_only=True):
+    response: FetchUsersIpsResultResponseDtoResponse
 
 
 class FindAllApiTokensResponseDto(msgspex.Model, kw_only=True):
@@ -418,6 +449,18 @@ class GetMetadataResponseDto(msgspex.Model, kw_only=True):
     response: GetMetadataResponseDtoResponse
 
 
+class GetNodeMetadataResponseDto(msgspex.Model, kw_only=True):
+    response: UpsertUserMetadataRequestBodyDto
+
+
+class GetNodePluginResponseDto(msgspex.Model, kw_only=True):
+    response: CloneNodePluginResponseDtoResponse
+
+
+class GetNodePluginsResponseDto(msgspex.Model, kw_only=True):
+    response: GetNodePluginsResponseDtoResponse
+
+
 class GetNodesMetricsResponseDto(msgspex.Model, kw_only=True):
     response: ReorderNodeRequestDto
 
@@ -450,6 +493,10 @@ class GetRawSubscriptionByShortUuidResponseDto(msgspex.Model, kw_only=True):
     response: GetRawSubscriptionByShortUuidResponseDtoResponse
 
 
+class GetRecapResponseDto(msgspex.Model, kw_only=True):
+    response: GetRecapResponseDtoResponse
+
+
 class GetRemnawaveHealthResponseDto(msgspex.Model, kw_only=True):
     response: GetRemnawaveHealthResponseDtoResponse
 
@@ -464,10 +511,6 @@ class GetSnippetsResponseDto(msgspex.Model, kw_only=True):
 
 class GetStatsNodeUsersUsageResponseDto(msgspex.Model, kw_only=True):
     response: GetStatsNodeUsersUsageResponseDtoResponse
-
-
-class GetStatsNodesRealtimeUsageResponseDto(msgspex.Model, kw_only=True):
-    response: list[GetStatsNodesRealtimeUsageResponseDtoResponse]
 
 
 class GetStatsNodesUsageResponseDto(msgspex.Model, kw_only=True):
@@ -538,6 +581,14 @@ class GetTopUsersByHwidDevicesResponseDto(msgspex.Model, kw_only=True):
     response: GetAllUsersResponseDtoResponse
 
 
+class GetTorrentBlockerReportsResponseDto(msgspex.Model, kw_only=True):
+    response: CreateInfraBillingHistoryRecordResponseDtoResponse
+
+
+class GetTorrentBlockerReportsStatsResponseDto(msgspex.Model, kw_only=True):
+    response: GetTorrentBlockerReportsStatsResponseDtoResponse
+
+
 class GetUserAccessibleNodesResponseDto(msgspex.Model, kw_only=True):
     response: GetUserAccessibleNodesResponseDtoResponse
 
@@ -574,6 +625,10 @@ class GetUserHwidDevicesResponseDto(msgspex.Model, kw_only=True):
     response: CreateUserHwidDeviceResponseDtoResponse
 
 
+class GetUserMetadataResponseDto(msgspex.Model, kw_only=True):
+    response: UpsertUserMetadataRequestBodyDto
+
+
 class GetUserSubscriptionRequestHistoryResponseDto(msgspex.Model, kw_only=True):
     response: CreateInfraBillingHistoryRecordResponseDtoResponse
 
@@ -588,6 +643,10 @@ class OAuth2AuthorizeResponseDto(msgspex.Model, kw_only=True):
 
 class OAuth2CallbackResponseDto(msgspex.Model, kw_only=True):
     response: LoginResponseDtoResponse
+
+
+class PluginExecutorResponseDto(msgspex.Model, kw_only=True):
+    response: AddUsersToExternalSquadResponseDtoResponse
 
 
 class ProfileModificationResponseDto(msgspex.Model, kw_only=True):
@@ -622,6 +681,10 @@ class ReorderInternalSquadsResponseDto(msgspex.Model, kw_only=True):
     response: GetInternalSquadsResponseDtoResponse
 
 
+class ReorderNodePluginsResponseDto(msgspex.Model, kw_only=True):
+    response: GetNodePluginsResponseDtoResponse
+
+
 class ReorderNodeResponseDto(msgspex.Model, kw_only=True):
     response: list[CreateNodeResponseDtoResponse]
 
@@ -640,6 +703,10 @@ class ResetNodeTrafficResponseDto(msgspex.Model, kw_only=True):
 
 class ResetUserTrafficResponseDto(msgspex.Model, kw_only=True):
     response: CreateUserResponseDtoResponse
+
+
+class ResolveUserResponseDto(msgspex.Model, kw_only=True):
+    response: ResolveUserResponseDtoResponse
 
 
 class RestartAllNodesResponseDto(msgspex.Model, kw_only=True):
@@ -662,8 +729,8 @@ class SetPortToManyHostsResponseDto(msgspex.Model, kw_only=True):
     response: list[BulkDeleteHostsResponseDtoResponse]
 
 
-class TelegramCallbackResponseDto(msgspex.Model, kw_only=True):
-    response: LoginResponseDtoResponse
+class TruncateTorrentBlockerReportsResponseDto(msgspex.Model, kw_only=True):
+    response: CreateInfraBillingHistoryRecordResponseDtoResponse
 
 
 class UpdateConfigProfileResponseDto(msgspex.Model, kw_only=True):
@@ -688,6 +755,10 @@ class UpdateInfraProviderResponseDto(msgspex.Model, kw_only=True):
 
 class UpdateInternalSquadResponseDto(msgspex.Model, kw_only=True):
     response: CreateInternalSquadResponseDtoResponse
+
+
+class UpdateNodePluginResponseDto(msgspex.Model, kw_only=True):
+    response: CloneNodePluginResponseDtoResponse
 
 
 class UpdateNodeResponseDto(msgspex.Model, kw_only=True):
@@ -722,6 +793,14 @@ class UpdateUserResponseDto(msgspex.Model, kw_only=True):
     response: CreateUserResponseDtoResponse
 
 
+class UpsertNodeMetadataResponseDto(msgspex.Model, kw_only=True):
+    response: UpsertUserMetadataRequestBodyDto
+
+
+class UpsertUserMetadataResponseDto(msgspex.Model, kw_only=True):
+    response: UpsertUserMetadataRequestBodyDto
+
+
 class VerifyPasskeyAuthenticationResponseDto(msgspex.Model, kw_only=True):
     response: LoginResponseDtoResponse
 
@@ -743,10 +822,12 @@ __all__ = (
     "BulkEnableHostsResponseDto",
     "BulkExtendExpirationDateResponseDto",
     "BulkNodesActionsResponseDto",
+    "BulkNodesUpdateResponseDto",
     "BulkResetTrafficUsersResponseDto",
     "BulkRevokeUsersSubscriptionResponseDto",
     "BulkUpdateUsersResponseDto",
     "BulkUpdateUsersSquadsResponseDto",
+    "CloneNodePluginResponseDto",
     "CloneSubscriptionPageConfigResponseDto",
     "CreateApiTokenResponseDto",
     "CreateConfigProfileResponseDto",
@@ -756,6 +837,7 @@ __all__ = (
     "CreateInfraBillingNodeResponseDto",
     "CreateInfraProviderResponseDto",
     "CreateInternalSquadResponseDto",
+    "CreateNodePluginResponseDto",
     "CreateNodeResponseDto",
     "CreateSnippetResponseDto",
     "CreateSubscriptionPageConfigResponseDto",
@@ -772,6 +854,7 @@ __all__ = (
     "DeleteInfraBillingNodeByUuidResponseDto",
     "DeleteInfraProviderByUuidResponseDto",
     "DeleteInternalSquadResponseDto",
+    "DeleteNodePluginResponseDto",
     "DeleteNodeResponseDto",
     "DeletePasskeyResponseDto",
     "DeleteSnippetResponseDto",
@@ -787,6 +870,8 @@ __all__ = (
     "EncryptHappCryptoLinkResponseDto",
     "FetchIpsResponseDto",
     "FetchIpsResultResponseDto",
+    "FetchUsersIpsResponseDto",
+    "FetchUsersIpsResultResponseDto",
     "FindAllApiTokensResponseDto",
     "GenerateX25519ResponseDto",
     "GetAllHostTagsResponseDto",
@@ -818,6 +903,9 @@ __all__ = (
     "GetLegacyStatsNodesUsersUsageResponseDto",
     "GetLegacyStatsUserUsageResponseDto",
     "GetMetadataResponseDto",
+    "GetNodeMetadataResponseDto",
+    "GetNodePluginResponseDto",
+    "GetNodePluginsResponseDto",
     "GetNodesMetricsResponseDto",
     "GetNodesStatisticsResponseDto",
     "GetOneHostResponseDto",
@@ -826,11 +914,11 @@ __all__ = (
     "GetPasskeyRegistrationOptionsResponseDto",
     "GetPubKeyResponseDto",
     "GetRawSubscriptionByShortUuidResponseDto",
+    "GetRecapResponseDto",
     "GetRemnawaveHealthResponseDto",
     "GetRemnawaveSettingsResponseDto",
     "GetSnippetsResponseDto",
     "GetStatsNodeUsersUsageResponseDto",
-    "GetStatsNodesRealtimeUsageResponseDto",
     "GetStatsNodesUsageResponseDto",
     "GetStatsResponseDto",
     "GetStatsUserUsageResponseDto",
@@ -848,6 +936,8 @@ __all__ = (
     "GetTemplateResponseDto",
     "GetTemplatesResponseDto",
     "GetTopUsersByHwidDevicesResponseDto",
+    "GetTorrentBlockerReportsResponseDto",
+    "GetTorrentBlockerReportsStatsResponseDto",
     "GetUserAccessibleNodesResponseDto",
     "GetUserByEmailResponseDto",
     "GetUserByIdResponseDto",
@@ -857,10 +947,12 @@ __all__ = (
     "GetUserByUsernameResponseDto",
     "GetUserByUuidResponseDto",
     "GetUserHwidDevicesResponseDto",
+    "GetUserMetadataResponseDto",
     "GetUserSubscriptionRequestHistoryResponseDto",
     "LoginResponseDto",
     "OAuth2AuthorizeResponseDto",
     "OAuth2CallbackResponseDto",
+    "PluginExecutorResponseDto",
     "ProfileModificationResponseDto",
     "RegisterResponseDto",
     "RemoveUsersFromExternalSquadResponseDto",
@@ -869,23 +961,26 @@ __all__ = (
     "ReorderExternalSquadsResponseDto",
     "ReorderHostResponseDto",
     "ReorderInternalSquadsResponseDto",
+    "ReorderNodePluginsResponseDto",
     "ReorderNodeResponseDto",
     "ReorderSubscriptionPageConfigsResponseDto",
     "ReorderSubscriptionTemplatesResponseDto",
     "ResetNodeTrafficResponseDto",
     "ResetUserTrafficResponseDto",
+    "ResolveUserResponseDto",
     "RestartAllNodesResponseDto",
     "RestartNodeResponseDto",
     "RevokeUserSubscriptionResponseDto",
     "SetInboundToManyHostsResponseDto",
     "SetPortToManyHostsResponseDto",
-    "TelegramCallbackResponseDto",
+    "TruncateTorrentBlockerReportsResponseDto",
     "UpdateConfigProfileResponseDto",
     "UpdateExternalSquadResponseDto",
     "UpdateHostResponseDto",
     "UpdateInfraBillingNodeResponseDto",
     "UpdateInfraProviderResponseDto",
     "UpdateInternalSquadResponseDto",
+    "UpdateNodePluginResponseDto",
     "UpdateNodeResponseDto",
     "UpdatePasskeyResponseDto",
     "UpdateRemnawaveSettingsResponseDto",
@@ -894,6 +989,8 @@ __all__ = (
     "UpdateSubscriptionSettingsResponseDto",
     "UpdateTemplateResponseDto",
     "UpdateUserResponseDto",
+    "UpsertNodeMetadataResponseDto",
+    "UpsertUserMetadataResponseDto",
     "VerifyPasskeyAuthenticationResponseDto",
     "VerifyPasskeyRegistrationResponseDto",
 )

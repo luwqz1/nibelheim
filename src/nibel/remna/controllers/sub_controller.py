@@ -1,7 +1,6 @@
 import saronia
 
-from ..errors import BadRequestError, InternalServerError
-from ..objects import GetAllSubscriptionsResponseDtoResponseSubscriptions
+from ..errors import BadRequestError, NotFoundInternalServerError
 from ..remnawave import remnawave
 from ..responses import GetSubscriptionInfoResponseDto
 from ..signatures import GetPublicSubscriptionControllerSubscriptionByClientTypeSignature
@@ -16,7 +15,7 @@ class SubController:
         short_uuid: saronia.Param[str, saronia.Path, "shortUuid"],
     ) -> saronia.APIResult[
         GetSubscriptionInfoResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]:
         """Args:
         short_uuid: Short UUID of the user
@@ -29,35 +28,15 @@ class SubController:
         self,
         *,
         short_uuid: saronia.Param[str, saronia.Path, "shortUuid"],
-    ) -> saronia.APIResult[GetAllSubscriptionsResponseDtoResponseSubscriptions]:
+    ) -> saronia.APIResult[None]:
         """Args:
         short_uuid: Short UUID of the user
 
         """
         ...
 
-    @saronia.get(
-        "/{shortUuid}/{clientType}",
-        content_type="text",
-        form=GetPublicSubscriptionControllerSubscriptionByClientTypeSignature,
-    )
-    async def get_subscription_by_client_type(self) -> saronia.APIResult[str]: ...
-
-    @saronia.get("/outline/{shortUuid}/{type}/{encodedTag}", content_type="text")
-    async def get_subscription_with_type(
-        self,
-        *,
-        type: str,
-        encoded_tag: saronia.Param[str, saronia.Path, "encodedTag"],
-        short_uuid: saronia.Param[str, saronia.Path, "shortUuid"],
-    ) -> saronia.APIResult[str]:
-        """Args:
-        type: Subscription type (required if encodedTag is provided). Only SS is supported for now.
-        encoded_tag: Base64 encoded tag for Outline config. This paramter is optional. It is required only when type=ss.
-        short_uuid: Short UUID of the user
-
-        """
-        ...
+    @saronia.get("/{shortUuid}/{clientType}", GetPublicSubscriptionControllerSubscriptionByClientTypeSignature)
+    async def get_subscription_by_client_type(self) -> saronia.APIResult[None]: ...
 
 
 __all__ = ("SubController",)

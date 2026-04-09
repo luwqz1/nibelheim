@@ -3,9 +3,10 @@ from uuid import UUID
 import saronia
 
 from ..auth import Authorization
-from ..errors import BadRequestError, InternalServerError
+from ..errors import BadRequestError, NotFoundInternalServerError
 from ..objects import (
     BulkNodesActionsRequestDto,
+    BulkNodesUpdateRequestDto,
     CreateNodeRequestDto,
     ProfileModificationRequestDto,
     ReorderNodeRequestDto,
@@ -15,6 +16,7 @@ from ..objects import (
 from ..remnawave import remnawave
 from ..responses import (
     BulkNodesActionsResponseDto,
+    BulkNodesUpdateResponseDto,
     CreateNodeResponseDto,
     DeleteNodeResponseDto,
     DisableNodeResponseDto,
@@ -40,7 +42,7 @@ class NodesController:
         self,
     ) -> saronia.APIResult[
         GetAllNodesTagsResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
     @saronia.get("/")
@@ -48,23 +50,23 @@ class NodesController:
         self,
     ) -> saronia.APIResult[
         GetAllNodesResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
-    @saronia.post("/", form=CreateNodeRequestDto)
+    @saronia.post("/", CreateNodeRequestDto)
     async def create_node(
         self,
     ) -> saronia.APIResult[
         CreateNodeResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
-    @saronia.patch("/", form=UpdateNodeRequestDto)
+    @saronia.patch("/", UpdateNodeRequestDto)
     async def update_node(
         self,
     ) -> saronia.APIResult[
         UpdateNodeResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
     @saronia.get("/{uuid}")
@@ -74,7 +76,7 @@ class NodesController:
         uuid: UUID,
     ) -> saronia.APIResult[
         GetOneNodeResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]:
         """Args:
         uuid: Node UUID
@@ -89,7 +91,7 @@ class NodesController:
         uuid: UUID,
     ) -> saronia.APIResult[
         DeleteNodeResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]:
         """Args:
         uuid: Node UUID
@@ -104,7 +106,7 @@ class NodesController:
         uuid: UUID,
     ) -> saronia.APIResult[
         EnableNodeResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]:
         """Args:
         uuid: Node UUID
@@ -119,7 +121,7 @@ class NodesController:
         uuid: UUID,
     ) -> saronia.APIResult[
         DisableNodeResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]:
         """Args:
         uuid: Node UUID
@@ -134,7 +136,7 @@ class NodesController:
         uuid: UUID,
     ) -> saronia.APIResult[
         RestartNodeResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]:
         """Args:
         uuid: Node UUID
@@ -149,7 +151,7 @@ class NodesController:
         uuid: UUID,
     ) -> saronia.APIResult[
         ResetNodeTrafficResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]:
         """Args:
         uuid: Node UUID
@@ -157,36 +159,44 @@ class NodesController:
         """
         ...
 
-    @saronia.post("/actions/restart-all", form=RestartAllNodesRequestBodyDto)
+    @saronia.post("/actions/restart-all", RestartAllNodesRequestBodyDto)
     async def restart_all_nodes(
         self,
     ) -> saronia.APIResult[
         RestartAllNodesResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
-    @saronia.post("/actions/reorder", form=ReorderNodeRequestDto)
+    @saronia.post("/actions/reorder", ReorderNodeRequestDto)
     async def reorder_nodes(
         self,
     ) -> saronia.APIResult[
         ReorderNodeResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
-    @saronia.post("/bulk-actions/profile-modification", form=ProfileModificationRequestDto)
+    @saronia.post("/bulk-actions/profile-modification", ProfileModificationRequestDto)
     async def profile_modification(
         self,
     ) -> saronia.APIResult[
         ProfileModificationResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
-    @saronia.post("/bulk-actions", form=BulkNodesActionsRequestDto)
+    @saronia.post("/bulk-actions", BulkNodesActionsRequestDto)
     async def bulk_nodes_actions(
         self,
     ) -> saronia.APIResult[
         BulkNodesActionsResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
+    ]: ...
+
+    @saronia.post("/bulk-actions/update", BulkNodesUpdateRequestDto)
+    async def bulk_nodes_update(
+        self,
+    ) -> saronia.APIResult[
+        BulkNodesUpdateResponseDto,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
 

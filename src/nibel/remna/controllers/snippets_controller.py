@@ -1,7 +1,7 @@
 import saronia
 
 from ..auth import Authorization
-from ..errors import BadRequestError, InternalServerError
+from ..errors import BadRequestError, NotFoundInternalServerError
 from ..objects import CreateSnippetRequestDto, DeleteSnippetRequestDto, UpdateSnippetRequestDto
 from ..remnawave import remnawave
 from ..responses import CreateSnippetResponseDto, DeleteSnippetResponseDto, GetSnippetsResponseDto, UpdateSnippetResponseDto
@@ -24,31 +24,31 @@ class SnippetsController:
         self,
     ) -> saronia.APIResult[
         GetSnippetsResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
-    @saronia.post("/", form=CreateSnippetRequestDto)
+    @saronia.post("/", CreateSnippetRequestDto)
     async def create_snippet(
         self,
     ) -> saronia.APIResult[
         CreateSnippetResponseDto,
-        BadRequestError | SnippetConflictError | InternalServerError,
+        BadRequestError | SnippetConflictError | NotFoundInternalServerError,
     ]: ...
 
-    @saronia.delete("/", form=DeleteSnippetRequestDto)
+    @saronia.delete("/", DeleteSnippetRequestDto)
     async def delete_snippet_by_name(
         self,
     ) -> saronia.APIResult[
         DeleteSnippetResponseDto,
-        BadRequestError | SnippetNotFoundError | InternalServerError,
+        BadRequestError | SnippetNotFoundError | NotFoundInternalServerError,
     ]: ...
 
-    @saronia.patch("/", form=UpdateSnippetRequestDto)
+    @saronia.patch("/", UpdateSnippetRequestDto)
     async def update_snippet(
         self,
     ) -> saronia.APIResult[
         UpdateSnippetResponseDto,
-        BadRequestError | SnippetNotFoundError | SnippetConflictError | InternalServerError,
+        BadRequestError | SnippetNotFoundError | SnippetConflictError | NotFoundInternalServerError,
     ]: ...
 
 

@@ -3,7 +3,7 @@ from uuid import UUID
 import saronia
 
 from ..auth import Authorization
-from ..errors import BadRequestError, InternalServerError
+from ..errors import BadRequestError, NotFoundInternalServerError
 from ..objects import (
     CloneSubscriptionPageConfigRequestDto,
     CreateSubscriptionPageConfigRequestDto,
@@ -31,23 +31,23 @@ class SubscriptionPageConfigsController:
         self,
     ) -> saronia.APIResult[
         GetSubscriptionPageConfigsResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
-    @saronia.post("/", form=CreateSubscriptionPageConfigRequestDto)
+    @saronia.post("/", CreateSubscriptionPageConfigRequestDto)
     async def create_config(
         self,
     ) -> saronia.APIResult[
         CreateSubscriptionPageConfigResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
-    @saronia.patch("/", form=UpdateSubscriptionPageConfigRequestDto)
+    @saronia.patch("/", UpdateSubscriptionPageConfigRequestDto)
     async def update_config(
         self,
     ) -> saronia.APIResult[
         UpdateSubscriptionPageConfigResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
     @saronia.get("/{uuid}")
@@ -57,7 +57,7 @@ class SubscriptionPageConfigsController:
         uuid: UUID,
     ) -> saronia.APIResult[
         GetSubscriptionPageConfigResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]:
         """Args:
         uuid: Subscription page config UUID
@@ -72,7 +72,7 @@ class SubscriptionPageConfigsController:
         uuid: UUID,
     ) -> saronia.APIResult[
         DeleteSubscriptionPageConfigResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]:
         """Args:
         uuid: Subscription page config UUID
@@ -80,20 +80,20 @@ class SubscriptionPageConfigsController:
         """
         ...
 
-    @saronia.post("/actions/reorder", form=ReorderSubscriptionPageConfigsRequestDto)
+    @saronia.post("/actions/reorder", ReorderSubscriptionPageConfigsRequestDto)
     async def reorder_subscription_page_configs(
         self,
     ) -> saronia.APIResult[
         ReorderSubscriptionPageConfigsResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
-    @saronia.post("/actions/clone", form=CloneSubscriptionPageConfigRequestDto)
+    @saronia.post("/actions/clone", CloneSubscriptionPageConfigRequestDto)
     async def clone_subscription_page_config(
         self,
     ) -> saronia.APIResult[
         CloneSubscriptionPageConfigResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
 

@@ -3,7 +3,7 @@ from uuid import UUID
 import saronia
 
 from ..auth import Authorization
-from ..errors import BadRequestError, InternalServerError
+from ..errors import BadRequestError, NotFoundInternalServerError
 from ..objects import CreateHostRequestDto, ReorderHostRequestDto, UpdateHostRequestDto
 from ..remnawave import remnawave
 from ..responses import (
@@ -30,7 +30,7 @@ class HostsController:
         self,
     ) -> saronia.APIResult[
         GetAllHostTagsResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
     @saronia.get("/")
@@ -38,23 +38,23 @@ class HostsController:
         self,
     ) -> saronia.APIResult[
         GetAllHostsResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
-    @saronia.post("/", form=CreateHostRequestDto)
+    @saronia.post("/", CreateHostRequestDto)
     async def create_host(
         self,
     ) -> saronia.APIResult[
         CreateHostResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
-    @saronia.patch("/", form=UpdateHostRequestDto)
+    @saronia.patch("/", UpdateHostRequestDto)
     async def update_host(
         self,
     ) -> saronia.APIResult[
         UpdateHostResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
     @saronia.get("/{uuid}")
@@ -64,7 +64,7 @@ class HostsController:
         uuid: UUID,
     ) -> saronia.APIResult[
         GetOneHostResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]:
         """Args:
         uuid: UUID of the host
@@ -79,7 +79,7 @@ class HostsController:
         uuid: UUID,
     ) -> saronia.APIResult[
         DeleteHostResponseDto,
-        BadRequestError | DeleteHostNotFoundError | InternalServerError,
+        BadRequestError | DeleteHostNotFoundError | NotFoundInternalServerError,
     ]:
         """Args:
         uuid: UUID of the host
@@ -87,12 +87,12 @@ class HostsController:
         """
         ...
 
-    @saronia.post("/actions/reorder", form=ReorderHostRequestDto)
+    @saronia.post("/actions/reorder", ReorderHostRequestDto)
     async def reorder_hosts(
         self,
     ) -> saronia.APIResult[
         ReorderHostResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
 

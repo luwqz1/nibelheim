@@ -3,7 +3,7 @@ from uuid import UUID
 import saronia
 
 from ..auth import Authorization
-from ..errors import BadRequestError, InternalServerError
+from ..errors import BadRequestError, NotFoundInternalServerError
 from ..objects import (
     CreateInfraBillingHistoryRecordRequestDto,
     CreateInfraBillingNodeRequestDto,
@@ -41,23 +41,23 @@ class InfraBillingController:
         self,
     ) -> saronia.APIResult[
         GetInfraProvidersResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
-    @saronia.post("/providers", form=CreateInfraProviderRequestDto)
+    @saronia.post("/providers", CreateInfraProviderRequestDto)
     async def create_infra_provider(
         self,
     ) -> saronia.APIResult[
         CreateInfraProviderResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
-    @saronia.patch("/providers", form=UpdateInfraProviderRequestDto)
+    @saronia.patch("/providers", UpdateInfraProviderRequestDto)
     async def update_infra_provider(
         self,
     ) -> saronia.APIResult[
         UpdateInfraProviderResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
     @saronia.get("/providers/{uuid}")
@@ -67,7 +67,7 @@ class InfraBillingController:
         uuid: UUID,
     ) -> saronia.APIResult[
         GetInfraProviderByUuidResponseDto,
-        BadRequestError | GetInfraProviderByUuidNotFoundError | InternalServerError,
+        BadRequestError | GetInfraProviderByUuidNotFoundError | NotFoundInternalServerError,
     ]: ...
 
     @saronia.delete("/providers/{uuid}")
@@ -77,7 +77,7 @@ class InfraBillingController:
         uuid: UUID,
     ) -> saronia.APIResult[
         DeleteInfraProviderByUuidResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
     @saronia.get("/history")
@@ -85,15 +85,15 @@ class InfraBillingController:
         self,
     ) -> saronia.APIResult[
         GetInfraBillingHistoryRecordsResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
-    @saronia.post("/history", form=CreateInfraBillingHistoryRecordRequestDto)
+    @saronia.post("/history", CreateInfraBillingHistoryRecordRequestDto)
     async def create_infra_billing_history_record(
         self,
     ) -> saronia.APIResult[
         CreateInfraBillingHistoryRecordResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
     @saronia.delete("/history/{uuid}")
@@ -103,7 +103,7 @@ class InfraBillingController:
         uuid: UUID,
     ) -> saronia.APIResult[
         DeleteInfraBillingHistoryRecordByUuidResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
     @saronia.get("/nodes")
@@ -111,23 +111,23 @@ class InfraBillingController:
         self,
     ) -> saronia.APIResult[
         GetInfraBillingNodesResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
-    @saronia.post("/nodes", form=CreateInfraBillingNodeRequestDto)
+    @saronia.post("/nodes", CreateInfraBillingNodeRequestDto)
     async def create_infra_billing_node(
         self,
     ) -> saronia.APIResult[
         CreateInfraBillingNodeResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
-    @saronia.patch("/nodes", form=UpdateInfraBillingNodeRequestDto)
+    @saronia.patch("/nodes", UpdateInfraBillingNodeRequestDto)
     async def update_infra_billing_node(
         self,
     ) -> saronia.APIResult[
         UpdateInfraBillingNodeResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
     @saronia.delete("/nodes/{uuid}")
@@ -137,7 +137,7 @@ class InfraBillingController:
         uuid: UUID,
     ) -> saronia.APIResult[
         DeleteInfraBillingNodeByUuidResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
 

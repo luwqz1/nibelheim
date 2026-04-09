@@ -44,7 +44,7 @@ class PostUsersControllerRevokeUserSubscriptionSignature(msgspex.Model, kw_only=
 
 @saronia.path
 class GetPublicSubscriptionControllerSubscriptionByClientTypeSignature(msgspex.Model, kw_only=True):
-    client_type: SubscriptionControllerGetSubscriptionByClientTypeClientType = msgspex.field(name="clientType")
+    client_type: ClientType = msgspex.field(name="clientType")
     """Client type"""
 
     short_uuid: str = msgspex.field(name="shortUuid")
@@ -59,7 +59,6 @@ class GetProtectedSubscriptionsControllerSubpageConfigByShortUuidSignature(msgsp
     request_headers: dict[str, str] = msgspex.field(name="requestHeaders")
 
 
-@saronia.query
 class GetBandwidthStatsControllerNodeUserUsageSignature(BandwidthStatsBase, kw_only=True):
     uuid: saronia.Path[UUID] = msgspex.field(converter=msgspex.From[str | UUID])
     """UUID of the node"""
@@ -97,6 +96,20 @@ class GetBandwidthStatsControllerNodesGetStatsNodesUsageSignature(StatsNodesUsag
     pass
 
 
+@saronia.json
+class PutMetadataControllerUpsertUserMetadataSignature(msgspex.Model, kw_only=True):
+    metadata: dict[str, typing.Any]
+    uuid: saronia.Path[UUID] = msgspex.field(converter=msgspex.From[str | UUID])
+    """UUID of the user"""
+
+
+@saronia.json
+class PutMetadataControllerUpsertNodeMetadataSignature(msgspex.Model, kw_only=True):
+    metadata: dict[str, typing.Any]
+    uuid: saronia.Path[UUID] = msgspex.field(converter=msgspex.From[str | UUID])
+    """UUID of the node"""
+
+
 __all__ = (
     "GetBandwidthStatsControllerNodeUserUsageSignature",
     "GetBandwidthStatsControllerNodesGetStatsNodesUsageSignature",
@@ -106,4 +119,6 @@ __all__ = (
     "GetProtectedSubscriptionsControllerSubpageConfigByShortUuidSignature",
     "GetPublicSubscriptionControllerSubscriptionByClientTypeSignature",
     "PostUsersControllerRevokeUserSubscriptionSignature",
+    "PutMetadataControllerUpsertNodeMetadataSignature",
+    "PutMetadataControllerUpsertUserMetadataSignature",
 )

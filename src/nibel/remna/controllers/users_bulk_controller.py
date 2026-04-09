@@ -1,7 +1,7 @@
 import saronia
 
 from ..auth import Authorization
-from ..errors import BadRequestError, InternalServerError
+from ..errors import BadRequestError, NotFoundInternalServerError
 from ..objects import (
     BulkAllExtendExpirationDateRequestDto,
     BulkAllUpdateUsersRequestDto,
@@ -32,70 +32,70 @@ USERS_BULK_ACTIONS_CONTROLLER_AUTH = Authorization
 
 @remnawave("/users/bulk", auth=USERS_BULK_ACTIONS_CONTROLLER_AUTH)
 class UsersBulkController:
-    @saronia.post("/delete-by-status", form=BulkDeleteUsersByStatusRequestDto)
+    @saronia.post("/delete-by-status", BulkDeleteUsersByStatusRequestDto)
     async def bulk_delete_users_by_status(
         self,
     ) -> saronia.APIResult[
         BulkDeleteUsersByStatusResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
-    @saronia.post("/delete", form=BulkDeleteUsersRequestDto)
+    @saronia.post("/delete", BulkDeleteUsersRequestDto)
     async def bulk_delete_users(
         self,
     ) -> saronia.APIResult[
         BulkDeleteUsersResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
-    @saronia.post("/revoke-subscription", form=BulkRevokeUsersSubscriptionRequestDto)
+    @saronia.post("/revoke-subscription", BulkRevokeUsersSubscriptionRequestDto)
     async def bulk_revoke_users_subscription(
         self,
     ) -> saronia.APIResult[
         BulkRevokeUsersSubscriptionResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
-    @saronia.post("/reset-traffic", form=BulkResetTrafficUsersRequestDto)
+    @saronia.post("/reset-traffic", BulkResetTrafficUsersRequestDto)
     async def bulk_reset_user_traffic(
         self,
     ) -> saronia.APIResult[
         BulkResetTrafficUsersResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
-    @saronia.post("/update", form=BulkUpdateUsersRequestDto)
+    @saronia.post("/update", BulkUpdateUsersRequestDto)
     async def bulk_update_users(
         self,
     ) -> saronia.APIResult[
         BulkUpdateUsersResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
-    @saronia.post("/update-squads", form=BulkUpdateUsersSquadsRequestDto)
+    @saronia.post("/update-squads", BulkUpdateUsersSquadsRequestDto)
     async def bulk_update_users_internal_squads(
         self,
     ) -> saronia.APIResult[
         BulkUpdateUsersSquadsResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
-    @saronia.post("/extend-expiration-date", form=BulkExtendExpirationDateRequestDto)
+    @saronia.post("/extend-expiration-date", BulkExtendExpirationDateRequestDto)
     async def bulk_extend_expiration_date(
         self,
     ) -> saronia.APIResult[
         BulkExtendExpirationDateResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]:
         """Bulk extend all users expiration date"""
         ...
 
-    @saronia.post("/all/update", form=BulkAllUpdateUsersRequestDto)
+    @saronia.post("/all/update", BulkAllUpdateUsersRequestDto)
     async def bulk_update_all_users(
         self,
     ) -> saronia.APIResult[
         BulkAllUpdateUsersResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
     @saronia.post("/all/reset-traffic")
@@ -103,17 +103,17 @@ class UsersBulkController:
         self,
     ) -> saronia.APIResult[
         BulkAllResetTrafficUsersResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]:
         """Bulk reset all users traffic"""
         ...
 
-    @saronia.post("/all/extend-expiration-date", form=BulkAllExtendExpirationDateRequestDto)
+    @saronia.post("/all/extend-expiration-date", BulkAllExtendExpirationDateRequestDto)
     async def bulk_all_extend_expiration_date(
         self,
     ) -> saronia.APIResult[
         BulkAllExtendExpirationDateResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]:
         """Bulk extend all users expiration date"""
         ...

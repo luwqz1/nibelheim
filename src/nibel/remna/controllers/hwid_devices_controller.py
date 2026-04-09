@@ -1,7 +1,7 @@
 import saronia
 
 from ..auth import Authorization
-from ..errors import BadRequestError, InternalServerError
+from ..errors import BadRequestError, NotFoundInternalServerError
 from ..objects import CreateUserHwidDeviceRequestDto, DeleteAllUserHwidDevicesRequestDto, DeleteUserHwidDeviceRequestDto
 from ..remnawave import remnawave
 from ..responses import (
@@ -31,7 +31,7 @@ class HwidDevicesController:
         start: int | None = None,
     ) -> saronia.APIResult[
         GetAllHwidDevicesResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]:
         """Args:
         size: Page size for pagination
@@ -40,28 +40,28 @@ class HwidDevicesController:
         """
         ...
 
-    @saronia.post("/", form=CreateUserHwidDeviceRequestDto)
+    @saronia.post("/", CreateUserHwidDeviceRequestDto)
     async def create_user_hwid_device(
         self,
     ) -> saronia.APIResult[
         CreateUserHwidDeviceResponseDto,
-        BadRequestError | HwidDeviceNotFoundError | InternalServerError,
+        BadRequestError | HwidDeviceNotFoundError | NotFoundInternalServerError,
     ]: ...
 
-    @saronia.post("/delete", form=DeleteUserHwidDeviceRequestDto)
+    @saronia.post("/delete", DeleteUserHwidDeviceRequestDto)
     async def delete_user_hwid_device(
         self,
     ) -> saronia.APIResult[
         DeleteUserHwidDeviceResponseDto,
-        BadRequestError | HwidDeviceNotFoundError | InternalServerError,
+        BadRequestError | HwidDeviceNotFoundError | NotFoundInternalServerError,
     ]: ...
 
-    @saronia.post("/delete-all", form=DeleteAllUserHwidDevicesRequestDto)
+    @saronia.post("/delete-all", DeleteAllUserHwidDevicesRequestDto)
     async def delete_all_user_hwid_devices(
         self,
     ) -> saronia.APIResult[
         DeleteAllUserHwidDevicesResponseDto,
-        BadRequestError | HwidDeviceNotFoundError | InternalServerError,
+        BadRequestError | HwidDeviceNotFoundError | NotFoundInternalServerError,
     ]: ...
 
     @saronia.get("/stats")
@@ -69,7 +69,7 @@ class HwidDevicesController:
         self,
     ) -> saronia.APIResult[
         GetHwidDevicesStatsResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
     @saronia.get("/top-users", query=True)
@@ -80,7 +80,7 @@ class HwidDevicesController:
         start: int | None = None,
     ) -> saronia.APIResult[
         GetTopUsersByHwidDevicesResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]:
         """Args:
         size: Page size for pagination
@@ -96,7 +96,7 @@ class HwidDevicesController:
         user_uuid: saronia.Param[str, saronia.Path, "userUuid"],
     ) -> saronia.APIResult[
         GetUserHwidDevicesResponseDto,
-        BadRequestError | HwidDeviceNotFoundError | InternalServerError,
+        BadRequestError | HwidDeviceNotFoundError | NotFoundInternalServerError,
     ]:
         """Args:
         user_uuid: UUID of the user

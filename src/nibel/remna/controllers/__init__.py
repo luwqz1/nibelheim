@@ -12,6 +12,8 @@ from .infra_billing_controller import InfraBillingController
 from .internal_squads_controller import InternalSquadsController
 from .ip_control_controller import IpControlController
 from .keygen_controller import KeygenController
+from .metadata_controller import MetadataController
+from .node_plugins_controller import NodePluginsController
 from .nodes_controller import NodesController
 from .passkeys_controller import PasskeysController
 from .remnawave_settings_controller import RemnawaveSettingsController
@@ -41,6 +43,8 @@ class APIControllers:
         self.internal_squads = InternalSquadsController()
         self.ip_control = IpControlController()
         self.keygen = KeygenController()
+        self.metadata = MetadataController()
+        self.node_plugins = NodePluginsController()
         self.nodes = NodesController()
         self.passkeys = PasskeysController()
         self.remnawave_settings = RemnawaveSettingsController()
@@ -72,6 +76,8 @@ __all__ = (
     "InternalSquadsController",
     "IpControlController",
     "KeygenController",
+    "MetadataController",
+    "NodePluginsController",
     "NodesController",
     "PasskeysController",
     "RemnawaveSettingsController",

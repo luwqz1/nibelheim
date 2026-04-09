@@ -1,7 +1,7 @@
 import saronia
 
 from ..auth import Authorization
-from ..errors import BadRequestError, InternalServerError
+from ..errors import BadRequestError, NotFoundInternalServerError
 from ..objects import DeletePasskeyRequestDto, UpdatePasskeyRequestDto, VerifyPasskeyRegistrationRequestDto
 from ..remnawave import remnawave
 from ..responses import (
@@ -22,15 +22,15 @@ class PasskeysController:
         self,
     ) -> saronia.APIResult[
         GetPasskeyRegistrationOptionsResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
-    @saronia.post("/registration/verify", form=VerifyPasskeyRegistrationRequestDto)
+    @saronia.post("/registration/verify", VerifyPasskeyRegistrationRequestDto)
     async def passkey_registration_verify(
         self,
     ) -> saronia.APIResult[
         VerifyPasskeyRegistrationResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
     @saronia.get("/")
@@ -38,23 +38,23 @@ class PasskeysController:
         self,
     ) -> saronia.APIResult[
         GetAllPasskeysResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
-    @saronia.delete("/", form=DeletePasskeyRequestDto)
+    @saronia.delete("/", DeletePasskeyRequestDto)
     async def delete_passkey(
         self,
     ) -> saronia.APIResult[
         DeletePasskeyResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
-    @saronia.patch("/", form=UpdatePasskeyRequestDto)
+    @saronia.patch("/", UpdatePasskeyRequestDto)
     async def update_passkey(
         self,
     ) -> saronia.APIResult[
         UpdatePasskeyResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
 

@@ -3,8 +3,8 @@ from uuid import UUID
 import saronia
 
 from ..auth import Authorization
-from ..errors import BadRequestError, InternalServerError
-from ..objects import CreateUserRequestDto, UpdateUserRequestDto
+from ..errors import BadRequestError, NotFoundInternalServerError
+from ..objects import CreateUserRequestDto, ResolveUserRequestBodyDto, UpdateUserRequestDto
 from ..remnawave import remnawave
 from ..responses import (
     CreateUserResponseDto,
@@ -23,6 +23,7 @@ from ..responses import (
     GetUserByUuidResponseDto,
     GetUserSubscriptionRequestHistoryResponseDto,
     ResetUserTrafficResponseDto,
+    ResolveUserResponseDto,
     RevokeUserSubscriptionResponseDto,
     UpdateUserResponseDto,
 )
@@ -45,7 +46,7 @@ class UsersController:
         start: int | None = None,
     ) -> saronia.APIResult[
         GetAllUsersResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]:
         """Args:
         size: Page size for pagination
@@ -54,20 +55,20 @@ class UsersController:
         """
         ...
 
-    @saronia.post("/", form=CreateUserRequestDto)
+    @saronia.post("/", CreateUserRequestDto)
     async def create_user(
         self,
     ) -> saronia.APIResult[
         CreateUserResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
-    @saronia.patch("/", form=UpdateUserRequestDto)
+    @saronia.patch("/", UpdateUserRequestDto)
     async def update_user(
         self,
     ) -> saronia.APIResult[
         UpdateUserResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
     @saronia.get("/{uuid}")
@@ -77,7 +78,7 @@ class UsersController:
         uuid: UUID,
     ) -> saronia.APIResult[
         GetUserByUuidResponseDto,
-        BadRequestError | UserNotFoundError | InternalServerError,
+        BadRequestError | UserNotFoundError | NotFoundInternalServerError,
     ]:
         """Args:
         uuid: UUID of the user
@@ -92,7 +93,7 @@ class UsersController:
         uuid: UUID,
     ) -> saronia.APIResult[
         DeleteUserResponseDto,
-        BadRequestError | UserNotFoundError | InternalServerError,
+        BadRequestError | UserNotFoundError | NotFoundInternalServerError,
     ]:
         """Args:
         uuid: UUID of the user
@@ -105,7 +106,7 @@ class UsersController:
         self,
     ) -> saronia.APIResult[
         GetAllTagsResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
     @saronia.get("/{uuid}/accessible-nodes")
@@ -115,7 +116,7 @@ class UsersController:
         uuid: UUID,
     ) -> saronia.APIResult[
         GetUserAccessibleNodesResponseDto,
-        BadRequestError | UserNotFoundError | InternalServerError,
+        BadRequestError | UserNotFoundError | NotFoundInternalServerError,
     ]:
         """Args:
         uuid: UUID of the user
@@ -130,7 +131,7 @@ class UsersController:
         uuid: UUID,
     ) -> saronia.APIResult[
         GetUserSubscriptionRequestHistoryResponseDto,
-        BadRequestError | UserNotFoundError | InternalServerError,
+        BadRequestError | UserNotFoundError | NotFoundInternalServerError,
     ]:
         """Args:
         uuid: UUID of the user
@@ -145,7 +146,7 @@ class UsersController:
         short_uuid: saronia.Param[str, saronia.Path, "shortUuid"],
     ) -> saronia.APIResult[
         GetUserByShortUuidResponseDto,
-        BadRequestError | UserNotFoundError | InternalServerError,
+        BadRequestError | UserNotFoundError | NotFoundInternalServerError,
     ]:
         """Args:
         short_uuid: Short UUID of the user
@@ -160,7 +161,7 @@ class UsersController:
         username: str,
     ) -> saronia.APIResult[
         GetUserByUsernameResponseDto,
-        BadRequestError | UserNotFoundError | InternalServerError,
+        BadRequestError | UserNotFoundError | NotFoundInternalServerError,
     ]:
         """Args:
         username: Username of the user
@@ -175,7 +176,7 @@ class UsersController:
         id: str,
     ) -> saronia.APIResult[
         GetUserByIdResponseDto,
-        BadRequestError | UserNotFoundError | InternalServerError,
+        BadRequestError | UserNotFoundError | NotFoundInternalServerError,
     ]:
         """Args:
         id: ID of the user
@@ -190,7 +191,7 @@ class UsersController:
         telegram_id: saronia.Param[str, saronia.Path, "telegramId"],
     ) -> saronia.APIResult[
         GetUserByTelegramIdResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]:
         """Args:
         telegram_id: Telegram ID of the user
@@ -205,7 +206,7 @@ class UsersController:
         email: str,
     ) -> saronia.APIResult[
         GetUserByEmailResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]:
         """Args:
         email: Email of the user
@@ -220,7 +221,7 @@ class UsersController:
         tag: str,
     ) -> saronia.APIResult[
         GetUserByTagResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]:
         """Args:
         tag: Tag of the user
@@ -228,12 +229,12 @@ class UsersController:
         """
         ...
 
-    @saronia.post("/{uuid}/actions/revoke", form=PostUsersControllerRevokeUserSubscriptionSignature)
+    @saronia.post("/{uuid}/actions/revoke", PostUsersControllerRevokeUserSubscriptionSignature)
     async def revoke_user_subscription(
         self,
     ) -> saronia.APIResult[
         RevokeUserSubscriptionResponseDto,
-        BadRequestError | UserNotFoundError | InternalServerError,
+        BadRequestError | UserNotFoundError | NotFoundInternalServerError,
     ]: ...
 
     @saronia.post("/{uuid}/actions/disable")
@@ -243,7 +244,7 @@ class UsersController:
         uuid: UUID,
     ) -> saronia.APIResult[
         DisableUserResponseDto,
-        BadRequestError | UserNotFoundError | InternalServerError,
+        BadRequestError | UserNotFoundError | NotFoundInternalServerError,
     ]:
         """Args:
         uuid: UUID of the user
@@ -258,7 +259,7 @@ class UsersController:
         uuid: UUID,
     ) -> saronia.APIResult[
         EnableUserResponseDto,
-        BadRequestError | UserNotFoundError | InternalServerError,
+        BadRequestError | UserNotFoundError | NotFoundInternalServerError,
     ]:
         """Args:
         uuid: UUID of the user
@@ -273,13 +274,21 @@ class UsersController:
         uuid: UUID,
     ) -> saronia.APIResult[
         ResetUserTrafficResponseDto,
-        BadRequestError | UserNotFoundError | InternalServerError,
+        BadRequestError | UserNotFoundError | NotFoundInternalServerError,
     ]:
         """Args:
         uuid: UUID of the user
 
         """
         ...
+
+    @saronia.post("/resolve", ResolveUserRequestBodyDto)
+    async def resolve_user(
+        self,
+    ) -> saronia.APIResult[
+        ResolveUserResponseDto,
+        BadRequestError | UserNotFoundError | NotFoundInternalServerError,
+    ]: ...
 
 
 __all__ = (

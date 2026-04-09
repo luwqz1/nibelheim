@@ -1,7 +1,7 @@
 import saronia
 
 from ..auth import Authorization
-from ..errors import BadRequestError, InternalServerError
+from ..errors import BadRequestError, NotFoundInternalServerError
 from ..objects import (
     BulkDeleteHostsRequestDto,
     BulkDisableHostsRequestDto,
@@ -23,44 +23,44 @@ HOSTS_BULK_ACTIONS_CONTROLLER_AUTH = Authorization
 
 @remnawave("/hosts/bulk", auth=HOSTS_BULK_ACTIONS_CONTROLLER_AUTH)
 class HostsBulkController:
-    @saronia.post("/delete", form=BulkDeleteHostsRequestDto)
+    @saronia.post("/delete", BulkDeleteHostsRequestDto)
     async def delete_hosts(
         self,
     ) -> saronia.APIResult[
         BulkDeleteHostsResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
-    @saronia.post("/disable", form=BulkDisableHostsRequestDto)
+    @saronia.post("/disable", BulkDisableHostsRequestDto)
     async def disable_hosts(
         self,
     ) -> saronia.APIResult[
         BulkDisableHostsResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
-    @saronia.post("/enable", form=BulkEnableHostsRequestDto)
+    @saronia.post("/enable", BulkEnableHostsRequestDto)
     async def enable_hosts(
         self,
     ) -> saronia.APIResult[
         BulkEnableHostsResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
-    @saronia.post("/set-inbound", form=SetInboundToManyHostsRequestDto)
+    @saronia.post("/set-inbound", SetInboundToManyHostsRequestDto)
     async def set_inbound_to_hosts(
         self,
     ) -> saronia.APIResult[
         SetInboundToManyHostsResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
-    @saronia.post("/set-port", form=SetPortToManyHostsRequestDto)
+    @saronia.post("/set-port", SetPortToManyHostsRequestDto)
     async def set_port_to_hosts(
         self,
     ) -> saronia.APIResult[
         SetPortToManyHostsResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
 

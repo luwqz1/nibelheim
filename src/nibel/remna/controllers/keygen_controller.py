@@ -1,7 +1,7 @@
 import saronia
 
 from ..auth import Authorization
-from ..errors import BadRequestError, InternalServerError
+from ..errors import BadRequestError, NotFoundInternalServerError
 from ..remnawave import remnawave
 from ..responses import GetPubKeyResponseDto
 
@@ -15,7 +15,7 @@ class KeygenController:
         self,
     ) -> saronia.APIResult[
         GetPubKeyResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
 

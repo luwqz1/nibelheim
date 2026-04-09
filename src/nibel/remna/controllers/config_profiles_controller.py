@@ -3,7 +3,7 @@ from uuid import UUID
 import saronia
 
 from ..auth import Authorization
-from ..errors import BadRequestError, InternalServerError
+from ..errors import BadRequestError, NotFoundInternalServerError
 from ..objects import CreateConfigProfileRequestDto, ReorderConfigProfilesRequestDto, UpdateConfigProfileRequestDto
 from ..remnawave import remnawave
 from ..responses import (
@@ -36,23 +36,23 @@ class ConfigProfilesController:
         self,
     ) -> saronia.APIResult[
         GetConfigProfilesResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
-    @saronia.post("/", form=CreateConfigProfileRequestDto)
+    @saronia.post("/", CreateConfigProfileRequestDto)
     async def create_config_profile(
         self,
     ) -> saronia.APIResult[
         CreateConfigProfileResponseDto,
-        BadRequestError | ConfigProfileConflictError | InternalServerError,
+        BadRequestError | ConfigProfileConflictError | NotFoundInternalServerError,
     ]: ...
 
-    @saronia.patch("/", form=UpdateConfigProfileRequestDto)
+    @saronia.patch("/", UpdateConfigProfileRequestDto)
     async def update_config_profile(
         self,
     ) -> saronia.APIResult[
         UpdateConfigProfileResponseDto,
-        BadRequestError | ConfigProfileNotFoundError | ConfigProfileConflictError | InternalServerError,
+        BadRequestError | ConfigProfileNotFoundError | ConfigProfileConflictError | NotFoundInternalServerError,
     ]: ...
 
     @saronia.get("/inbounds")
@@ -60,7 +60,7 @@ class ConfigProfilesController:
         self,
     ) -> saronia.APIResult[
         GetAllInboundsResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
     @saronia.get("/{uuid}/inbounds")
@@ -70,7 +70,7 @@ class ConfigProfilesController:
         uuid: UUID,
     ) -> saronia.APIResult[
         GetInboundsByProfileUuidResponseDto,
-        BadRequestError | ConfigProfileNotFoundError | InternalServerError,
+        BadRequestError | ConfigProfileNotFoundError | NotFoundInternalServerError,
     ]: ...
 
     @saronia.get("/{uuid}")
@@ -80,7 +80,7 @@ class ConfigProfilesController:
         uuid: UUID,
     ) -> saronia.APIResult[
         GetConfigProfileByUuidResponseDto,
-        BadRequestError | ConfigProfileNotFoundError | InternalServerError,
+        BadRequestError | ConfigProfileNotFoundError | NotFoundInternalServerError,
     ]: ...
 
     @saronia.delete("/{uuid}")
@@ -90,7 +90,7 @@ class ConfigProfilesController:
         uuid: UUID,
     ) -> saronia.APIResult[
         DeleteConfigProfileResponseDto,
-        BadRequestError | ConfigProfileNotFoundError | InternalServerError,
+        BadRequestError | ConfigProfileNotFoundError | NotFoundInternalServerError,
     ]: ...
 
     @saronia.get("/{uuid}/computed-config")
@@ -100,15 +100,15 @@ class ConfigProfilesController:
         uuid: UUID,
     ) -> saronia.APIResult[
         GetComputedConfigProfileByUuidResponseDto,
-        BadRequestError | ConfigProfileNotFoundError | InternalServerError,
+        BadRequestError | ConfigProfileNotFoundError | NotFoundInternalServerError,
     ]: ...
 
-    @saronia.post("/actions/reorder", form=ReorderConfigProfilesRequestDto)
+    @saronia.post("/actions/reorder", ReorderConfigProfilesRequestDto)
     async def reorder_config_profiles(
         self,
     ) -> saronia.APIResult[
         ReorderConfigProfilesResponseDto,
-        BadRequestError | InternalServerError,
+        BadRequestError | NotFoundInternalServerError,
     ]: ...
 
 
