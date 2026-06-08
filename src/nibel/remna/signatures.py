@@ -59,6 +59,7 @@ class GetProtectedSubscriptionsControllerSubpageConfigByShortUuidSignature(msgsp
     request_headers: dict[str, str] = msgspex.field(name="requestHeaders")
 
 
+@saronia.query
 class GetBandwidthStatsControllerNodeUserUsageSignature(BandwidthStatsBase, kw_only=True):
     uuid: saronia.Path[UUID] = msgspex.field(converter=msgspex.From[str | UUID])
     """UUID of the node"""

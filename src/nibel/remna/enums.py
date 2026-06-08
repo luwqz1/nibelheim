@@ -33,6 +33,7 @@ class TrafficLimitStrategy(msgspex.StrEnum, metaclass=msgspex.BaseEnumMeta):
     """Traffic limit resets monthly."""
 
     MONTH_ROLLING = "MONTH_ROLLING"
+    """Traffic limit resets monthly by creation date."""
 
 
 class SecurityLayer(msgspex.StrEnum, metaclass=msgspex.BaseEnumMeta):

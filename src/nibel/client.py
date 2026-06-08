@@ -3,16 +3,18 @@ import pathlib
 import typing
 
 import certifi
-import wreq
-from saronia.client.base import DEFAULT_TIMEOUT, DEFAULT_USER_AGENT
 from saronia.client.wreq_client import WreqClient
+from wreq.dns import DnsOptions
+from wreq.emulation import Emulation, Platform
+from wreq.wreq import Client
 
 from nibel.__meta__ import __version__
 from nibel.remna import remnawave
 from nibel.remna.auth import Authorization, Prometheus
 from nibel.remna.controllers import APIControllers
 
-NIBEL_CLIENT_VERSION: typing.Final = f"wreq; Nibelheim/{__version__}"
+NIBEL_USERAGENT: typing.Final = f"Nibelheim/{__version__}"
+TIMEOUT: typing.Final = 60.0
 POOL_IDLE_TIMEOUT: typing.Final = datetime.timedelta(seconds=60.0)
 POOL_MAX_IDLE_PER_HOST: typing.Final = 32
 POOL_MAX_SIZE: typing.Final = POOL_MAX_IDLE_PER_HOST * 2
@@ -25,7 +27,7 @@ TCP_USER_TIMEOUT: typing.Final = (TCP_KEEPALIVE + TCP_KEEPALIVE_INTERVAL) * TCP_
 class ClientSettings(typing.TypedDict):
     cookies: typing.NotRequired[typing.Mapping[str, str]]
     headers: typing.NotRequired[typing.Mapping[str, str]]
-    verify_ssl: typing.NotRequired[bool]
+    tls_verify: typing.NotRequired[bool]
     read_timeout: typing.NotRequired[float]
     connect_timeout: typing.NotRequired[float]
     request_timeout: typing.NotRequired[float]
@@ -33,10 +35,13 @@ class ClientSettings(typing.TypedDict):
 
 class Remnawave(APIControllers):
     @typing.overload
-    def __init__(self, *, panel_url: str, **kwargs: typing.Unpack[ClientSettings]) -> None: ...
+    def __init__(self, *, panel_url: str) -> None: ...
 
     @typing.overload
-    def __init__(self, *, panel_url: str, http_client: wreq.Client) -> None: ...
+    def __init__(self, *, panel_url: str, http_client: Client) -> None: ...
+
+    @typing.overload
+    def __init__(self, *, panel_url: str, **settings: typing.Unpack[ClientSettings]) -> None: ...
 
     @typing.overload
     def __init__(
@@ -44,7 +49,7 @@ class Remnawave(APIControllers):
         *,
         panel_url: str,
         token: str,
-        **kwargs: typing.Unpack[ClientSettings],
+        http_client: Client,
     ) -> None:
         pass
 
@@ -54,7 +59,7 @@ class Remnawave(APIControllers):
         *,
         panel_url: str,
         token: str,
-        http_client: wreq.Client,
+        **settings: typing.Unpack[ClientSettings],
     ) -> None:
         pass
 
@@ -65,7 +70,7 @@ class Remnawave(APIControllers):
         panel_url: str,
         username: str,
         password: str,
-        **kwargs: typing.Unpack[ClientSettings],
+        http_client: Client,
     ) -> None:
         pass
 
@@ -76,19 +81,7 @@ class Remnawave(APIControllers):
         panel_url: str,
         username: str,
         password: str,
-        http_client: wreq.Client,
-    ) -> None:
-        pass
-
-    @typing.overload
-    def __init__(
-        self,
-        *,
-        panel_url: str,
-        token: str,
-        username: str,
-        password: str,
-        **kwargs: typing.Unpack[ClientSettings],
+        **settings: typing.Unpack[ClientSettings],
     ) -> None:
         pass
 
@@ -100,7 +93,19 @@ class Remnawave(APIControllers):
         token: str,
         username: str,
         password: str,
-        http_client: wreq.Client,
+        http_client: Client,
+    ) -> None:
+        pass
+
+    @typing.overload
+    def __init__(
+        self,
+        *,
+        panel_url: str,
+        token: str,
+        username: str,
+        password: str,
+        **settings: typing.Unpack[ClientSettings],
     ) -> None:
         pass
 
@@ -111,21 +116,23 @@ class Remnawave(APIControllers):
         token: str | None = None,
         username: str | None = None,
         password: str | None = None,
-        http_client: wreq.Client | None = None,
-        **kwargs: typing.Unpack[ClientSettings],
+        http_client: Client | None = None,
+        **settings: typing.Unpack[ClientSettings],
     ) -> None:
-        self.http = http_client or wreq.Client(
-            emulation=wreq.EmulationOption(
-                emulation=wreq.Emulation.Chrome145,
-                emulation_os=wreq.EmulationOS.Linux,
-                skip_http2=False,
-                skip_headers=False,
+        self.panel_url = panel_url.removesuffix("/api")
+        self.http = http_client or Client(
+            dns_options=DnsOptions(system_dns=True),
+            emulation=Emulation(
+                profile=Emulation.Chrome147,
+                platform=Platform.Linux,
+                http2=True,
+                headers=True,
             ),
             tcp_reuse_address=True,
             zstd=True,
             gzip=True,
             http2_only=True,
-            verify=False if kwargs.get("verify_ssl", True) is False else pathlib.Path(certifi.where()),
+            tls_verify=False if settings.get("tls_verify", True) is False else pathlib.Path(certifi.where()),
             tcp_keepalive=TCP_KEEPALIVE,
             tcp_keepalive_interval=TCP_KEEPALIVE_INTERVAL,
             tcp_keepalive_retries=TCP_KEEPALIVE_RETRIES,
@@ -133,24 +140,28 @@ class Remnawave(APIControllers):
             pool_max_size=POOL_MAX_SIZE,
             pool_idle_timeout=POOL_IDLE_TIMEOUT,
             pool_max_idle_per_host=POOL_MAX_IDLE_PER_HOST,
-            connect_timeout=datetime.timedelta(seconds=kwargs.get("connect_timeout", DEFAULT_TIMEOUT)),
-            read_timeout=datetime.timedelta(seconds=kwargs.get("read_timeout", DEFAULT_TIMEOUT)),
+            connect_timeout=datetime.timedelta(seconds=settings.get("connect_timeout", TIMEOUT)),
+            read_timeout=datetime.timedelta(seconds=settings.get("read_timeout", TIMEOUT)),
         )
         self.client = WreqClient(
             client=self.http,
-            base_url=panel_url.removesuffix("/api"),
-            user_agent=DEFAULT_USER_AGENT.format(http_client=NIBEL_CLIENT_VERSION),
-            request_timeout=kwargs.get("request_timeout", DEFAULT_TIMEOUT),
+            base_url=self.panel_url,
+            user_agent=NIBEL_USERAGENT,
+            request_timeout=settings.get("request_timeout", TIMEOUT),
             default_headers=True,
         )
-        self.client.cookies.update(kwargs.get("cookies", {}))
-        self.client.headers.update(kwargs.get("headers", {}))
+        self.client.cookies.update(settings.get("cookies", {}))
+        self.client.headers.update(settings.get("headers", {}))
 
         super().__init__(self.client)
+
         remnawave.auth(
             authorization=Authorization(token) if token else None,
             prometheus=Prometheus(username, password) if username and password else None,
         )
+
+    def __repr__(self) -> str:
+        return f"<Remnawave `{self.panel_url}`>"
 
 
 __all__ = ("Remnawave",)

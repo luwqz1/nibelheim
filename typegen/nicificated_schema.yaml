@@ -299,6 +299,7 @@ remnawave:
           DAY: Traffic limit resets daily.
           WEEK: Traffic limit resets weekly.
           MONTH: Traffic limit resets monthly.
+          MONTH_ROLLING: Traffic limit resets monthly by creation date.
     - config_action:
         name: ConfigAction
         members:

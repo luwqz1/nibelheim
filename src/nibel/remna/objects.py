@@ -1252,8 +1252,6 @@ class DebugSrrMatcherRequestDtoResponseRulesSettings(msgspex.Model, kw_only=True
 
 
 class DebugSrrMatcherRequestDtoResponseRulesRulesConditions(msgspex.Model, kw_only=True):
-    r"""{"markdownDescription":"Condition to check against the **headerName**.","defaultSnippets":[{"label":"Examples: Check if header contains \"text/html\"","markdownDescription":"Condition to check if **headerName** contains \"text/html\"","body":{"headerName":"accept","operator":"CONTAINS","value":"text/html","caseSensitive":true}}]}"""
-
     header_name: typing.Annotated[str, msgspec.Meta(pattern="^[!#$%&'*+\\-.0-9A-Z^_`a-z|~]+$")] = msgspex.field(name="headerName")
     """{"markdownDescription":"**Name** of the HTTP header to check. Must comply with RFC 7230."}"""
 
@@ -1270,7 +1268,7 @@ class DebugSrrMatcherRequestDtoResponseRulesRulesConditions(msgspex.Model, kw_on
 class DebugSrrMatcherRequestDtoResponseRulesRulesResponseModificationsHeaders(msgspex.Model, kw_only=True):
     """{"markdownDescription":"**Key** and **value** of the response header will be added to the response."}"""
 
-    key: typing.Annotated[str, msgspec.Meta(pattern="^[!#$%&'*+\\-.0-9A-Z^_`a-z|~]+$")]
+    key: typing.Annotated[str, msgspec.Meta(pattern=r"^[!#$%&'*+\\-.0-9A-Z^_`a-z|~]+$")]
     """{"markdownDescription":"Key of the response header. Must comply with RFC 7230."}"""
 
     value: typing.Annotated[str, msgspec.Meta(min_length=1)]
@@ -1308,8 +1306,6 @@ class DebugSrrMatcherRequestDtoResponseRulesRulesResponseModifications(msgspex.M
 
 
 class DebugSrrMatcherRequestDtoResponseRulesRules(msgspex.Model, kw_only=True):
-    r"""{"defaultSnippets":[{"label":"Examples: Blank rule","markdownDescription":"Simple blank rule with no conditions or modifications.\n```json\n{\n  \"name\": \"Blank rule\",\n  \"description\": \"Blank rule\",\n  \"operator\": \"AND\",\n  \"enabled\": true,\n  \"conditions\": [],\n  \"responseType\": \"BLOCK\",\n  \"responseModifications\": {\n    \"headers\": []\n  }\n}\n```","body":{"name":"Blank rule","description":"Blank rule","operator":"AND","enabled":true,"conditions":[],"responseType":"BLOCK","responseModifications":{"headers":[]}}},{"label":"Examples: Block Legacy Clients","markdownDescription":"Block requests from legacy clients\n```json\n{\n  \"name\": \"Block Legacy Clients\",\n  \"description\": \"Block requests from legacy clients\",\n  \"enabled\": true,\n  \"operator\": \"OR\",\n  \"conditions\": [\n    {\n      \"headerName\": \"user-agent\",\n      \"operator\": \"CONTAINS\",\n      \"value\": \"Hiddify\",\n      \"caseSensitive\": true\n    },\n    {\n      \"headerName\": \"user-agent\",\n      \"operator\": \"CONTAINS\",\n      \"value\": \"FoxRay\",\n      \"caseSensitive\": true\n    }\n  ],\n  \"responseType\": \"BLOCK\"\n}\n```","body":{"name":"Block Legacy Clients","description":"Block requests from legacy clients","enabled":true,"operator":"OR","conditions":[{"headerName":"user-agent","operator":"CONTAINS","value":"Hiddify","caseSensitive":true},{"headerName":"user-agent","operator":"CONTAINS","value":"FoxRay","caseSensitive":true}],"responseType":"BLOCK"}}],"title":"Response Rule","markdownDescription":"Response rule configuration.\n\n**Fields:**\n- **name**: Name of the response rule.\n- **description**: Description of the response rule. Optional.\n- **enabled**: Control whether the response rule is enabled or disabled. \n\n - `true` the rule will be applied. \n\n - `false` the rule will be always ignored.\n- **operator**: Operator to use for combining conditions in the rule.\n- **conditions**: Array of conditions to check against the request headers. Conditions are applied with **operator**. If conditions are empty, the rule will be matched.\n- **responseType**: Type of the response. Determines the type of **response** to be returned when the rule is matched.\n- **responseModifications**: Response modifications to be applied when the rule is matched. Optional.\n\n**Example:**\n```json\n{\n  \"name\": \"Block Legacy Clients\",\n  \"description\": \"Block requests from legacy clients\",\n  \"enabled\": true,\n  \"operator\": \"OR\",\n  \"conditions\": [\n    {\n      \"headerName\": \"user-agent\",\n      \"operator\": \"CONTAINS\",\n      \"value\": \"Hiddify\",\n      \"caseSensitive\": true\n    },\n    {\n      \"headerName\": \"user-agent\",\n      \"operator\": \"CONTAINS\",\n      \"value\": \"FoxRay\",\n      \"caseSensitive\": true\n    }\n  ],\n  \"responseType\": \"BLOCK\"\n}\n```"}"""
-
     name: typing.Annotated[str, msgspec.Meta(min_length=1, max_length=50)]
     """{"markdownDescription":"Name of the response rule."}"""
 
