@@ -7,17 +7,11 @@ name = "nibelheim"
 authors = [{ name = "luwqz1", email = "howluwqz1@gmail.com" }]
 maintainers = [{ name = "luwqz1", email = "howluwqz1@gmail.com" }]
 dynamic = ["version"]
-description = "A simple, fast, and reliable SDK for Remnawave."
+description = "a simple, fast, and reliable sdk for remnawave."
 readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.14"
-dependencies = [
-    "kungfu-fp (>=1.0.0)",
-    "certifi (>=2026.5.20)",
-    "saronia (>=1.7.0)",
-    "wreq (>=0.12.0)",
-    "openretcon",
-]
+dependencies = ["saronia", "wreq"]
 keywords = [
     "async",
     "asyncio",
@@ -51,21 +45,22 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/luwqz1/nibelheim"
-Repository = "https://github.com/luwqz1/nibelheim"
-"Bug Tracker" = "https://github.com/luwqz1/nibelheim/issues"
+"Bug Tracker" = "https://github.com/nibelregion/nibelheim/issues"
+Repository = "https://github.com/nibelregion/nibelheim"
+Remnawave = "https://github.com/remnawave"
 
 [dependency-groups]
 dev = [
-    "ruff>=0.15.16,<1",
-    "basedpyright>=1.39.7,<2",
-    "tomlkit>=0.15.0",
+    "ruff>=0.16.0,<1",
+    "basedpyright>=1.39.9,<2",
+    "tomlkit>=0.15.1",
     "pytest>=9.0.3,<10",
     "packaging>=26.2,<30",
     "pytest-asyncio>=1.4.0,<2",
     "pytest-cov>=7.1.0,<8",
     "pytest-mock>=3.15.1,<4",
-    "pre-commit>=4.6.0,<5",
+    "pre-commit>=4.6.1,<5",
+    "openretcon",
 ]
 
 [tool.hatch.version]
